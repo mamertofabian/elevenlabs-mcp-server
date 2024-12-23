@@ -2,6 +2,8 @@
 
 A Model Context Protocol (MCP) server that integrates with ElevenLabs text-to-speech API.
 
+<a href="https://glama.ai/mcp/servers/leukzvus7o"><img width="380" height="200" src="https://glama.ai/mcp/servers/leukzvus7o/badge" alt="ElevenLabs Server MCP server" /></a>
+
 ## Features
 
 - Generate audio from text using ElevenLabs API
