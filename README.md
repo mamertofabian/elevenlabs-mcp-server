@@ -2,6 +2,8 @@
 
 A Model Context Protocol (MCP) server that integrates with ElevenLabs text-to-speech API, featuring both a server component and a sample web-based MCP Client (SvelteKit) for managing voice generation tasks.
 
+<a href="https://glama.ai/mcp/servers/leukzvus7o"><img width="380" height="200" src="https://glama.ai/mcp/servers/leukzvus7o/badge" alt="ElevenLabs Server MCP server" /></a>
+
 ## Features
 
 - Generate audio from text using ElevenLabs API
