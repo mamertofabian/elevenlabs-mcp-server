@@ -1,4 +1,5 @@
 # ElevenLabs MCP Server
+[![smithery badge](https://smithery.ai/badge/elevenlabs-mcp-server)](https://smithery.ai/server/elevenlabs-mcp-server)
 
 A Model Context Protocol (MCP) server that integrates with ElevenLabs text-to-speech API, featuring both a server component and a sample web-based MCP Client (SvelteKit) for managing voice generation tasks.
 
@@ -14,6 +15,14 @@ A Model Context Protocol (MCP) server that integrates with ElevenLabs text-to-sp
   - Audio file downloads
 
 ## Installation
+
+### Installing via Smithery
+
+To install ElevenLabs MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/elevenlabs-mcp-server):
+
+```bash
+npx -y @smithery/cli install elevenlabs-mcp-server --client claude
+```
 
 ### Using uvx (recommended)
 
