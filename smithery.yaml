@@ -1,0 +1,53 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - elevenLabsApiKey
+      - elevenLabsVoiceId
+      - elevenLabsModelId
+      - elevenLabsStability
+      - elevenLabsSimilarityBoost
+      - elevenLabsStyle
+      - elevenLabsOutputDir
+    properties:
+      elevenLabsApiKey:
+        type: string
+        description: Your API key for the ElevenLabs service.
+      elevenLabsVoiceId:
+        type: string
+        description: Voice ID for ElevenLabs text-to-speech.
+      elevenLabsModelId:
+        type: string
+        description: Model ID for ElevenLabs, default is eleven_flash_v2.
+      elevenLabsStability:
+        type: number
+        description: Stability parameter for voice generation.
+      elevenLabsSimilarityBoost:
+        type: number
+        description: Similarity boost parameter.
+      elevenLabsStyle:
+        type: number
+        description: Style parameter for voice generation.
+      elevenLabsOutputDir:
+        type: string
+        description: Directory to store output files.
+  commandFunction:
+    # A function that produces the CLI command to start the MCP on stdio.
+    |-
+    (config) => ({
+      command: 'uv',
+      args: ['--directory', '.', 'run', 'elevenlabs-mcp-server'],
+      env: {
+        ELEVENLABS_API_KEY: config.elevenLabsApiKey,
+        ELEVENLABS_VOICE_ID: config.elevenLabsVoiceId,
+        ELEVENLABS_MODEL_ID: config.elevenLabsModelId,
+        ELEVENLABS_STABILITY: config.elevenLabsStability.toString(),
+        ELEVENLABS_SIMILARITY_BOOST: config.elevenLabsSimilarityBoost.toString(),
+        ELEVENLABS_STYLE: config.elevenLabsStyle.toString(),
+        ELEVENLABS_OUTPUT_DIR: config.elevenLabsOutputDir
+      }
+    })
