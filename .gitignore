@@ -36,3 +36,5 @@ node_modules/
 .maid/run-reviews/
 .maid/cache/
 # END MAID RUNNER GENERATED FILES
+
+docs/revival/
