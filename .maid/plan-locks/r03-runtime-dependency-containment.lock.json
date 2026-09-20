@@ -1,11 +1,11 @@
 {
   "manifest_path": "manifests/r03-runtime-dependency-containment.manifest.yaml",
-  "manifest_hash": "sha256-contract:ed0171fc76965402323c2de78fd7fe6e318f9ed4b6644bf56861cc4009da2b13",
+  "manifest_hash": "sha256-contract:3903da5f9d3d628dfa9e6e1e8ca5fbe259291d7a9d09140efe286c39406b51c3",
   "test_hashes": {
-    "tests/acceptance/test_runtime_dependency_metadata.py": "sha256-pyast:v2:e07045b398d54bda9c44a9043815ccd37d348c61984b9cc5a191ed1235bce735"
+    "tests/acceptance/test_runtime_dependency_metadata.py": "sha256-pyast:v2:c00d3d64d58dd16d07486c09a70e0eb779b2beb1372eca3ada5720706aa863c7"
   },
   "created_at": "2026-09-20T07:07:22.941138+00:00",
-  "revision": 5,
+  "revision": 9,
   "revisions": [
     {
       "prior_manifest_hash": "sha256-contract:dd791f035e92b6504deaa2a0098de898c2ced0c2a3b050129a63fe26fdbf0620",
@@ -74,22 +74,90 @@
         "validate_commands_added": [],
         "validate_commands_removed": []
       }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:ed0171fc76965402323c2de78fd7fe6e318f9ed4b6644bf56861cc4009da2b13",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_dependency_metadata.py": "sha256-pyast:v2:e07045b398d54bda9c44a9043815ccd37d348c61984b9cc5a191ed1235bce735"
+      },
+      "revised_at": "2026-09-20T09:03:22.386761+00:00",
+      "reason": "Evolve the still-unaccepted packaging contract to declare and verify the direct regex runtime dependency required by R04 grapheme-safe fragmentation.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:3903da5f9d3d628dfa9e6e1e8ca5fbe259291d7a9d09140efe286c39406b51c3",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_dependency_metadata.py": "sha256-pyast:v2:3d066dc2e7af7ab22a4920bbbb4521d265aaca426de3e9c8ced48f3a46371ce0"
+      },
+      "revised_at": "2026-09-20T09:08:00.158242+00:00",
+      "reason": "Review-driven packaging hardening now asserts the exact regex range in source, lock metadata, and built wheel metadata.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:3903da5f9d3d628dfa9e6e1e8ca5fbe259291d7a9d09140efe286c39406b51c3",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_dependency_metadata.py": "sha256-pyast:v2:c00d3d64d58dd16d07486c09a70e0eb779b2beb1372eca3ada5720706aa863c7"
+      },
+      "revised_at": "2026-09-20T09:09:27.321156+00:00",
+      "reason": "Refresh the evolved packaging Outcome with exact regex metadata assertions, 92-test validation, deep verification, and the first review findings.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:3903da5f9d3d628dfa9e6e1e8ca5fbe259291d7a9d09140efe286c39406b51c3",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_dependency_metadata.py": "sha256-pyast:v2:c00d3d64d58dd16d07486c09a70e0eb779b2beb1372eca3ada5720706aa863c7"
+      },
+      "revised_at": "2026-09-20T09:12:54.810636+00:00",
+      "reason": "Record the independent Ready to merge review for the evolved regex packaging contract.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
     }
   ],
   "red_evidence": {
     "red": true,
-    "captured_at": "2026-09-20T08:38:22.364982+00:00",
+    "captured_at": "2026-09-20T09:08:07.533900+00:00",
     "commands": [
       {
         "command": "uv run pytest -q tests/acceptance/test_runtime_dependency_metadata.py",
         "exit_code": 1,
-        "output_tail": "    yield from self._runtest_for(item, \"call\")\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/_pytest/logging.py:829: in _runtest_for\n    yield\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <CaptureManager _method='fd' _global_capturing=<MultiCapture out=<FDCapture 1 oldfd=6 _state='suspended' tmpfile=<_io....xtIOWrapper name='/dev/null' mode='r' encoding='utf-8'>> _state='suspended' _in_suspended=False> _capture_fixture=None>\nitem = <Function test_built_wheel_preserves_identity_license_and_safe_requirements>\n\n    @hookimpl(wrapper=True)\n    def pytest_runtest_call(self, item: Item) -> Generator[None]:\n        with self.item_capture(\"call\", item):\n>           return (yield)\nE           RuntimeError: generator raised StopIteration\n\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/_pytest/capture.py:880: RuntimeError\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_project_runtime_dependencies_bound_mcp_and_exclude_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_lock_resolves_tested_mcp_v1_without_runtime_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_built_wheel_preserves_identity_license_and_safe_requirements\n3 failed in 0.24s",
+        "output_tail": "    @hookimpl(wrapper=True)\n    def pytest_runtest_call(self, item: Item) -> Generator[None]:\n        with self.item_capture(\"call\", item):\n>           return (yield)\nE           RuntimeError: generator raised StopIteration\n\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/_pytest/capture.py:880: RuntimeError\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_project_runtime_dependencies_bound_mcp_and_exclude_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_lock_resolves_tested_mcp_v1_without_runtime_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_built_wheel_preserves_identity_license_and_safe_requirements\n3 failed in 0.32s\n\n   Building elevenlabs-mcp-server @ file:///mnt/storage/development/elevenlabs-mcp-server\n      Built elevenlabs-mcp-server @ file:///mnt/storage/development/elevenlabs-mcp-server\nUninstalled 1 package in 0.31ms\nwarning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.\n         If the cache and target directories are on different filesystems, hardlinking may not be supported.\n         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.\nInstalled 1 package in 0.90ms",
         "classification": "red"
       },
       {
         "command": "uv run pytest -q",
         "exit_code": 1,
-        "output_tail": "item = <Function test_built_wheel_preserves_identity_license_and_safe_requirements>\n\n    @hookimpl(wrapper=True)\n    def pytest_runtest_call(self, item: Item) -> Generator[None]:\n        with self.item_capture(\"call\", item):\n>           return (yield)\nE           RuntimeError: generator raised StopIteration\n\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/_pytest/capture.py:880: RuntimeError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_project_runtime_dependencies_bound_mcp_and_exclude_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_lock_resolves_tested_mcp_v1_without_runtime_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_built_wheel_preserves_identity_license_and_safe_requirements\n3 failed, 76 passed, 1 warning in 5.43s",
+        "output_tail": "\n    @hookimpl(wrapper=True)\n    def pytest_runtest_call(self, item: Item) -> Generator[None]:\n        with self.item_capture(\"call\", item):\n>           return (yield)\nE           RuntimeError: generator raised StopIteration\n\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/_pytest/capture.py:880: RuntimeError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_lossless_text_fragmentation.py::test_unicode_segmenter_is_a_direct_runtime_dependency\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_project_runtime_dependencies_bound_mcp_and_exclude_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_lock_resolves_tested_mcp_v1_without_runtime_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_built_wheel_preserves_identity_license_and_safe_requirements\n4 failed, 88 passed, 1 warning in 5.95s",
         "classification": "red"
       },
       {
@@ -110,6 +178,13 @@
         "output_tail": "Resolved 42 packages in 5ms",
         "classification": "not_red"
       }
+    ],
+    "sibling_dirty_paths": [
+      ".maid/plan-locks/r04-lossless-text-fragmentation.lock.json",
+      "manifests/r04-lossless-text-fragmentation.manifest.yaml",
+      "src/elevenlabs_mcp/contracts.py",
+      "src/elevenlabs_mcp/planner.py",
+      "tests/acceptance/test_lossless_text_fragmentation.py"
     ]
   },
   "legacy_baseline": null,
@@ -155,7 +230,7 @@
             {
               "kind": "test_function",
               "name": "test_lock_resolves_tested_mcp_v1_without_runtime_pytest",
-              "description": "Parsed uv.lock project metadata and selected package version reflect the bounded v1/runtime-dev separation."
+              "description": "Parsed uv.lock project metadata and selected package version reflect the exact approved runtime set, including direct Pydantic and regex dependencies, and the bounded v1/runtime-dev separation."
             },
             {
               "kind": "test_function",

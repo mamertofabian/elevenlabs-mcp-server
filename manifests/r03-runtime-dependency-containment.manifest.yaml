@@ -4,12 +4,13 @@
 # Nothing here is needed to build or run this project; safe to ignore.
 # What it is: https://github.com/mamertofabian/maid-runner
 schema: "2"
-goal: Bound recovery installs to tested dependency lines, declare Pydantic v2 directly for typed contracts, and keep test/MAID tooling out of unconditional wheel runtime requirements.
+goal: Bound recovery installs to tested dependency lines, declare Pydantic v2 and Unicode regex support directly for typed planning, and keep test/MAID tooling out of unconditional wheel runtime requirements.
 description: |
   First R03 packaging child. Change the published runtime contract from
   unbounded mcp>=1.0.0 to tested mcp>=1.1.2,<2, declare
   pydantic>=2.10,<3 for the R04 public contracts, remove pytest from runtime
-  dependencies, preserve the project name/import/entry point/MIT license and
+  dependencies, and declare regex>=2024.11.6,<2027 for R04 grapheme-safe
+  fragmentation. Preserve the project name/import/entry point/MIT license and
   optional dev extra, and migrate repo-local uv tools from deprecated
   tool.uv.dev-dependencies to dependency-groups.dev. Regenerate uv.lock without
   upgrading unrelated resolutions. Behavioral tests build the real wheel into
@@ -41,7 +42,7 @@ files:
           description: Parsed pyproject data preserves identity and optional dev support while runtime dependencies contain mcp>=1.1.2,<2 and no pytest.
         - kind: test_function
           name: test_lock_resolves_tested_mcp_v1_without_runtime_pytest
-          description: Parsed uv.lock project metadata and selected package version reflect the bounded v1/runtime-dev separation.
+          description: Parsed uv.lock project metadata and selected package version reflect the exact approved runtime set, including direct Pydantic and regex dependencies, and the bounded v1/runtime-dev separation.
         - kind: test_function
           name: test_built_wheel_preserves_identity_license_and_safe_requirements
           description: A real temporary wheel advertises bounded MCP, no unconditional pytest, the legacy console entry point/import package, and MIT license file.
@@ -68,28 +69,34 @@ acceptance:
   immutable: true
 outcome:
   status: completed
-  summary: Built wheels advertise mcp>=1.1.2,<2 and direct pydantic>=2.10,<3, exclude pytest from unconditional runtime requirements, preserve the optional dev extra, and retain existing resolved versions.
-  rationale: Wheel metadata now declares every application-imported foundational dependency directly before R04 typed contracts, while lockfile-only and transitive-dependency assumptions remain prohibited.
+  summary: Built wheels advertise mcp>=1.1.2,<2, direct pydantic>=2.10,<3, and direct regex>=2024.11.6,<2027, exclude pytest from unconditional runtime requirements, preserve the optional dev extra, and keep unrelated resolutions stable.
+  rationale: Wheel metadata now declares every application-imported foundational dependency directly for R04 typed contracts and grapheme-safe planning, while lockfile-only and transitive-dependency assumptions remain prohibited.
   lessons:
     - lesson_type: packaging-contract
-      summary: Direct application imports must be declared in wheel metadata even when another runtime dependency currently brings the package transitively.
-      tags: [packaging, pydantic, dependencies, wheel]
+      summary: Direct application imports and both tested dependency bounds must be asserted in source, lock metadata, and built-wheel metadata rather than inferred from one layer.
+      tags: [packaging, pydantic, regex, dependencies, wheel]
       paths: [pyproject.toml, uv.lock, tests/acceptance/test_runtime_dependency_metadata.py]
   review_notes:
     - source: maid-implementation-reviewer:r03_pydantic_review
       severity: ready
       summary: No findings; wheel range, locked 2.10.4 resolution, minimal lock diff, runtime/dev separation, and fresh revision evidence are valid.
+    - source: maid-implementation-reviewer:r04_fragmentation_review
+      severity: needs-changes
+      summary: The first evolved-contract review required exact regex lower/upper assertions in source, lock, and wheel metadata plus refreshed post-revision Outcome evidence; the dependency assertions and validation evidence were then hardened.
+    - source: maid-implementation-reviewer:r04_fragmentation_review_2
+      severity: ready
+      summary: No blocking findings; exact source and lock dependency bounds, built-wheel range evidence, evolved Outcome evidence, scope, and manifest fidelity are valid.
   validation:
     - command: [uv, run, pytest, -q]
       status: passed
-      summary: All 79 tests passed.
+      summary: All 92 tests passed after the regex contract evolution.
     - command: [uv, lock, --check]
       status: passed
-      summary: Lock is current with unchanged package resolutions.
-    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, f5b16e5, --summary, --packet]
+      summary: Lock is current with regex 2026.9.10 inside the advertised range and unrelated resolutions preserved.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, b404212, --summary, --packet]
       status: passed
-      summary: All 11 deep stages passed.
-  completed_at: "2026-09-20T16:40:24+08:00"
+      summary: All 11 deep stages passed after the R04 dependency evolution.
+  completed_at: "2026-09-20T17:11:57+08:00"
 created: "2026-09-20T07:07:27Z"
 metadata:
   author: Codex

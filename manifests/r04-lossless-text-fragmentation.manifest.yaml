@@ -1,0 +1,169 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Fragment normalized script parts losslessly at stable human and Unicode boundaries without credentials or I/O.
+description: |
+  Second R04 child covering the reusable text-fragmentation core for A17 and
+  A20. Add immutable SourceSpan and TextFragment contracts plus a pure
+  fragment_text(part, max_characters) function. Normalize only CRLF and bare CR
+  to LF, preserve every other code point, prefer paragraph then sentence then
+  whitespace boundaries, and fall back to Unicode extended grapheme clusters.
+  Complete bracketed audio tags are indivisible. Return ordered nonempty
+  fragments whose spans cover the normalized text exactly, or raise a typed
+  TextFragmentationError when one tag or grapheme cannot fit. Add the maintained
+  regex runtime dependency for standards-based \X segmentation. This child does
+  not group fragments into provider chunks, enforce voice/scene boundaries,
+  hash plans, expose MCP tools, persist data, or call ElevenLabs. Expected red:
+  planner.py and every declared fragmentation symbol are absent.
+temptations:
+  - risk: Slice Python strings at the character ceiling and split combining sequences, emoji, or audio tags.
+    instead: Build legal boundaries from complete bracketed tags and regex \X grapheme clusters, then choose the latest allowed preferred boundary.
+  - risk: Strip, rewrite, or append separators while normalizing and fragmenting text.
+    instead: Normalize only CRLF and CR to LF and prove concatenated fragments equal that exact normalized value.
+  - risk: Return an oversized or empty fragment to force termination.
+    instead: Advance through at least one complete token per iteration and raise TextFragmentationError when the next indivisible token exceeds the ceiling.
+  - risk: Pull credentials, provider metadata, files, or an LLM into text planning.
+    instead: Keep planner.py dependent only on typed input values and deterministic local Unicode processing.
+type: feature
+files:
+  create:
+    - path: src/elevenlabs_mcp/planner.py
+      artifacts:
+        - kind: class
+          name: TextFragmentationError
+          bases: [ValueError]
+        - kind: attribute
+          name: part_id
+          of: TextFragmentationError
+          type: str
+        - kind: attribute
+          name: token_start
+          of: TextFragmentationError
+          type: int
+        - kind: attribute
+          name: token_end
+          of: TextFragmentationError
+          type: int
+        - kind: attribute
+          name: max_characters
+          of: TextFragmentationError
+          type: int
+        - kind: class
+          name: TextFragment
+        - kind: attribute
+          name: text
+          of: TextFragment
+          type: str
+        - kind: attribute
+          name: source_span
+          of: TextFragment
+          type: SourceSpan
+        - kind: type
+          name: TextFragments
+          type: tuple[TextFragment, ...]
+        - kind: function
+          name: fragment_text
+          args:
+            - {name: part, type: ScriptPart}
+            - {name: max_characters, type: int}
+          returns: TextFragments
+    - path: tests/acceptance/test_lossless_text_fragmentation.py
+      artifacts:
+        - kind: test_function
+          name: test_exact_character_boundary_and_overflow_are_lossless
+          description: Exactly 2,000 code points remain one fragment while 2,001 split into ordered nonempty fragments with exact normalized coverage and spans.
+        - kind: test_function
+          name: test_normalization_preserves_all_content_except_line_endings
+          description: CRLF and CR become LF while whitespace, punctuation, Unicode, and tag text remain byte-for-code-point equivalent after reconstruction.
+        - kind: test_function
+          name: test_maximum_text_with_unit_ceiling_completes_losslessly
+          description: A valid maximum-size 100,000-code-point part fragments at a one-character ceiling with complete ordered coverage and bounded progress.
+        - kind: test_function
+          name: test_fragmentation_respects_preferred_and_indivisible_boundaries
+          description: Paragraph, sentence, and whitespace boundaries are preferred and no complete tag, combining grapheme, or emoji sequence is split.
+        - kind: test_function
+          name: test_indivisible_token_reports_precise_failure_and_planner_has_no_io
+          description: An oversized tag raises typed positional evidence, invalid limits fail, and fragmentation performs no filesystem, network, credential, database, or environment access.
+        - kind: test_function
+          name: test_unicode_segmenter_is_a_direct_runtime_dependency
+          description: Project runtime metadata directly declares the regex package used for standards-based grapheme segmentation, and the locked environment can import it.
+  edit:
+    - path: src/elevenlabs_mcp/contracts.py
+      artifacts:
+        - kind: class
+          name: SourceSpan
+          bases: [_StrictModel]
+        - kind: attribute
+          name: part_id
+          of: SourceSpan
+          type: str
+        - kind: attribute
+          name: start
+          of: SourceSpan
+          type: int
+        - kind: attribute
+          name: end
+          of: SourceSpan
+          type: int
+    - path: tests/acceptance/test_runtime_dependency_metadata.py
+      artifacts:
+        - kind: test_function
+          name: test_lock_resolves_tested_mcp_v1_without_runtime_pytest
+          description: Parsed lock metadata contains the complete approved runtime dependency set including direct regex support, preserves MCP 1.1.2, and excludes pytest from unconditional requirements.
+  scope:
+    - path: pyproject.toml
+      reason: Declare the direct regex runtime dependency used for Unicode extended grapheme segmentation.
+    - path: uv.lock
+      reason: Reconcile the lockfile after the narrow direct dependency addition without upgrading unrelated packages.
+  read:
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/03_TOOL_CONTRACTS.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - manifests/r04-typed-script-contracts.manifest.yaml
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_lossless_text_fragmentation.py]
+  - [uv, run, pytest, -q, tests/acceptance/test_runtime_dependency_metadata.py]
+  - [uv, run, ruff, check, tests/acceptance/test_lossless_text_fragmentation.py]
+  - [uv, run, ruff, format, --check, tests/acceptance/test_lossless_text_fragmentation.py]
+  - [uv, run, pyright, tests/acceptance/test_lossless_text_fragmentation.py]
+  - [uv, lock, --check]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_lossless_text_fragmentation.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Pure planning now normalizes only line endings and fragments up to 100,000 code points losslessly at paragraph, sentence, whitespace, complete audio-tag, and Unicode grapheme boundaries with contiguous source spans and typed indivisible-token failures.
+  rationale: A reusable deterministic fragmentation layer isolates Unicode correctness and bounded progress before later R04 children add scene/voice grouping and canonical plan hashing; regex is a direct bounded runtime dependency because Python's standard library does not implement extended grapheme segmentation.
+  lessons:
+    - lesson_type: contract-evolution
+      summary: Boundary algorithms must prove both semantic losslessness and practical progress at the largest accepted input; cursor/bisect traversal replaced repeated full rescans.
+      tags: [planner, unicode, fragmentation, performance, boundaries]
+      paths: [src/elevenlabs_mcp/planner.py, tests/acceptance/test_lossless_text_fragmentation.py]
+    - lesson_type: packaging-contract
+      summary: A direct Unicode dependency needs exact lower and upper bounds asserted in source, lock metadata, and built-wheel metadata.
+      tags: [packaging, regex, wheel, dependencies]
+      paths: [pyproject.toml, uv.lock, tests/acceptance/test_runtime_dependency_metadata.py]
+  review_notes:
+    - source: maid-implementation-reviewer:r04_fragmentation_review_2
+      severity: ready
+      summary: No blocking findings; losslessness, normalized spans, termination at the 100,000-character/unit-ceiling extreme, tag/grapheme indivisibility, dependency scope, and manifest fidelity are valid. Direct grapheme-error and mutation probes plus parsed wheel-specifier equality remain advisory only.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 92 credential-free tests passed.
+    - command: [uv, run, maid, test, --manifest, manifests/r04-lossless-text-fragmentation.manifest.yaml]
+      status: passed
+      summary: All 6 manifest-local validation commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, b404212, --summary, --packet]
+      status: passed
+      summary: All 11 deep verification stages passed with zero blocking findings or warnings.
+  completed_at: "2026-09-20T17:11:57+08:00"
+created: "2026-09-20T08:58:10Z"
+metadata:
+  author: Codex
+  tags: [revival, r04, planner, fragmentation, unicode]
+  priority: high

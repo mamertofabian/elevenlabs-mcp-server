@@ -119,6 +119,18 @@ class VoiceoverOptions(_StrictModel):
         return self
 
 
+class SourceSpan(_StrictModel):
+    part_id: str = Field(pattern=_IDENTIFIER_PATTERN)
+    start: int = Field(ge=0)
+    end: int = Field(ge=1)
+
+    @model_validator(mode="after")
+    def _validate_order(self) -> Self:
+        if self.end <= self.start:
+            raise ValueError("source span end must be greater than start")
+        return self
+
+
 class PlanVoiceoverInput(_StrictModel):
     script: Script
     options: VoiceoverOptions
