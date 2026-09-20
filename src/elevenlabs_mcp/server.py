@@ -377,7 +377,8 @@ class ElevenLabsServer:
 
                         output_file, api_debug_info, completed_parts = self.api.generate_full_audio(
                             script_parts,
-                            self.output_dir
+                            self.output_dir,
+                            output_id=job_id,
                         )
                         debug_info.extend(api_debug_info)
 
@@ -455,7 +456,8 @@ class ElevenLabsServer:
 
                         output_file, api_debug_info, completed_parts = self.api.generate_full_audio(
                             script_parts,
-                            self.output_dir
+                            self.output_dir,
+                            output_id=job_id,
                         )
                         debug_info.extend(api_debug_info)
 

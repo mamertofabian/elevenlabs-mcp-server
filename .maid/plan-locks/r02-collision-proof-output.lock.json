@@ -1,0 +1,240 @@
+{
+  "manifest_path": "manifests/r02-collision-proof-output.manifest.yaml",
+  "manifest_hash": "sha256-contract:65f68d8441d53e425841733bdd6faa01f83dcdebb4aadfa0e7e1a2dcced93945",
+  "test_hashes": {
+    "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+    "tests/acceptance/test_collision_proof_output.py": "sha256-pyast:v2:911c3e4f0bc521fc47ab666e265138660aad16a6d2b862daa8ce794d6cd47ee4"
+  },
+  "created_at": "2026-09-20T05:18:26.207454+00:00",
+  "revision": 4,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:799d230598b5f264512035c616c27f2a7ab8a6f8fb356e4538831097c6db06dc",
+      "prior_test_hashes": {
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_collision_proof_output.py": "sha256-pyast:v2:a4370f3083923cfd82a87c724eeef424c8d08d3890dea0a143b18833a7524d1c"
+      },
+      "revised_at": "2026-09-20T05:18:27.907145+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r02-collision-proof-output.manifest.yaml -> manifests/r02-collision-proof-output.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:391b4fcc128886fa70a0d9f9d15576d2eba2e25240c4ae7d67db1039d49571c0",
+      "prior_test_hashes": {
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_collision_proof_output.py": "sha256-pyast:v2:a4370f3083923cfd82a87c724eeef424c8d08d3890dea0a143b18833a7524d1c"
+      },
+      "revised_at": "2026-09-20T05:21:54.428131+00:00",
+      "reason": "Add review-driven real MCP server UUID wiring coverage and export/link failure cleanup assertions",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "tests/acceptance/test_collision_proof_output.py:test_export_and_link_failures_cleanup_temporary_files",
+          "tests/acceptance/test_collision_proof_output.py:test_export_and_link_failures_cleanup_temporary_files:kind=test_function",
+          "tests/acceptance/test_collision_proof_output.py:test_legacy_server_tools_publish_with_persisted_job_ids",
+          "tests/acceptance/test_collision_proof_output.py:test_legacy_server_tools_publish_with_persisted_job_ids:kind=test_function"
+        ],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:65f68d8441d53e425841733bdd6faa01f83dcdebb4aadfa0e7e1a2dcced93945",
+      "prior_test_hashes": {
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_collision_proof_output.py": "sha256-pyast:v2:911c3e4f0bc521fc47ab666e265138660aad16a6d2b862daa8ce794d6cd47ee4"
+      },
+      "revised_at": "2026-09-20T05:23:58.782404+00:00",
+      "reason": "Capture reviewed collision-proof output Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T05:21:56.356672+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_collision_proof_output.py",
+        "exit_code": 1,
+        "output_tail": "        )\nE       TypeError: ElevenLabsAPI.generate_full_audio() got an unexpected keyword argument 'output_id'\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_collision_proof_output.py:44: TypeError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_collision_proof_output.py::test_distinct_job_ids_create_distinct_files_in_same_clock_second\nFAILED tests/acceptance/test_collision_proof_output.py::test_repeated_job_id_never_overwrites_existing_audio\nFAILED tests/acceptance/test_collision_proof_output.py::test_omitted_output_id_uses_unique_uuid_filenames\nFAILED tests/acceptance/test_collision_proof_output.py::test_invalid_output_id_cannot_create_paths\nFAILED tests/acceptance/test_collision_proof_output.py::test_legacy_server_tools_publish_with_persisted_job_ids\nFAILED tests/acceptance/test_collision_proof_output.py::test_export_and_link_failures_cleanup_temporary_files\n6 failed, 1 warning in 0.21s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run pytest -q tests/acceptance/test_collision_proof_output.py tests/acceptance/test_credential_free_discovery.py",
+        "exit_code": 1,
+        "output_tail": "        )\nE       TypeError: ElevenLabsAPI.generate_full_audio() got an unexpected keyword argument 'output_id'\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_collision_proof_output.py:44: TypeError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_collision_proof_output.py::test_distinct_job_ids_create_distinct_files_in_same_clock_second\nFAILED tests/acceptance/test_collision_proof_output.py::test_repeated_job_id_never_overwrites_existing_audio\nFAILED tests/acceptance/test_collision_proof_output.py::test_omitted_output_id_uses_unique_uuid_filenames\nFAILED tests/acceptance/test_collision_proof_output.py::test_invalid_output_id_cannot_create_paths\nFAILED tests/acceptance/test_collision_proof_output.py::test_legacy_server_tools_publish_with_persisted_job_ids\nFAILED tests/acceptance/test_collision_proof_output.py::test_export_and_link_failures_cleanup_temporary_files\n6 failed, 4 passed, 1 warning in 0.46s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/acceptance/test_collision_proof_output.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/acceptance/test_collision_proof_output.py",
+        "exit_code": 1,
+        "output_tail": "/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_collision_proof_output.py\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_collision_proof_output.py:45:44 - error: No parameter named \"output_id\" (reportCallIssue)\n1 error, 0 warnings, 0 informations\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:arg=output_dir:type=Path:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:arg=output_id:type=Optional[str]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:arg=script_parts:type=List[Dict]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:kind=method",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:of=ElevenLabsAPI",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:returns=tuple[str, List[str], int]",
+      "tests/acceptance/test_collision_proof_output.py:test_distinct_job_ids_create_distinct_files_in_same_clock_second",
+      "tests/acceptance/test_collision_proof_output.py:test_distinct_job_ids_create_distinct_files_in_same_clock_second:kind=test_function",
+      "tests/acceptance/test_collision_proof_output.py:test_export_and_link_failures_cleanup_temporary_files",
+      "tests/acceptance/test_collision_proof_output.py:test_export_and_link_failures_cleanup_temporary_files:kind=test_function",
+      "tests/acceptance/test_collision_proof_output.py:test_invalid_output_id_cannot_create_paths",
+      "tests/acceptance/test_collision_proof_output.py:test_invalid_output_id_cannot_create_paths:kind=test_function",
+      "tests/acceptance/test_collision_proof_output.py:test_legacy_server_tools_publish_with_persisted_job_ids",
+      "tests/acceptance/test_collision_proof_output.py:test_legacy_server_tools_publish_with_persisted_job_ids:kind=test_function",
+      "tests/acceptance/test_collision_proof_output.py:test_omitted_output_id_uses_unique_uuid_filenames",
+      "tests/acceptance/test_collision_proof_output.py:test_omitted_output_id_uses_unique_uuid_filenames:kind=test_function",
+      "tests/acceptance/test_collision_proof_output.py:test_repeated_job_id_never_overwrites_existing_audio",
+      "tests/acceptance/test_collision_proof_output.py:test_repeated_job_id_never_overwrites_existing_audio:kind=test_function"
+    ],
+    "files": {
+      "create": [],
+      "edit": [
+        "src/elevenlabs_mcp/elevenlabs_api.py",
+        "tests/acceptance/test_collision_proof_output.py"
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md",
+        "manifests/r01-credential-free-discovery.manifest.yaml",
+        "tests/acceptance/test_credential_free_discovery.py"
+      ],
+      "scope": [
+        "src/elevenlabs_mcp/server.py"
+      ],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "edit": [
+        {
+          "path": "src/elevenlabs_mcp/elevenlabs_api.py",
+          "artifacts": [
+            {
+              "kind": "method",
+              "name": "generate_full_audio",
+              "of": "ElevenLabsAPI",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "script_parts",
+                  "type": "List[Dict]"
+                },
+                {
+                  "name": "output_dir",
+                  "type": "Path"
+                },
+                {
+                  "name": "output_id",
+                  "type": "Optional[str]",
+                  "default": "None"
+                }
+              ],
+              "returns": "tuple[str, List[str], int]"
+            }
+          ]
+        },
+        {
+          "path": "tests/acceptance/test_collision_proof_output.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_distinct_job_ids_create_distinct_files_in_same_clock_second",
+              "description": "A07 produces two different final paths and bytes for explicit UUID job identities independent of wall-clock time."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_repeated_job_id_never_overwrites_existing_audio",
+              "description": "Reusing one UUID raises FileExistsError and preserves the original final bytes."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_omitted_output_id_uses_unique_uuid_filenames",
+              "description": "Backward-compatible direct calls without output_id receive distinct canonical UUID filenames."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_invalid_output_id_cannot_create_paths",
+              "description": "Non-UUID and traversal-like identifiers fail before output-directory or provider work."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_legacy_server_tools_publish_with_persisted_job_ids",
+              "description": "Real in-memory MCP calls for both legacy generation tools persist jobs whose output filenames contain those same job UUIDs."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_export_and_link_failures_cleanup_temporary_files",
+              "description": "Export and non-collision finalization failures leave no temporary or final artifact and do not disturb existing files."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "manifests/r01-credential-free-discovery.manifest.yaml",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md",
+        "tests/acceptance/test_credential_free_discovery.py"
+      ],
+      "scope": [
+        {
+          "path": "src/elevenlabs_mcp/server.py",
+          "reason": "Pass the already-created job_id to both generate_full_audio call sites without changing public server artifacts."
+        }
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_collision_proof_output.py",
+      "tests/acceptance/test_credential_free_discovery.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_collision_proof_output.py",
+      "uv run pytest -q tests/acceptance/test_collision_proof_output.py tests/acceptance/test_credential_free_discovery.py",
+      "uv run ruff check tests/acceptance/test_collision_proof_output.py",
+      "uv run pyright tests/acceptance/test_collision_proof_output.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_collision_proof_output.py"
+    ]
+  }
+}

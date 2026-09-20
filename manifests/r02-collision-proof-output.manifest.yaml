@@ -1,0 +1,113 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Make legacy assembled-audio filenames collision-proof and atomically non-overwriting by tying them to UUID job identity instead of wall-clock seconds.
+description: |
+  R02/A07 child. Extend ElevenLabsAPI.generate_full_audio with an optional
+  output_id. Server call sites pass their existing job UUID; direct legacy
+  callers that omit it receive a generated UUID. Only canonical UUID text may
+  become a filename. Assembly exports to a same-directory temporary file and
+  atomically links it into the final full_audio_<uuid>.mp3 path without
+  replacing an existing artifact, then cleans temporary state. This preserves
+  the return tuple and legacy synchronous tool envelopes while removing
+  second-resolution collisions and path injection. Partial-generation truth,
+  codec verification, and broader artifact ownership remain later children.
+  Expected red: two renders use the same timestamp filename, output_id is not
+  accepted, and a repeated identity can overwrite the first artifact.
+temptations:
+  - risk: Add microseconds or randomness to the old timestamp filename.
+    instead: Use the already-persisted job UUID from server call sites and generate a UUID only for backward-compatible direct callers.
+  - risk: Interpolate arbitrary caller text into a filesystem path.
+    instead: Parse output_id as UUID and use its canonical string form only.
+  - risk: Check Path.exists before a normal export and call that non-overwriting.
+    instead: Export to a same-directory temporary file and use an atomic no-replace link operation for finalization.
+  - risk: Leave temporary encoded files after export or finalization failure.
+    instead: Remove the owned temporary path in a finally block while never deleting an existing final artifact.
+type: fix
+files:
+  edit:
+    - path: src/elevenlabs_mcp/elevenlabs_api.py
+      artifacts:
+        - kind: method
+          name: generate_full_audio
+          of: ElevenLabsAPI
+          args:
+            - name: self
+            - name: script_parts
+              type: List[Dict]
+            - name: output_dir
+              type: Path
+            - name: output_id
+              type: Optional[str]
+              default: None
+          returns: tuple[str, List[str], int]
+    - path: tests/acceptance/test_collision_proof_output.py
+      artifacts:
+        - kind: test_function
+          name: test_distinct_job_ids_create_distinct_files_in_same_clock_second
+          description: A07 produces two different final paths and bytes for explicit UUID job identities independent of wall-clock time.
+        - kind: test_function
+          name: test_repeated_job_id_never_overwrites_existing_audio
+          description: Reusing one UUID raises FileExistsError and preserves the original final bytes.
+        - kind: test_function
+          name: test_omitted_output_id_uses_unique_uuid_filenames
+          description: Backward-compatible direct calls without output_id receive distinct canonical UUID filenames.
+        - kind: test_function
+          name: test_invalid_output_id_cannot_create_paths
+          description: Non-UUID and traversal-like identifiers fail before output-directory or provider work.
+        - kind: test_function
+          name: test_legacy_server_tools_publish_with_persisted_job_ids
+          description: Real in-memory MCP calls for both legacy generation tools persist jobs whose output filenames contain those same job UUIDs.
+        - kind: test_function
+          name: test_export_and_link_failures_cleanup_temporary_files
+          description: Export and non-collision finalization failures leave no temporary or final artifact and do not disturb existing files.
+  read:
+    - manifests/r01-credential-free-discovery.manifest.yaml
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md
+    - tests/acceptance/test_credential_free_discovery.py
+  scope:
+    - path: src/elevenlabs_mcp/server.py
+      reason: Pass the already-created job_id to both generate_full_audio call sites without changing public server artifacts.
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_collision_proof_output.py]
+  - [uv, run, pytest, -q, tests/acceptance/test_collision_proof_output.py, tests/acceptance/test_credential_free_discovery.py]
+  - [uv, run, ruff, check, tests/acceptance/test_collision_proof_output.py]
+  - [uv, run, pyright, tests/acceptance/test_collision_proof_output.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_collision_proof_output.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Legacy assembled audio now uses canonical UUID identity, server jobs publish under their persisted UUIDs, direct callers receive generated UUIDs, and atomic no-replace finalization prevents collisions and overwrites.
+  rationale: Same-directory temporary export plus hard-link publication provides an observable non-overwrite guarantee while preserving legacy return tuples and synchronous tool envelopes.
+  lessons:
+    - lesson_type: artifact-finalization
+      summary: Collision resistance requires identity-based names plus atomic no-replace publication; a preflight exists check or more timestamp precision is insufficient.
+      tags: [filesystem, atomicity, uuid, artifacts]
+      paths: [src/elevenlabs_mcp/elevenlabs_api.py, tests/acceptance/test_collision_proof_output.py]
+  review_notes:
+    - source: maid-implementation-reviewer:r02_collision_review_2
+      severity: ready
+      summary: No findings; real MCP wiring, UUID safety, non-overwrite behavior, and cleanup paths align with the locked contract.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: Full suite passed with the six focused A07 cases.
+    - command: [uv, run, maid, test, --manifest, manifests/r02-collision-proof-output.manifest.yaml]
+      status: passed
+      summary: All four child commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, 35aae2d, --summary, --packet]
+      status: passed
+      summary: All 11 deep stages passed.
+  completed_at: "2026-09-20T13:23:36+08:00"
+created: "2026-09-20T05:18:27Z"
+metadata:
+  author: Codex
+  tags: [revival, r02, output, collision, filesystem]
+  priority: high

@@ -4,7 +4,9 @@ import time
 import requests
 from collections.abc import Mapping
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Dict, List, Optional, TypedDict
+from uuid import UUID, uuid4
 
 log_level = os.getenv("ELEVENLABS_LOG_LEVEL", "ERROR").upper()
 valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
@@ -33,7 +35,6 @@ class _MissingAPIKeyError(ValueError):
 
 from pydub import AudioSegment
 import io
-from datetime import datetime
 from tenacity import (
     retry,
     retry_if_not_exception_type,
@@ -179,15 +180,19 @@ class ElevenLabsAPI:
             logging.error(error_message)
             raise Exception(error_message)
 
-    def generate_full_audio(self, script_parts: List[Dict], output_dir: Path) -> tuple[str, List[str], int]:
+    def generate_full_audio(
+        self,
+        script_parts: List[Dict],
+        output_dir: Path,
+        output_id: Optional[str] = None,
+    ) -> tuple[str, List[str], int]:
         """Generate audio for multiple parts using request stitching. Returns tuple of (output_file_path, debug_info, completed_parts)"""
         self._require_api_key()
+        canonical_output_id = str(uuid4()) if output_id is None else str(UUID(output_id))
         # Create output directory if it doesn't exist
         output_dir.mkdir(exist_ok=True)
-        
-        # Final output file path with unique file name
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        output_file = output_dir / f"full_audio_{timestamp}.mp3"
+
+        output_file = output_dir / f"full_audio_{canonical_output_id}.mp3"
         
         debug_info = []
         debug_info.append("ElevenLabsAPI - Starting generate_full_audio")
@@ -264,8 +269,20 @@ class ElevenLabsAPI:
             for segment in segments[1:]:
                 final_audio = final_audio + segment
             
-            # Export combined audio
-            final_audio.export(output_file, format="mp3")
+            # Export to an owned temporary file, then atomically publish without
+            # replacing an existing artifact for the same job identity.
+            with NamedTemporaryFile(
+                dir=output_dir,
+                prefix=f".full_audio_{canonical_output_id}_",
+                suffix=".tmp",
+                delete=False,
+            ) as temporary:
+                temporary_path = Path(temporary.name)
+            try:
+                final_audio.export(temporary_path, format="mp3")
+                os.link(temporary_path, output_file)
+            finally:
+                temporary_path.unlink(missing_ok=True)
 
             if failed_parts:
                 debug_info.append(f"Failed parts: {failed_parts}")
