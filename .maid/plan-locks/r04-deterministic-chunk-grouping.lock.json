@@ -1,0 +1,476 @@
+{
+  "manifest_path": "manifests/r04-deterministic-chunk-grouping.manifest.yaml",
+  "manifest_hash": "sha256-contract:b6360a790d24806b1c86a936aad7955485f62804414da21d3c5e97010f3a1ab0",
+  "test_hashes": {
+    "tests/acceptance/test_deterministic_chunk_grouping.py": "sha256-pyast:v2:08f4360b72d7afc7726ca79cc8fde50823d3f9096338a908b06715c6e33223e3"
+  },
+  "created_at": "2026-09-20T09:15:52.920799+00:00",
+  "revision": 6,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:96414111778a90fccd68bed9c0e00011ed75251ad84576fc8075ff120c98df15",
+      "prior_test_hashes": {
+        "tests/acceptance/test_deterministic_chunk_grouping.py": "sha256-pyast:v2:d5982767d43fb5076917b75aa55d16d1972cd95614767c41969925b2960d34bd"
+      },
+      "revised_at": "2026-09-20T09:15:54.409338+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r04-deterministic-chunk-grouping.manifest.yaml -> manifests/r04-deterministic-chunk-grouping.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:370a1f48343da61a98487f51d5c99828e962d8413fcab2164aaf242249686885",
+      "prior_test_hashes": {
+        "tests/acceptance/test_deterministic_chunk_grouping.py": "sha256-pyast:v2:d5982767d43fb5076917b75aa55d16d1972cd95614767c41969925b2960d34bd"
+      },
+      "revised_at": "2026-09-20T09:20:43.104506+00:00",
+      "reason": "Review-driven performance hardening replaces repeated pending-state rescans with running character/voice summaries and locks bounded grouping at the accepted 2,000-part maximum.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "tests/acceptance/test_deterministic_chunk_grouping.py:test_maximum_part_count_groups_in_bounded_time",
+          "tests/acceptance/test_deterministic_chunk_grouping.py:test_maximum_part_count_groups_in_bounded_time:kind=test_function"
+        ],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:4e60e0a739207fe2f26b08f6fe70a5eaac6ca9f0c985dcfc12eec8a7eaeca4a2",
+      "prior_test_hashes": {
+        "tests/acceptance/test_deterministic_chunk_grouping.py": "sha256-pyast:v2:15f29005460b5b6fa6c13dcf164a7b0d74516da73cfe8c06941c27001cba9c9a"
+      },
+      "revised_at": "2026-09-20T09:21:16.003761+00:00",
+      "reason": "Keep the maximum-part performance contract statically typed without changing its behavior.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:4e60e0a739207fe2f26b08f6fe70a5eaac6ca9f0c985dcfc12eec8a7eaeca4a2",
+      "prior_test_hashes": {
+        "tests/acceptance/test_deterministic_chunk_grouping.py": "sha256-pyast:v2:2d8bcd6a4d275b38b3e4ea559a51f3703e59aa322da0831d21ac5d1c466784b6"
+      },
+      "revised_at": "2026-09-20T09:23:55.401441+00:00",
+      "reason": "Review-driven behavioral coverage now executes the dialogue character-ceiling branch at exactly 2,000 and 2,001 code points with ordered lossless output.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "tests/acceptance/test_deterministic_chunk_grouping.py:test_dialogue_character_ceiling_splits_at_exact_boundary",
+          "tests/acceptance/test_deterministic_chunk_grouping.py:test_dialogue_character_ceiling_splits_at_exact_boundary:kind=test_function"
+        ],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:b6360a790d24806b1c86a936aad7955485f62804414da21d3c5e97010f3a1ab0",
+      "prior_test_hashes": {
+        "tests/acceptance/test_deterministic_chunk_grouping.py": "sha256-pyast:v2:08f4360b72d7afc7726ca79cc8fde50823d3f9096338a908b06715c6e33223e3"
+      },
+      "revised_at": "2026-09-20T09:26:57.604251+00:00",
+      "reason": "Capture the evidence-backed Outcome after an independent Ready to merge review.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T09:23:56.614950+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_deterministic_chunk_grouping.py",
+        "exit_code": 1,
+        "output_tail": "    def test_maximum_part_count_groups_in_bounded_time() -> None:\n>       from elevenlabs_mcp.contracts import PlanningLimits, Script, VoiceoverOptions\nE       ImportError: cannot import name 'PlanningLimits' from 'elevenlabs_mcp.contracts' (/mnt/storage/development/elevenlabs-mcp-server/src/elevenlabs_mcp/contracts.py)\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:189: ImportError\n=============================== warnings summary ===============================\ntests/acceptance/test_deterministic_chunk_grouping.py::test_dialogue_starts_new_chunk_for_eleventh_distinct_voice\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_deterministic_chunk_grouping.py::test_dialogue_starts_new_chunk_for_eleventh_distinct_voice\nFAILED tests/acceptance/test_deterministic_chunk_grouping.py::test_dialogue_counts_shared_voice_id_once\nFAILED tests/acceptance/test_deterministic_chunk_grouping.py::test_dialogue_character_ceiling_splits_at_exact_boundary\nFAILED tests/acceptance/test_deterministic_chunk_grouping.py::test_scenes_and_explicit_pauses_force_stable_boundaries\nFAILED tests/acceptance/test_deterministic_chunk_grouping.py::test_tts_emits_one_chunk_per_lossless_fragment_without_actor_labels\nFAILED tests/acceptance/test_deterministic_chunk_grouping.py::test_planned_chunk_limit_fails_with_typed_evidence\nFAILED tests/acceptance/test_deterministic_chunk_grouping.py::test_maximum_part_count_groups_in_bounded_time\n7 failed, 1 warning in 0.16s",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/acceptance/test_deterministic_chunk_grouping.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run ruff format --check tests/acceptance/test_deterministic_chunk_grouping.py",
+        "exit_code": 0,
+        "output_tail": "1 file already formatted",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/acceptance/test_deterministic_chunk_grouping.py",
+        "exit_code": 1,
+        "output_tail": "  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:22:9 - error: \"PlannedChunk\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:23:9 - error: \"PlannedFragment\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:24:9 - error: \"PlanningLimits\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:27:40 - error: \"PlannedChunks\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:27:55 - error: \"chunk_script\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:55:42 - error: \"PlanningLimits\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:56:40 - error: \"chunk_script\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:77:42 - error: \"PlanningLimits\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:78:40 - error: \"chunk_script\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:102:42 - error: \"PlanningLimits\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:103:40 - error: \"chunk_script\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:146:42 - error: \"PlanningLimits\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:147:40 - error: \"chunk_script\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:167:42 - error: \"PlanningLimits\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:168:40 - error: \"PlanningLimitError\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:168:60 - error: \"chunk_script\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:189:42 - error: \"PlanningLimits\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:190:40 - error: \"PlannedChunks\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_deterministic_chunk_grouping.py:190:55 - error: \"chunk_script\" is unknown import symbol (reportAttributeAccessIssue)\n19 errors, 0 warnings, 0 informations",
+        "classification": "red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.character_count",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.character_count:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.character_count:of=PlannedChunk",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.character_count:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.fragments",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.fragments:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.fragments:of=PlannedChunk",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.fragments:type=tuple[PlannedFragment, ...]",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.index",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.index:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.index:of=PlannedChunk",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.index:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.pause_after_ms",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.pause_after_ms:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.pause_after_ms:of=PlannedChunk",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.pause_after_ms:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.scene_id",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.scene_id:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.scene_id:of=PlannedChunk",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.scene_id:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.voice_ids",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.voice_ids:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.voice_ids:of=PlannedChunk",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedChunk.voice_ids:type=tuple[str, ...]",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.actor",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.actor:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.actor:of=PlannedFragment",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.actor:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.source_span",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.source_span:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.source_span:of=PlannedFragment",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.source_span:type=SourceSpan",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.text",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.text:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.text:of=PlannedFragment",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.text:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.voice_id",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.voice_id:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.voice_id:of=PlannedFragment",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedFragment.voice_id:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_planned_chunks",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_planned_chunks:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_planned_chunks:of=PlanningLimits",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_planned_chunks:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_text_characters",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_text_characters:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_text_characters:of=PlanningLimits",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_text_characters:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_unique_voices",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_unique_voices:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_unique_voices:of=PlanningLimits",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_unique_voices:type=int",
+      "src/elevenlabs_mcp/contracts.py:class:PlannedChunk",
+      "src/elevenlabs_mcp/contracts.py:class:PlannedChunk:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:PlannedChunk:kind=class",
+      "src/elevenlabs_mcp/contracts.py:class:PlannedFragment",
+      "src/elevenlabs_mcp/contracts.py:class:PlannedFragment:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:PlannedFragment:kind=class",
+      "src/elevenlabs_mcp/contracts.py:class:PlanningLimits",
+      "src/elevenlabs_mcp/contracts.py:class:PlanningLimits:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:PlanningLimits:kind=class",
+      "src/elevenlabs_mcp/planner.py:attribute:PlanningLimitError.actual",
+      "src/elevenlabs_mcp/planner.py:attribute:PlanningLimitError.actual:kind=attribute",
+      "src/elevenlabs_mcp/planner.py:attribute:PlanningLimitError.actual:of=PlanningLimitError",
+      "src/elevenlabs_mcp/planner.py:attribute:PlanningLimitError.actual:type=int",
+      "src/elevenlabs_mcp/planner.py:attribute:PlanningLimitError.limit",
+      "src/elevenlabs_mcp/planner.py:attribute:PlanningLimitError.limit:kind=attribute",
+      "src/elevenlabs_mcp/planner.py:attribute:PlanningLimitError.limit:of=PlanningLimitError",
+      "src/elevenlabs_mcp/planner.py:attribute:PlanningLimitError.limit:type=int",
+      "src/elevenlabs_mcp/planner.py:attribute:PlanningLimitError.limit_name",
+      "src/elevenlabs_mcp/planner.py:attribute:PlanningLimitError.limit_name:kind=attribute",
+      "src/elevenlabs_mcp/planner.py:attribute:PlanningLimitError.limit_name:of=PlanningLimitError",
+      "src/elevenlabs_mcp/planner.py:attribute:PlanningLimitError.limit_name:type=str",
+      "src/elevenlabs_mcp/planner.py:class:PlanningLimitError",
+      "src/elevenlabs_mcp/planner.py:class:PlanningLimitError:base=ValueError",
+      "src/elevenlabs_mcp/planner.py:class:PlanningLimitError:kind=class",
+      "src/elevenlabs_mcp/planner.py:function:chunk_script",
+      "src/elevenlabs_mcp/planner.py:function:chunk_script:arg=limits:type=PlanningLimits:default=None",
+      "src/elevenlabs_mcp/planner.py:function:chunk_script:arg=options:type=VoiceoverOptions:default=None",
+      "src/elevenlabs_mcp/planner.py:function:chunk_script:arg=script:type=Script:default=None",
+      "src/elevenlabs_mcp/planner.py:function:chunk_script:kind=function",
+      "src/elevenlabs_mcp/planner.py:function:chunk_script:returns=PlannedChunks",
+      "src/elevenlabs_mcp/planner.py:type:PlannedChunks",
+      "src/elevenlabs_mcp/planner.py:type:PlannedChunks:kind=type",
+      "src/elevenlabs_mcp/planner.py:type:PlannedChunks:type=tuple[PlannedChunk, ...]",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_dialogue_character_ceiling_splits_at_exact_boundary",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_dialogue_character_ceiling_splits_at_exact_boundary:kind=test_function",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_dialogue_counts_shared_voice_id_once",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_dialogue_counts_shared_voice_id_once:kind=test_function",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_dialogue_starts_new_chunk_for_eleventh_distinct_voice",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_dialogue_starts_new_chunk_for_eleventh_distinct_voice:kind=test_function",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_maximum_part_count_groups_in_bounded_time",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_maximum_part_count_groups_in_bounded_time:kind=test_function",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_planned_chunk_limit_fails_with_typed_evidence",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_planned_chunk_limit_fails_with_typed_evidence:kind=test_function",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_scenes_and_explicit_pauses_force_stable_boundaries",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_scenes_and_explicit_pauses_force_stable_boundaries:kind=test_function",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_tts_emits_one_chunk_per_lossless_fragment_without_actor_labels",
+      "tests/acceptance/test_deterministic_chunk_grouping.py:test_tts_emits_one_chunk_per_lossless_fragment_without_actor_labels:kind=test_function"
+    ],
+    "files": {
+      "create": [],
+      "edit": [
+        "src/elevenlabs_mcp/contracts.py",
+        "src/elevenlabs_mcp/planner.py",
+        "tests/acceptance/test_deterministic_chunk_grouping.py"
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r04-lossless-text-fragmentation.manifest.yaml",
+        "manifests/r04-typed-script-contracts.manifest.yaml"
+      ],
+      "scope": [],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "edit": [
+        {
+          "path": "src/elevenlabs_mcp/contracts.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "PlanningLimits",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "max_text_characters",
+              "of": "PlanningLimits",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "max_unique_voices",
+              "of": "PlanningLimits",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "max_planned_chunks",
+              "of": "PlanningLimits",
+              "type": "int"
+            },
+            {
+              "kind": "class",
+              "name": "PlannedFragment",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "text",
+              "of": "PlannedFragment",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "actor",
+              "of": "PlannedFragment",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "voice_id",
+              "of": "PlannedFragment",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "source_span",
+              "of": "PlannedFragment",
+              "type": "SourceSpan"
+            },
+            {
+              "kind": "class",
+              "name": "PlannedChunk",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "index",
+              "of": "PlannedChunk",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "scene_id",
+              "of": "PlannedChunk",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "fragments",
+              "of": "PlannedChunk",
+              "type": "tuple[PlannedFragment, ...]"
+            },
+            {
+              "kind": "attribute",
+              "name": "character_count",
+              "of": "PlannedChunk",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "voice_ids",
+              "of": "PlannedChunk",
+              "type": "tuple[str, ...]"
+            },
+            {
+              "kind": "attribute",
+              "name": "pause_after_ms",
+              "of": "PlannedChunk",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "path": "src/elevenlabs_mcp/planner.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "PlanningLimitError",
+              "bases": [
+                "ValueError"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "limit_name",
+              "of": "PlanningLimitError",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "limit",
+              "of": "PlanningLimitError",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "actual",
+              "of": "PlanningLimitError",
+              "type": "int"
+            },
+            {
+              "kind": "type",
+              "name": "PlannedChunks",
+              "type": "tuple[PlannedChunk, ...]"
+            },
+            {
+              "kind": "function",
+              "name": "chunk_script",
+              "args": [
+                {
+                  "name": "script",
+                  "type": "Script"
+                },
+                {
+                  "name": "options",
+                  "type": "VoiceoverOptions"
+                },
+                {
+                  "name": "limits",
+                  "type": "PlanningLimits"
+                }
+              ],
+              "returns": "PlannedChunks"
+            }
+          ]
+        },
+        {
+          "path": "tests/acceptance/test_deterministic_chunk_grouping.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_dialogue_starts_new_chunk_for_eleventh_distinct_voice",
+              "description": "Eleven resolved voice IDs remain valid at job level and greedily produce ten-voice then one-voice dialogue chunks."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_dialogue_counts_shared_voice_id_once",
+              "description": "Different actor labels sharing one voice ID fit the same one-voice chunk and actor labels are metadata only."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_dialogue_character_ceiling_splits_at_exact_boundary",
+              "description": "Dialogue greedily groups exactly 2,000 code points, starts a new chunk for the 2,001st, and preserves ordered text, indexes, and counts."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_scenes_and_explicit_pauses_force_stable_boundaries",
+              "description": "Chunks never cross scenes and a nonzero part pause ends its final fragment's chunk with the exact pause value."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_tts_emits_one_chunk_per_lossless_fragment_without_actor_labels",
+              "description": "TTS uses one resolved voice per fragment, preserves 2,001 text code points losslessly across two requests, and never inserts actor labels."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_planned_chunk_limit_fails_with_typed_evidence",
+              "description": "Exceeding max_planned_chunks raises PlanningLimitError with the exact limit name, limit, and first disallowed count."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_maximum_part_count_groups_in_bounded_time",
+              "description": "Repeated grouping of the accepted 2,000-part maximum completes within a generous regression ceiling that detects quadratic pending-state rescans."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r04-typed-script-contracts.manifest.yaml",
+        "manifests/r04-lossless-text-fragmentation.manifest.yaml"
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_deterministic_chunk_grouping.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_deterministic_chunk_grouping.py",
+      "uv run ruff check tests/acceptance/test_deterministic_chunk_grouping.py",
+      "uv run ruff format --check tests/acceptance/test_deterministic_chunk_grouping.py",
+      "uv run pyright tests/acceptance/test_deterministic_chunk_grouping.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_deterministic_chunk_grouping.py"
+    ]
+  }
+}

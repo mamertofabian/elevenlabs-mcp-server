@@ -1,0 +1,142 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Group lossless text fragments into deterministic dialogue or TTS chunks with explicit scene, voice, pause, and resource boundaries.
+description: |
+  Third R04 child covering A18, A19, A21, and the planning half of A22.
+  Add immutable PlanningLimits, PlannedFragment, and PlannedChunk contracts plus
+  a pure chunk_script(script, options, limits) function. Dialogue grouping is
+  greedy and stable within one scene, counts distinct voice IDs rather than
+  actor labels, caps each request at the effective character and unique-voice
+  limits, and ends a chunk after a nonzero source-part pause. TTS produces one
+  request chunk per lossless part fragment. Neither mode speaks actor labels or
+  crosses scenes. Enforce the planned-chunk ceiling with typed evidence. This
+  child does not create chunk IDs, hashes, provider fingerprints, full plan
+  views, MCP tools, persistence, provider dispatch, or audio silence. Expected
+  red: every declared grouping artifact and function is absent.
+temptations:
+  - risk: Reject a whole script merely because its cast contains more than ten voices.
+    instead: Apply max_unique_voices only while greedily building each dialogue chunk and start a new chunk at the boundary.
+  - risk: Count actor labels instead of resolved provider voice IDs.
+    instead: Resolve every fragment through Script.cast and maintain stable unique voice IDs per candidate chunk.
+  - risk: Combine scenes or ignore explicit pauses to reduce request count.
+    instead: Flush at every scene transition and after the final fragment of any part with nonzero pause_after_ms.
+  - risk: Concatenate actor names into provider text or reuse dialogue grouping for TTS.
+    instead: Preserve fragment text exactly; in TTS mode emit one generation chunk per fragment with one resolved voice.
+  - risk: Create IDs, hashes, files, jobs, or provider clients during grouping.
+    instead: Return deterministic immutable value objects only; later R04 children own identity and plan views.
+type: feature
+files:
+  edit:
+    - path: src/elevenlabs_mcp/contracts.py
+      artifacts:
+        - kind: class
+          name: PlanningLimits
+          bases: [_StrictModel]
+        - {kind: attribute, name: max_text_characters, of: PlanningLimits, type: int}
+        - {kind: attribute, name: max_unique_voices, of: PlanningLimits, type: int}
+        - {kind: attribute, name: max_planned_chunks, of: PlanningLimits, type: int}
+        - kind: class
+          name: PlannedFragment
+          bases: [_StrictModel]
+        - {kind: attribute, name: text, of: PlannedFragment, type: str}
+        - {kind: attribute, name: actor, of: PlannedFragment, type: str}
+        - {kind: attribute, name: voice_id, of: PlannedFragment, type: str}
+        - {kind: attribute, name: source_span, of: PlannedFragment, type: SourceSpan}
+        - kind: class
+          name: PlannedChunk
+          bases: [_StrictModel]
+        - {kind: attribute, name: index, of: PlannedChunk, type: int}
+        - {kind: attribute, name: scene_id, of: PlannedChunk, type: str}
+        - {kind: attribute, name: fragments, of: PlannedChunk, type: "tuple[PlannedFragment, ...]"}
+        - {kind: attribute, name: character_count, of: PlannedChunk, type: int}
+        - {kind: attribute, name: voice_ids, of: PlannedChunk, type: "tuple[str, ...]"}
+        - {kind: attribute, name: pause_after_ms, of: PlannedChunk, type: int}
+    - path: src/elevenlabs_mcp/planner.py
+      artifacts:
+        - kind: class
+          name: PlanningLimitError
+          bases: [ValueError]
+        - {kind: attribute, name: limit_name, of: PlanningLimitError, type: str}
+        - {kind: attribute, name: limit, of: PlanningLimitError, type: int}
+        - {kind: attribute, name: actual, of: PlanningLimitError, type: int}
+        - kind: type
+          name: PlannedChunks
+          type: tuple[PlannedChunk, ...]
+        - kind: function
+          name: chunk_script
+          args:
+            - {name: script, type: Script}
+            - {name: options, type: VoiceoverOptions}
+            - {name: limits, type: PlanningLimits}
+          returns: PlannedChunks
+    - path: tests/acceptance/test_deterministic_chunk_grouping.py
+      artifacts:
+        - kind: test_function
+          name: test_dialogue_starts_new_chunk_for_eleventh_distinct_voice
+          description: Eleven resolved voice IDs remain valid at job level and greedily produce ten-voice then one-voice dialogue chunks.
+        - kind: test_function
+          name: test_dialogue_counts_shared_voice_id_once
+          description: Different actor labels sharing one voice ID fit the same one-voice chunk and actor labels are metadata only.
+        - kind: test_function
+          name: test_dialogue_character_ceiling_splits_at_exact_boundary
+          description: Dialogue greedily groups exactly 2,000 code points, starts a new chunk for the 2,001st, and preserves ordered text, indexes, and counts.
+        - kind: test_function
+          name: test_scenes_and_explicit_pauses_force_stable_boundaries
+          description: Chunks never cross scenes and a nonzero part pause ends its final fragment's chunk with the exact pause value.
+        - kind: test_function
+          name: test_tts_emits_one_chunk_per_lossless_fragment_without_actor_labels
+          description: TTS uses one resolved voice per fragment, preserves 2,001 text code points losslessly across two requests, and never inserts actor labels.
+        - kind: test_function
+          name: test_planned_chunk_limit_fails_with_typed_evidence
+          description: Exceeding max_planned_chunks raises PlanningLimitError with the exact limit name, limit, and first disallowed count.
+        - kind: test_function
+          name: test_maximum_part_count_groups_in_bounded_time
+          description: Repeated grouping of the accepted 2,000-part maximum completes within a generous regression ceiling that detects quadratic pending-state rescans.
+  read:
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/03_TOOL_CONTRACTS.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - manifests/r04-typed-script-contracts.manifest.yaml
+    - manifests/r04-lossless-text-fragmentation.manifest.yaml
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_deterministic_chunk_grouping.py]
+  - [uv, run, ruff, check, tests/acceptance/test_deterministic_chunk_grouping.py]
+  - [uv, run, ruff, format, --check, tests/acceptance/test_deterministic_chunk_grouping.py]
+  - [uv, run, pyright, tests/acceptance/test_deterministic_chunk_grouping.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_deterministic_chunk_grouping.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Pure deterministic grouping now converts lossless fragments into immutable dialogue or TTS chunks while enforcing exact character, resolved-voice, scene, pause, and planned-request boundaries without I/O.
+  rationale: Grouping is isolated from hashing, persistence, provider dispatch, and MCP transport so A18/A19/A21/A22 policy can be verified independently and reused by the canonical planner child.
+  lessons:
+    - lesson_type: contract-evolution
+      summary: Greedy grouping must carry running character and unique-voice summaries; recomputing pending collections per fragment turns valid maximum inputs quadratic.
+      tags: [planner, chunks, performance, dialogue, limits]
+      paths: [src/elevenlabs_mcp/planner.py, tests/acceptance/test_deterministic_chunk_grouping.py]
+  review_notes:
+    - source: maid-implementation-reviewer:r04_chunk_grouping_review_3
+      severity: ready
+      summary: No blockers or actionable advisories; character/voice greediness, scene and pause boundaries, TTS separation, linear complexity, immutable summaries, scope, and exact deep verification are valid.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 99 credential-free tests passed.
+    - command: [uv, run, maid, test, --manifest, manifests/r04-deterministic-chunk-grouping.manifest.yaml]
+      status: passed
+      summary: All 4 manifest-local commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, d5d419b, --summary, --packet]
+      status: passed
+      summary: All 11 deep verification stages passed with zero blockers or warnings.
+  completed_at: "2026-09-20T17:26:21+08:00"
+created: "2026-09-20T09:15:54Z"
+metadata:
+  author: Codex
+  tags: [revival, r04, planner, chunks, dialogue, tts]
+  priority: high

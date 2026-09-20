@@ -131,6 +131,43 @@ class SourceSpan(_StrictModel):
         return self
 
 
+class PlanningLimits(_StrictModel):
+    max_text_characters: int = Field(default=2_000, ge=1, le=2_000)
+    max_unique_voices: int = Field(default=10, ge=1, le=10)
+    max_planned_chunks: int = Field(default=2_048, ge=1, le=2_048)
+
+
+class PlannedFragment(_StrictModel):
+    text: str = Field(min_length=1, max_length=2_000)
+    actor: str = Field(pattern=_IDENTIFIER_PATTERN)
+    voice_id: str = Field(min_length=1, max_length=128)
+    source_span: SourceSpan
+
+    @model_validator(mode="after")
+    def _validate_span_length(self) -> Self:
+        if len(self.text) != self.source_span.end - self.source_span.start:
+            raise ValueError("planned fragment length must match its source span")
+        return self
+
+
+class PlannedChunk(_StrictModel):
+    index: int = Field(ge=0)
+    scene_id: str = Field(pattern=_IDENTIFIER_PATTERN)
+    fragments: tuple[PlannedFragment, ...] = Field(min_length=1, max_length=2_000)
+    character_count: int = Field(ge=1, le=2_000)
+    voice_ids: tuple[str, ...] = Field(min_length=1, max_length=10)
+    pause_after_ms: int = Field(default=0, ge=0, le=10_000)
+
+    @model_validator(mode="after")
+    def _validate_summary(self) -> Self:
+        if self.character_count != sum(len(item.text) for item in self.fragments):
+            raise ValueError("character_count must equal fragment text length")
+        resolved = tuple(dict.fromkeys(item.voice_id for item in self.fragments))
+        if self.voice_ids != resolved:
+            raise ValueError("voice_ids must be stable unique fragment voice IDs")
+        return self
+
+
 class PlanVoiceoverInput(_StrictModel):
     script: Script
     options: VoiceoverOptions

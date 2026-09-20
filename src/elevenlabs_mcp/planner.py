@@ -8,7 +8,15 @@ from typing import TypeAlias
 
 import regex
 
-from elevenlabs_mcp.contracts import ScriptPart, SourceSpan
+from elevenlabs_mcp.contracts import (
+    PlannedChunk,
+    PlannedFragment,
+    PlanningLimits,
+    Script,
+    ScriptPart,
+    SourceSpan,
+    VoiceoverOptions,
+)
 
 _TOKEN_PATTERN = regex.compile(r"\[[^\[\]]*\]|\X")
 _PARAGRAPH_BOUNDARY = regex.compile(r"\n{2,}")
@@ -30,6 +38,14 @@ class TextFragmentationError(ValueError):
         )
 
 
+class PlanningLimitError(ValueError):
+    def __init__(self, limit_name: str, limit: int, actual: int) -> None:
+        self.limit_name = limit_name
+        self.limit = limit
+        self.actual = actual
+        super().__init__(f"{limit_name} limit {limit} exceeded by {actual}")
+
+
 @dataclass(frozen=True, slots=True)
 class TextFragment:
     text: str
@@ -43,6 +59,7 @@ class TextFragment:
 
 
 TextFragments: TypeAlias = tuple[TextFragment, ...]
+PlannedChunks: TypeAlias = tuple[PlannedChunk, ...]
 
 
 def fragment_text(part: ScriptPart, max_characters: int) -> TextFragments:
@@ -84,6 +101,81 @@ def fragment_text(part: ScriptPart, max_characters: int) -> TextFragments:
         token_index = bisect_right(token_ends, end, lo=token_index, hi=legal_stop)
 
     return tuple(fragments)
+
+
+def chunk_script(
+    script: Script, options: VoiceoverOptions, limits: PlanningLimits
+) -> PlannedChunks:
+    """Group normalized fragments into deterministic provider request chunks."""
+    chunks: list[PlannedChunk] = []
+    pending: list[PlannedFragment] = []
+    pending_scene = ""
+    pending_characters = 0
+    pending_voice_ids: dict[str, None] = {}
+
+    def flush(pause_after_ms: int = 0) -> None:
+        nonlocal pending, pending_characters, pending_voice_ids
+        if not pending:
+            return
+        actual = len(chunks) + 1
+        if actual > limits.max_planned_chunks:
+            raise PlanningLimitError(
+                "max_planned_chunks", limits.max_planned_chunks, actual
+            )
+        chunks.append(
+            PlannedChunk(
+                index=len(chunks),
+                scene_id=pending_scene,
+                fragments=tuple(pending),
+                character_count=pending_characters,
+                voice_ids=tuple(pending_voice_ids),
+                pause_after_ms=pause_after_ms,
+            )
+        )
+        pending = []
+        pending_characters = 0
+        pending_voice_ids = {}
+
+    for scene in script.scenes:
+        flush()
+        pending_scene = scene.id
+        for part in scene.parts:
+            voice_id = script.cast[part.actor].voice_id
+            text_fragments = fragment_text(part, limits.max_text_characters)
+            for fragment_index, fragment in enumerate(text_fragments):
+                planned = PlannedFragment(
+                    text=fragment.text,
+                    actor=part.actor,
+                    voice_id=voice_id,
+                    source_span=fragment.source_span,
+                )
+                is_final_fragment = fragment_index == len(text_fragments) - 1
+                pause_after_ms = part.pause_after_ms if is_final_fragment else 0
+
+                if options.engine == "tts":
+                    pending = [planned]
+                    pending_characters = len(planned.text)
+                    pending_voice_ids = {planned.voice_id: None}
+                    flush(pause_after_ms)
+                    continue
+
+                exceeds_characters = (
+                    pending_characters + len(planned.text) > limits.max_text_characters
+                )
+                exceeds_voices = (
+                    planned.voice_id not in pending_voice_ids
+                    and len(pending_voice_ids) >= limits.max_unique_voices
+                )
+                if pending and (exceeds_characters or exceeds_voices):
+                    flush()
+                pending.append(planned)
+                pending_characters += len(planned.text)
+                pending_voice_ids.setdefault(planned.voice_id, None)
+                if pause_after_ms:
+                    flush(pause_after_ms)
+        flush()
+
+    return tuple(chunks)
 
 
 def _boundary_ends(
