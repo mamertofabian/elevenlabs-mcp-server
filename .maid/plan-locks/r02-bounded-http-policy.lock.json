@@ -1,12 +1,12 @@
 {
   "manifest_path": "manifests/r02-bounded-http-policy.manifest.yaml",
-  "manifest_hash": "sha256-contract:fe177a4d645f9a71a463ba8d2260ecfd15255ae8a475da83be43d5d40205e60b",
+  "manifest_hash": "sha256-contract:36d3f8f5bdbc3ce60c96226a44acf57586b90ede5596e1735f689ac160cccdb3",
   "test_hashes": {
     "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
-    "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:bb30a0e395017ff4549ca53c9e419309464160fe2e2a14cfb6212d6315d4f9ef"
+    "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:8cb3267caf80396acc84682ac4c47fa7dfbd23e874342b8e7c01232b8940eee8"
   },
   "created_at": "2026-09-20T05:38:29.408014+00:00",
-  "revision": 3,
+  "revision": 5,
   "revisions": [
     {
       "prior_manifest_hash": "sha256-contract:daf910b23e433e2e65e92afd1a2930fc3296961c65cd1c990a962a3aeb4044fa",
@@ -43,22 +43,64 @@
         "validate_commands_added": [],
         "validate_commands_removed": []
       }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:fe177a4d645f9a71a463ba8d2260ecfd15255ae8a475da83be43d5d40205e60b",
+      "prior_test_hashes": {
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:bb30a0e395017ff4549ca53c9e419309464160fe2e2a14cfb6212d6315d4f9ef"
+      },
+      "revised_at": "2026-09-20T07:01:20.627848+00:00",
+      "reason": "Evolve the unmerged bounded HTTP contract so synthesis 500/502/503/504 are one-dispatch upstream uncertainty while metadata 500 remains retryable",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "tests/acceptance/test_bounded_http_policy.py:test_metadata_500_retries_but_synthesis_5xx_is_unknown",
+          "tests/acceptance/test_bounded_http_policy.py:test_metadata_500_retries_but_synthesis_5xx_is_unknown:kind=test_function"
+        ],
+        "artifacts_removed": [
+          "tests/acceptance/test_bounded_http_policy.py:test_server_failures_retain_bounded_three_attempt_policy",
+          "tests/acceptance/test_bounded_http_policy.py:test_server_failures_retain_bounded_three_attempt_policy:kind=test_function"
+        ],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:36d3f8f5bdbc3ce60c96226a44acf57586b90ede5596e1735f689ac160cccdb3",
+      "prior_test_hashes": {
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:8cb3267caf80396acc84682ac4c47fa7dfbd23e874342b8e7c01232b8940eee8"
+      },
+      "revised_at": "2026-09-20T07:04:44.627290+00:00",
+      "reason": "Capture reviewed evolved bounded HTTP Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
     }
   ],
   "red_evidence": {
     "red": true,
-    "captured_at": "2026-09-20T05:38:30.918521+00:00",
+    "captured_at": "2026-09-20T07:01:22.231988+00:00",
     "commands": [
       {
         "command": "uv run pytest -q tests/acceptance/test_bounded_http_policy.py",
         "exit_code": 1,
-        "output_tail": "ERROR    root:elevenlabs_api.py:195 API error details: provider failure\nERROR    root:elevenlabs_api.py:196 Request data: {'text': 'Fixture', 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.5, 'similarity_boost': 0.75, 'style': 0.1}}\nERROR    root:elevenlabs_api.py:194 API error response: 422\nERROR    root:elevenlabs_api.py:195 API error details: provider failure\nERROR    root:elevenlabs_api.py:196 Request data: {'text': 'Fixture', 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.5, 'similarity_boost': 0.75, 'style': 0.1}}\nERROR    root:elevenlabs_api.py:194 API error response: 422\nERROR    root:elevenlabs_api.py:195 API error details: provider failure\nERROR    root:elevenlabs_api.py:196 Request data: {'text': 'Fixture', 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.5, 'similarity_boost': 0.75, 'style': 0.1}}\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_bounded_http_policy.py::test_voice_metadata_uses_finite_timeout_and_one_401_dispatch\nFAILED tests/acceptance/test_bounded_http_policy.py::test_synthesis_uses_finite_timeout_and_one_422_dispatch\n2 failed, 1 passed, 1 warning in 0.14s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "output_tail": "            raise retry_exc.reraise()\n>       raise retry_exc from fut.exception()\nE       tenacity.RetryError: RetryError[<Future at 0x749ff3120e10 state=finished raised Exception>]\n\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/tenacity/__init__.py:419: RetryError\n------------------------------ Captured log call -------------------------------\nERROR    root:elevenlabs_api.py:272 API error response: 500\nERROR    root:elevenlabs_api.py:272 API error response: 500\nERROR    root:elevenlabs_api.py:272 API error response: 500\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_bounded_http_policy.py::test_metadata_500_retries_but_synthesis_5xx_is_unknown\n1 failed, 2 passed, 1 warning in 0.16s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
         "classification": "red"
       },
       {
         "command": "uv run pytest -q tests/acceptance/test_bounded_http_policy.py tests/acceptance/test_credential_free_discovery.py",
         "exit_code": 1,
-        "output_tail": "ERROR    root:elevenlabs_api.py:195 API error details: provider failure\nERROR    root:elevenlabs_api.py:196 Request data: {'text': 'Fixture', 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.5, 'similarity_boost': 0.75, 'style': 0.1}}\nERROR    root:elevenlabs_api.py:194 API error response: 422\nERROR    root:elevenlabs_api.py:195 API error details: provider failure\nERROR    root:elevenlabs_api.py:196 Request data: {'text': 'Fixture', 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.5, 'similarity_boost': 0.75, 'style': 0.1}}\nERROR    root:elevenlabs_api.py:194 API error response: 422\nERROR    root:elevenlabs_api.py:195 API error details: provider failure\nERROR    root:elevenlabs_api.py:196 Request data: {'text': 'Fixture', 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.5, 'similarity_boost': 0.75, 'style': 0.1}}\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_bounded_http_policy.py::test_voice_metadata_uses_finite_timeout_and_one_401_dispatch\nFAILED tests/acceptance/test_bounded_http_policy.py::test_synthesis_uses_finite_timeout_and_one_422_dispatch\n2 failed, 5 passed, 1 warning in 0.36s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "output_tail": "            raise retry_exc.reraise()\n>       raise retry_exc from fut.exception()\nE       tenacity.RetryError: RetryError[<Future at 0x745b8262ed10 state=finished raised Exception>]\n\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/tenacity/__init__.py:419: RetryError\n------------------------------ Captured log call -------------------------------\nERROR    root:elevenlabs_api.py:272 API error response: 500\nERROR    root:elevenlabs_api.py:272 API error response: 500\nERROR    root:elevenlabs_api.py:272 API error response: 500\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_bounded_http_policy.py::test_metadata_500_retries_but_synthesis_5xx_is_unknown\n1 failed, 6 passed, 1 warning in 0.40s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
         "classification": "red"
       },
       {
@@ -96,8 +138,8 @@
       "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.get_voices:kind=method",
       "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.get_voices:of=ElevenLabsAPI",
       "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.get_voices:returns=List[VoiceData]",
-      "tests/acceptance/test_bounded_http_policy.py:test_server_failures_retain_bounded_three_attempt_policy",
-      "tests/acceptance/test_bounded_http_policy.py:test_server_failures_retain_bounded_three_attempt_policy:kind=test_function",
+      "tests/acceptance/test_bounded_http_policy.py:test_metadata_500_retries_but_synthesis_5xx_is_unknown",
+      "tests/acceptance/test_bounded_http_policy.py:test_metadata_500_retries_but_synthesis_5xx_is_unknown:kind=test_function",
       "tests/acceptance/test_bounded_http_policy.py:test_synthesis_uses_finite_timeout_and_one_422_dispatch",
       "tests/acceptance/test_bounded_http_policy.py:test_synthesis_uses_finite_timeout_and_one_422_dispatch:kind=test_function",
       "tests/acceptance/test_bounded_http_policy.py:test_voice_metadata_uses_finite_timeout_and_one_401_dispatch",
@@ -196,8 +238,8 @@
             },
             {
               "kind": "test_function",
-              "name": "test_server_failures_retain_bounded_three_attempt_policy",
-              "description": "Fake 500 responses still dispatch three times for metadata and synthesis, proving this child did not broaden retry reclassification."
+              "name": "test_metadata_500_retries_but_synthesis_5xx_is_unknown",
+              "description": "Metadata 500 dispatches three times while synthesis 500/502/503/504 each dispatch once with typed upstream uncertainty."
             }
           ]
         }

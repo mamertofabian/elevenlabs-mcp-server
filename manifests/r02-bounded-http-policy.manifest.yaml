@@ -4,18 +4,18 @@
 # Nothing here is needed to build or run this project; safe to ignore.
 # What it is: https://github.com/mamertofabian/maid-runner
 schema: "2"
-goal: Bound legacy HTTP connect/read time and prevent retries for deterministic provider 4xx responses while preserving existing retry behavior elsewhere.
+goal: Bound legacy HTTP connect/read time, avoid retries for deterministic 4xx responses, and treat synthesis 5xx responses as non-retryable unknown outcomes.
 description: |
   R02 transport-policy child covering finite HTTP limits and the deterministic
   portion of A12/A27. Both get_voices and generate_audio_segment pass an exact
   finite (connect, read) timeout to Requests. Provider 400/401/403/404/422
   responses raise a private non-retryable error at the response boundary and
-  dispatch exactly once beneath Tenacity. 429 and 5xx behavior remains on the
-  existing bounded three-attempt path for a later Retry-After/uncertainty child;
-  request-exception classification, sanitized error envelopes, and SDK
-  migration are explicitly deferred. Successful response shapes and public
-  method signatures remain unchanged. Expected red: captured Requests calls
-  have no timeout and deterministic 401/422 responses dispatch three times.
+  dispatch exactly once beneath Tenacity. Metadata 5xx retains three bounded
+  attempts because it cannot spend synthesis credits; synthesis 500/502/503/504
+  dispatch once and raise UpstreamOutcomeUnknownError because the provider may
+  have processed the request. 429 follows the separately approved Retry-After
+  policy. Successful response shapes and public method signatures remain
+  unchanged. Fresh evolution red: synthesis 5xx still dispatches three times.
 temptations:
   - risk: Assert only that the decorated public method raises.
     instead: Count calls inside fake requests.get/post and assert deterministic failures dispatch exactly once.
@@ -25,6 +25,8 @@ temptations:
     instead: Capture and assert the same finite tuple on both requests.get and requests.post.
   - risk: Reclassify timeouts/read resets while adding timeout arguments.
     instead: Leave RequestException retry semantics unchanged for the later unknown-outcome child.
+  - risk: Retry synthesis 5xx because metadata 5xx is safe to retry.
+    instead: Preserve three attempts for get_voices but classify synthesis 500/502/503/504 as one-dispatch upstream uncertainty.
 type: fix
 files:
   edit:
@@ -70,8 +72,8 @@ files:
           name: test_synthesis_uses_finite_timeout_and_one_422_dispatch
           description: A27 captures the POST timeout tuple and proves a 422 response reaches requests.post exactly once.
         - kind: test_function
-          name: test_server_failures_retain_bounded_three_attempt_policy
-          description: Fake 500 responses still dispatch three times for metadata and synthesis, proving this child did not broaden retry reclassification.
+          name: test_metadata_500_retries_but_synthesis_5xx_is_unknown
+          description: Metadata 500 dispatches three times while synthesis 500/502/503/504 each dispatch once with typed upstream uncertainty.
   read:
     - manifests/r01-credential-free-discovery.manifest.yaml
     - docs/revival/02_ENGINEERING_SPEC.md
@@ -88,23 +90,28 @@ acceptance:
   immutable: true
 outcome:
   status: completed
-  summary: Legacy metadata and synthesis HTTP calls now have finite connect/read timeouts and deterministic 400/401/403/404/422 responses bypass Tenacity after one dispatch while other retry behavior remains unchanged.
-  rationale: The narrow policy prevents unbounded calls and blind deterministic retries without prematurely deciding 429, timeout, reset, or uncertain-response semantics.
+  summary: Legacy HTTP calls retain finite timeouts and one-dispatch deterministic 4xx behavior; metadata 5xx retries remain bounded while synthesis 500/502/503/504 now dispatch once as typed non-retryable upstream uncertainty.
+  rationale: The evolved policy distinguishes safe metadata retries from synthesis responses that may represent consumed provider work, closing the last automatic replay gap without altering 429, ConnectTimeout, or successful response behavior.
+  lessons:
+    - lesson_type: contract-evolution
+      summary: When a committed but unmerged regression contract must intentionally change, revise it in place with fresh red evidence and refresh every dependent shared-test lock rather than layering contradictory manifests.
+      tags: [maid, retries, uncertainty, tests]
+      paths: [manifests/r02-bounded-http-policy.manifest.yaml, tests/acceptance/test_bounded_http_policy.py]
   review_notes:
-    - source: maid-implementation-reviewer:r02_http_review
+    - source: maid-implementation-reviewer:r02_5xx_review
       severity: ready
-      summary: No blockers; explicit 400/403/404/429 status-partition cases remain a P2 test coverage advisory.
+      summary: No blockers; metadata and synthesis 5xx partitions, Tenacity behavior, dependent lock refresh, and in-place evolution are valid.
   validation:
     - command: [uv, run, pytest, -q]
       status: passed
-      summary: All 52 tests passed.
+      summary: All 67 tests passed.
     - command: [uv, run, maid, test, --manifest, manifests/r02-bounded-http-policy.manifest.yaml]
       status: passed
-      summary: All four child commands passed.
-    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, 67565c0, --summary, --packet]
+      summary: All four evolved contract commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, 9e8d34a, --summary, --packet]
       status: passed
-      summary: All 11 deep stages passed.
-  completed_at: "2026-09-20T13:41:14+08:00"
+      summary: All 11 deep stages passed after dependent lock reconciliation.
+  completed_at: "2026-09-20T15:04:12+08:00"
 created: "2026-09-20T05:38:31Z"
 metadata:
   author: Codex

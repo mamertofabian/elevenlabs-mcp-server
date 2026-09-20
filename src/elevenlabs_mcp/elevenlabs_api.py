@@ -274,6 +274,10 @@ class ElevenLabsAPI:
                     raise _RetryableRateLimitError(_retry_after_seconds(response))
                 if response.status_code in {400, 401, 403, 404, 422}:
                     raise _NonRetryableProviderError(error_message)
+                if response.status_code in {500, 502, 503, 504}:
+                    raise UpstreamOutcomeUnknownError(
+                        "synthesis", f"HTTP_{response.status_code}"
+                    )
                 raise Exception(error_message)
         except requests.exceptions.ConnectTimeout as e:
             error_message = f"Network error during API call: {type(e).__name__}"

@@ -14,10 +14,10 @@ description: |
   to 0..10 seconds; invalid/missing values use the existing exponential wait.
   Both legacy job paths persist the typed unknown message and return it through
   the already-sanitized error envelope so blind automatic replay is not
-  encouraged. Metadata read retries remain unchanged. Uncertain 5xx evolution
-  is intentionally separate because the durable bounded-HTTP contract currently
-  characterizes 500 as three attempts and must be superseded with its test in a
-  dedicated child. Expected red: ReadTimeout/ConnectionError each dispatch
+  encouraged. Metadata read retries remain unchanged. The subsequently evolved
+  bounded-HTTP contract applies the same typed one-dispatch uncertainty policy
+  to synthesis 500/502/503/504 while preserving metadata 5xx retries. Original
+  red evidence: ReadTimeout/ConnectionError each dispatched
   three times and no typed unknown error exists; 429 sleeps use exponential
   values rather than Retry-After.
 temptations:
@@ -27,8 +27,8 @@ temptations:
     instead: Accept numeric values only in the inclusive 0..10 second range and otherwise use the bounded exponential wait.
   - risk: Store a generic failed job that loses uncertainty semantics.
     instead: Persist the sanitized UpstreamOutcomeUnknownError text and surface retryable=false through its public field.
-  - risk: Quietly change the locked 500 retry characterization in this child.
-    instead: Preserve it here and use an explicit superseding contract for uncertain 5xx behavior.
+  - risk: Let dependent uncertainty guidance drift after an approved retry-policy evolution.
+    instead: Refresh dependent lock hashes and narrative metadata while preserving the original uncertainty red evidence.
 type: fix
 files:
   edit:

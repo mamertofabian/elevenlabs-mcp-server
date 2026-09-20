@@ -5,7 +5,7 @@ from typing import Any, ClassVar, cast
 import pytest
 from tenacity import RetryError
 
-from elevenlabs_mcp.elevenlabs_api import ElevenLabsAPI
+from elevenlabs_mcp.elevenlabs_api import ElevenLabsAPI, UpstreamOutcomeUnknownError
 
 
 class _Response:
@@ -68,12 +68,11 @@ def test_synthesis_uses_finite_timeout_and_one_422_dispatch(
     assert calls[0]["timeout"] == (5.0, 60.0)
 
 
-def test_server_failures_retain_bounded_three_attempt_policy(
+def test_metadata_500_retries_but_synthesis_5xx_is_unknown(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     api = ElevenLabsAPI({"ELEVENLABS_API_KEY": "fixture"})
     get_calls = 0
-    post_calls = 0
     _disable_retry_sleep(monkeypatch)
 
     def get(*args: object, **kwargs: Any) -> _Response:
@@ -82,19 +81,26 @@ def test_server_failures_retain_bounded_three_attempt_policy(
         get_calls += 1
         return _Response(500)
 
-    def post(*args: object, **kwargs: Any) -> _Response:
-        nonlocal post_calls
-        del args, kwargs
-        post_calls += 1
-        return _Response(500)
-
     monkeypatch.setattr("elevenlabs_mcp.elevenlabs_api.requests.get", get)
-    monkeypatch.setattr("elevenlabs_mcp.elevenlabs_api.requests.post", post)
 
     with pytest.raises(RetryError):
         api.get_voices()
-    with pytest.raises(RetryError):
-        api.generate_audio_segment("Fixture", "voice-a", debug_info=[])
-
     assert get_calls == 3
-    assert post_calls == 3
+
+    for status_code in (500, 502, 503, 504):
+        post_calls = 0
+
+        def post(
+            *args: object, response_status: int = status_code, **kwargs: Any
+        ) -> _Response:
+            nonlocal post_calls
+            del args, kwargs
+            post_calls += 1
+            return _Response(response_status)
+
+        monkeypatch.setattr("elevenlabs_mcp.elevenlabs_api.requests.post", post)
+        with pytest.raises(UpstreamOutcomeUnknownError) as captured:
+            api.generate_audio_segment("Fixture", "voice-a", debug_info=[])
+
+        assert post_calls == 1
+        assert captured.value.cause_type == f"HTTP_{status_code}"

@@ -1,13 +1,13 @@
 {
   "manifest_path": "manifests/r02-synthesis-uncertainty-policy.manifest.yaml",
-  "manifest_hash": "sha256-contract:737ed77bc4e69b39c0769a152705c7d4718bab6c61913aefe0a17db2b3037cd3",
+  "manifest_hash": "sha256-contract:d7918abe5ed680978a988b4418fa5a54f41a0eb152a39a3681a70d450d104366",
   "test_hashes": {
-    "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:bb30a0e395017ff4549ca53c9e419309464160fe2e2a14cfb6212d6315d4f9ef",
+    "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:8cb3267caf80396acc84682ac4c47fa7dfbd23e874342b8e7c01232b8940eee8",
     "tests/acceptance/test_synthesis_uncertainty_policy.py": "sha256-pyast:v2:a3ba691491b9d9cfa704f0aef1419b96e4c2cacd03af606c748312ee4d955b0c",
     "tests/acceptance/test_log_and_response_hygiene.py": "sha256-pyast:v2:e389b572ea9d5a8b5e6deee1a9453dc358bd7d3e63e5a28157a82ba9729b60a4"
   },
   "created_at": "2026-09-20T06:55:47.394697+00:00",
-  "revision": 3,
+  "revision": 5,
   "revisions": [
     {
       "prior_manifest_hash": "sha256-contract:4af9de6bd3f14662c1bfc96e764756599ea907a7ddca1f79598c0753e5e610be",
@@ -37,6 +37,44 @@
       },
       "revised_at": "2026-09-20T06:59:31.955707+00:00",
       "reason": "Capture reviewed synthesis uncertainty Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:737ed77bc4e69b39c0769a152705c7d4718bab6c61913aefe0a17db2b3037cd3",
+      "prior_test_hashes": {
+        "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:bb30a0e395017ff4549ca53c9e419309464160fe2e2a14cfb6212d6315d4f9ef",
+        "tests/acceptance/test_synthesis_uncertainty_policy.py": "sha256-pyast:v2:a3ba691491b9d9cfa704f0aef1419b96e4c2cacd03af606c748312ee4d955b0c",
+        "tests/acceptance/test_log_and_response_hygiene.py": "sha256-pyast:v2:e389b572ea9d5a8b5e6deee1a9453dc358bd7d3e63e5a28157a82ba9729b60a4"
+      },
+      "revised_at": "2026-09-20T07:02:12.205107+00:00",
+      "reason": "Refresh the dependent regression-test hash after the approved bounded-HTTP 5xx uncertainty evolution; this manifest's own contract and red evidence are unchanged",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:737ed77bc4e69b39c0769a152705c7d4718bab6c61913aefe0a17db2b3037cd3",
+      "prior_test_hashes": {
+        "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:8cb3267caf80396acc84682ac4c47fa7dfbd23e874342b8e7c01232b8940eee8",
+        "tests/acceptance/test_synthesis_uncertainty_policy.py": "sha256-pyast:v2:a3ba691491b9d9cfa704f0aef1419b96e4c2cacd03af606c748312ee4d955b0c",
+        "tests/acceptance/test_log_and_response_hygiene.py": "sha256-pyast:v2:e389b572ea9d5a8b5e6deee1a9453dc358bd7d3e63e5a28157a82ba9729b60a4"
+      },
+      "revised_at": "2026-09-20T07:04:44.429667+00:00",
+      "reason": "Reconcile dependent uncertainty narrative after the approved synthesis 5xx policy evolution",
       "agent": null,
       "contract_delta": {
         "artifacts_added": [],
