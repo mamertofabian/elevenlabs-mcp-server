@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import time
 import requests
 from collections.abc import Mapping
@@ -12,7 +13,7 @@ log_level = os.getenv("ELEVENLABS_LOG_LEVEL", "ERROR").upper()
 valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
 if log_level not in valid_levels:
     log_level = "ERROR"
-    print(f"Invalid log level {log_level}. Using ERROR. Valid levels are: {', '.join(valid_levels)}")
+    print("Invalid log level; using ERROR.", file=sys.stderr)
 
 logging.basicConfig(
     level=getattr(logging, log_level),
@@ -92,28 +93,40 @@ class ElevenLabsAPI:
             "xi-api-key": api_key
         }
         
-        response = requests.get(
-            f"{self.base_url}/voices",
-            headers=headers,
-            timeout=(5.0, 60.0),
-        )
+        try:
+            response = requests.get(
+                f"{self.base_url}/voices",
+                headers=headers,
+                timeout=(5.0, 60.0),
+            )
+        except requests.exceptions.RequestException as error:
+            error_message = f"Voice metadata network error: {type(error).__name__}"
+            logging.error(error_message)
+            raise Exception(error_message)
         
         if response.status_code == 200:
-            voices_data = response.json()["voices"]
-            return [
-                {
-                    "voice_id": voice["voice_id"],
-                    "name": voice["name"],
-                    "category": voice.get("category", ""),
-                    "labels": voice.get("labels", {}),
-                    "description": voice.get("description", ""),
-                    "preview_url": voice.get("preview_url", ""),
-                    "high_quality_base_model_ids": voice.get("high_quality_base_model_ids", [])
-                }
-                for voice in voices_data
-            ]
+            try:
+                voices_data = response.json()["voices"]
+                return [
+                    {
+                        "voice_id": voice["voice_id"],
+                        "name": voice["name"],
+                        "category": voice.get("category", ""),
+                        "labels": voice.get("labels", {}),
+                        "description": voice.get("description", ""),
+                        "preview_url": voice.get("preview_url", ""),
+                        "high_quality_base_model_ids": voice.get("high_quality_base_model_ids", [])
+                    }
+                    for voice in voices_data
+                ]
+            except Exception as error:
+                error_message = (
+                    f"Voice metadata response invalid: {type(error).__name__}"
+                )
+                logging.error(error_message)
+                raise Exception(error_message)
         else:
-            error_message = f"Failed to fetch voices: {response.text}"
+            error_message = f"Voice metadata request failed with status {response.status_code}"
             if response.status_code in {400, 401, 403, 404, 422}:
                 raise _NonRetryableProviderError(error_message)
             raise Exception(error_message)
@@ -182,7 +195,7 @@ class ElevenLabsAPI:
             if previous_request_ids:
                 data["previous_request_ids"] = previous_request_ids[-3:]  # Maximum of 3 previous IDs
         
-        logging.info(f"Generating audio for text length: {len(text)} chars using voice_id: {voice_id}")
+        logging.info("Generating audio for text length: %s chars", len(text))
         logging.debug(f"Generation parameters: stability={self.stability}, similarity_boost={self.similarity_boost}, model={self.model_id}")
         
         try:
@@ -202,16 +215,15 @@ class ElevenLabsAPI:
                         f.write(response.content)
                 return response.content, response.headers["request-id"]
             else:
-                debug_info.append(response.text)
-                error_message = f"Failed to generate audio: {response.text} \n\n{debug_info} \n\n{data}"
+                error_message = (
+                    f"Audio provider request failed with status {response.status_code}"
+                )
                 logging.error(f"API error response: {response.status_code}")
-                logging.error(f"API error details: {response.text}")
-                logging.error(f"Request data: {data}")
                 if response.status_code in {400, 401, 403, 404, 422}:
                     raise _NonRetryableProviderError(error_message)
                 raise Exception(error_message)
         except requests.exceptions.RequestException as e:
-            error_message = f"Network error during API call: {str(e)}"
+            error_message = f"Network error during API call: {type(e).__name__}"
             logging.error(error_message)
             raise Exception(error_message)
 
@@ -229,7 +241,7 @@ class ElevenLabsAPI:
 
         debug_info = []
         debug_info.append("ElevenLabsAPI - Starting generate_full_audio")
-        debug_info.append(f"Input script_parts: {script_parts}")
+        debug_info.append(f"Script part count: {len(script_parts)}")
         
         # Initialize segments list and request IDs tracking
         segments = []
@@ -237,17 +249,13 @@ class ElevenLabsAPI:
         failed_part_indexes: list[int] = []
         completed_parts = 0
         
-        debug_info.append("Processing all_texts")
         all_texts = []
         for part in script_parts:
-            debug_info.append(f"Processing text from part: {part}")
             text = str(part.get('text', ''))
-            debug_info.append(f"Extracted text: {text}")
             all_texts.append(text)
-        debug_info.append(f"Final all_texts: {all_texts}")
         
         for i, part in enumerate(script_parts):
-            debug_info.append(f"Processing part {i}: {part}")
+            debug_info.append(f"Processing part index: {i}")
             part_voice_id = part.get('voice_id')
             if not part_voice_id:
                 part_voice_id = self.voice_id
@@ -255,7 +263,6 @@ class ElevenLabsAPI:
             if not text:
                 continue
                 
-            debug_info.append(f"Using voice ID: {part_voice_id}")
             
             # Determine previous and next text for context
             is_first = i == 0
@@ -291,7 +298,7 @@ class ElevenLabsAPI:
                 # Wait for the specified wait_time
                 time.sleep(self.MODELS[self.model_id]["wait_time"])
             except Exception as e:
-                debug_info.append(f"Error generating audio: {e}")
+                debug_info.append(f"Part {i} failed: {type(e).__name__}")
                 failed_part_indexes.append(i)
                 continue
         

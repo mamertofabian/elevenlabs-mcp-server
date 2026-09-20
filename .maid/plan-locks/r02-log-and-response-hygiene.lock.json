@@ -1,0 +1,378 @@
+{
+  "manifest_path": "manifests/r02-log-and-response-hygiene.manifest.yaml",
+  "manifest_hash": "sha256-contract:fae2f304a0b0227aadfd5f143aad7b8d076634665a8b93f8679b3807b48128ea",
+  "test_hashes": {
+    "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9",
+    "tests/acceptance/test_log_and_response_hygiene.py": "sha256-pyast:v2:e389b572ea9d5a8b5e6deee1a9453dc358bd7d3e63e5a28157a82ba9729b60a4",
+    "tests/acceptance/test_honest_partial_generation.py": "sha256-pyast:v2:c4b323edd6e5ef734b1370577b3789ca256eb480276835cdfef5b100b508916d"
+  },
+  "created_at": "2026-09-20T05:59:38.133659+00:00",
+  "revision": 5,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:aed7fbfed4b962d6dccf9170bee219e1a8fac6b79570ddfae39f95ed8e054ac5",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9",
+        "tests/acceptance/test_log_and_response_hygiene.py": "sha256-pyast:v2:3283fdce54b7439a8aa415cc0b885317921d6130c78771c8445dabcd0a019af1",
+        "tests/acceptance/test_honest_partial_generation.py": "sha256-pyast:v2:c4b323edd6e5ef734b1370577b3789ca256eb480276835cdfef5b100b508916d"
+      },
+      "revised_at": "2026-09-20T05:59:40.923689+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r02-log-and-response-hygiene.manifest.yaml -> manifests/r02-log-and-response-hygiene.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:2a0ab1d5c8e2b77eefbfdd8ae0197285c4436c8ca3e3d5f833f9ed0c3718ee1a",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9",
+        "tests/acceptance/test_log_and_response_hygiene.py": "sha256-pyast:v2:3283fdce54b7439a8aa415cc0b885317921d6130c78771c8445dabcd0a019af1",
+        "tests/acceptance/test_honest_partial_generation.py": "sha256-pyast:v2:c4b323edd6e5ef734b1370577b3789ca256eb480276835cdfef5b100b508916d"
+      },
+      "revised_at": "2026-09-20T06:37:46.566260+00:00",
+      "reason": "Sanitize startup initialization and voice-metadata network exceptions, with direct and real-MCP review-driven regressions",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "tests/acceptance/test_log_and_response_hygiene.py:test_startup_failure_never_writes_exception_to_stdout",
+          "tests/acceptance/test_log_and_response_hygiene.py:test_startup_failure_never_writes_exception_to_stdout:kind=test_function",
+          "tests/acceptance/test_log_and_response_hygiene.py:test_voice_network_failure_is_sanitized_in_api_and_tool",
+          "tests/acceptance/test_log_and_response_hygiene.py:test_voice_network_failure_is_sanitized_in_api_and_tool:kind=test_function"
+        ],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:fae2f304a0b0227aadfd5f143aad7b8d076634665a8b93f8679b3807b48128ea",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9",
+        "tests/acceptance/test_log_and_response_hygiene.py": "sha256-pyast:v2:044d84b612958af0cf656db3dd210bfd8e807cbf833f3f684b727ec6577f3e01",
+        "tests/acceptance/test_honest_partial_generation.py": "sha256-pyast:v2:c4b323edd6e5ef734b1370577b3789ca256eb480276835cdfef5b100b508916d"
+      },
+      "revised_at": "2026-09-20T06:42:06.131999+00:00",
+      "reason": "Sanitize all nearby startup, voice cache, metadata decode, resource/tool, dispatcher, delete, history, and notification exception sinks with sentinel-bearing regressions",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:fae2f304a0b0227aadfd5f143aad7b8d076634665a8b93f8679b3807b48128ea",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9",
+        "tests/acceptance/test_log_and_response_hygiene.py": "sha256-pyast:v2:e389b572ea9d5a8b5e6deee1a9453dc358bd7d3e63e5a28157a82ba9729b60a4",
+        "tests/acceptance/test_honest_partial_generation.py": "sha256-pyast:v2:c4b323edd6e5ef734b1370577b3789ca256eb480276835cdfef5b100b508916d"
+      },
+      "revised_at": "2026-09-20T06:47:07.345635+00:00",
+      "reason": "Capture reviewed log and response hygiene Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T06:42:08.887010+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_log_and_response_hygiene.py",
+        "exit_code": 1,
+        "output_tail": "      |       \"error\": \"PRIVATE_NETWORK_EXCEPTION_SENTINEL\"\n      |     }\n      +------------------------------------\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_invalid_log_level_never_writes_protocol_stdout\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_parser_debug_never_echoes_script_or_voice_values\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_provider_rejection_redacts_body_request_and_credentials\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_legacy_success_line_is_preserved_without_untrusted_debug\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_general_generation_failure_is_sanitized_in_job_and_response\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_startup_failure_never_writes_exception_to_stdout\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_voice_network_failure_is_sanitized_in_api_and_tool\n7 failed, 1 warning in 0.44s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run pytest -q tests/acceptance/test_log_and_response_hygiene.py tests/acceptance/test_honest_partial_generation.py tests/characterization/test_legacy_server_surface.py",
+        "exit_code": 1,
+        "output_tail": "      |       \"error\": \"PRIVATE_NETWORK_EXCEPTION_SENTINEL\"\n      |     }\n      +------------------------------------\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_invalid_log_level_never_writes_protocol_stdout\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_parser_debug_never_echoes_script_or_voice_values\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_provider_rejection_redacts_body_request_and_credentials\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_legacy_success_line_is_preserved_without_untrusted_debug\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_general_generation_failure_is_sanitized_in_job_and_response\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_startup_failure_never_writes_exception_to_stdout\nFAILED tests/acceptance/test_log_and_response_hygiene.py::test_voice_network_failure_is_sanitized_in_api_and_tool\n7 failed, 6 passed, 1 warning in 0.88s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/acceptance/test_log_and_response_hygiene.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/acceptance/test_log_and_response_hygiene.py",
+        "exit_code": 0,
+        "output_tail": "0 errors, 0 warnings, 0 informations\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=debug_info:type=Optional[List[str]]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=next_text:type=Optional[str]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=output_file:type=Optional[str]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=previous_request_ids:type=Optional[List[str]]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=previous_text:type=Optional[str]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=text:type=str:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=voice_id:type=str:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:kind=method",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:of=ElevenLabsAPI",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:returns=tuple[bytes, str]",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:arg=output_dir:type=Path:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:arg=output_id:type=Optional[str]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:arg=script_parts:type=List[Dict]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:kind=method",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:of=ElevenLabsAPI",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:raises=PartialGenerationError",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:returns=tuple[str, List[str], int]",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.get_voices",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.get_voices:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.get_voices:kind=method",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.get_voices:of=ElevenLabsAPI",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.get_voices:returns=List[VoiceData]",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script:arg=script_json:type=str:default=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script:kind=method",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script:of=ElevenLabsServer",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script:returns=tuple[list[dict[str, Union[str, None]]], list[str]]",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_general_generation_failure_is_sanitized_in_job_and_response",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_general_generation_failure_is_sanitized_in_job_and_response:kind=test_function",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_invalid_log_level_never_writes_protocol_stdout",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_invalid_log_level_never_writes_protocol_stdout:kind=test_function",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_legacy_success_line_is_preserved_without_untrusted_debug",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_legacy_success_line_is_preserved_without_untrusted_debug:kind=test_function",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_parser_debug_never_echoes_script_or_voice_values",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_parser_debug_never_echoes_script_or_voice_values:kind=test_function",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_provider_rejection_redacts_body_request_and_credentials",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_provider_rejection_redacts_body_request_and_credentials:kind=test_function",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_startup_failure_never_writes_exception_to_stdout",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_startup_failure_never_writes_exception_to_stdout:kind=test_function",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_voice_network_failure_is_sanitized_in_api_and_tool",
+      "tests/acceptance/test_log_and_response_hygiene.py:test_voice_network_failure_is_sanitized_in_api_and_tool:kind=test_function"
+    ],
+    "files": {
+      "create": [],
+      "edit": [
+        "src/elevenlabs_mcp/elevenlabs_api.py",
+        "src/elevenlabs_mcp/server.py",
+        "tests/acceptance/test_log_and_response_hygiene.py"
+      ],
+      "read": [
+        "clients/web-ui/src/lib/elevenlabs-client.ts",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r01-credential-free-discovery.manifest.yaml",
+        "manifests/r02-honest-partial-generation.manifest.yaml",
+        "tests/characterization/test_legacy_server_surface.py"
+      ],
+      "scope": [
+        "src/elevenlabs_mcp/server.py"
+      ],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "edit": [
+        {
+          "path": "src/elevenlabs_mcp/server.py",
+          "artifacts": [
+            {
+              "kind": "method",
+              "name": "parse_script",
+              "of": "ElevenLabsServer",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "script_json",
+                  "type": "str"
+                }
+              ],
+              "returns": "tuple[list[dict[str, Union[str, None]]], list[str]]"
+            }
+          ]
+        },
+        {
+          "path": "src/elevenlabs_mcp/elevenlabs_api.py",
+          "artifacts": [
+            {
+              "kind": "method",
+              "name": "get_voices",
+              "of": "ElevenLabsAPI",
+              "args": [
+                {
+                  "name": "self"
+                }
+              ],
+              "returns": "List[VoiceData]"
+            },
+            {
+              "kind": "method",
+              "name": "generate_audio_segment",
+              "of": "ElevenLabsAPI",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "text",
+                  "type": "str"
+                },
+                {
+                  "name": "voice_id",
+                  "type": "str"
+                },
+                {
+                  "name": "output_file",
+                  "type": "Optional[str]",
+                  "default": "None"
+                },
+                {
+                  "name": "previous_text",
+                  "type": "Optional[str]",
+                  "default": "None"
+                },
+                {
+                  "name": "next_text",
+                  "type": "Optional[str]",
+                  "default": "None"
+                },
+                {
+                  "name": "previous_request_ids",
+                  "type": "Optional[List[str]]",
+                  "default": "None"
+                },
+                {
+                  "name": "debug_info",
+                  "type": "Optional[List[str]]",
+                  "default": "None"
+                }
+              ],
+              "returns": "tuple[bytes, str]"
+            },
+            {
+              "kind": "method",
+              "name": "generate_full_audio",
+              "of": "ElevenLabsAPI",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "script_parts",
+                  "type": "List[Dict]"
+                },
+                {
+                  "name": "output_dir",
+                  "type": "Path"
+                },
+                {
+                  "name": "output_id",
+                  "type": "Optional[str]",
+                  "default": "None"
+                }
+              ],
+              "returns": "tuple[str, List[str], int]",
+              "raises": [
+                "PartialGenerationError"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "tests/acceptance/test_log_and_response_hygiene.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_invalid_log_level_never_writes_protocol_stdout",
+              "description": "A11 imports server/API in a bounded subprocess with an invalid log level and observes empty stdout plus a stderr diagnostic."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_parser_debug_never_echoes_script_or_voice_values",
+              "description": "Parsed values remain intact while returned debug text contains no sentinel text, voice, or actor values."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_provider_rejection_redacts_body_request_and_credentials",
+              "description": "A fake 422 exception and captured logs include status but exclude sentinel provider body, script, voice, and key."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_legacy_success_line_is_preserved_without_untrusted_debug",
+              "description": "A real MCP tool success preserves the exact first line and excludes sentinel script/key/API-debug strings."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_general_generation_failure_is_sanitized_in_job_and_response",
+              "description": "A fake exception message is absent from the real MCP response and persisted AudioJob.error while failed status remains observable."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_startup_failure_never_writes_exception_to_stdout",
+              "description": "A sentinel-bearing initialize failure raises while stdout stays empty and stderr/log diagnostics exclude the sentinel message."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_voice_network_failure_is_sanitized_in_api_and_tool",
+              "description": "A sentinel-bearing Requests network exception is absent from the direct API error/logs and real list_voices MCP error JSON."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "manifests/r01-credential-free-discovery.manifest.yaml",
+        "manifests/r02-honest-partial-generation.manifest.yaml",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "clients/web-ui/src/lib/elevenlabs-client.ts",
+        "tests/characterization/test_legacy_server_surface.py"
+      ],
+      "scope": [
+        {
+          "path": "src/elevenlabs_mcp/server.py",
+          "reason": "Remove raw request/API debug accumulation and sanitize success/error/persisted general-failure text outside the declared parse_script method without changing tool schemas."
+        }
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_honest_partial_generation.py",
+      "tests/acceptance/test_log_and_response_hygiene.py",
+      "tests/characterization/test_legacy_server_surface.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_log_and_response_hygiene.py",
+      "uv run pytest -q tests/acceptance/test_log_and_response_hygiene.py tests/acceptance/test_honest_partial_generation.py tests/characterization/test_legacy_server_surface.py",
+      "uv run ruff check tests/acceptance/test_log_and_response_hygiene.py",
+      "uv run pyright tests/acceptance/test_log_and_response_hygiene.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_log_and_response_hygiene.py"
+    ]
+  }
+}

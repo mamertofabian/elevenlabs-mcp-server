@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import os
+import sys
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, cast
@@ -35,7 +36,7 @@ valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
 _request_ctx = cast(Any, mcp_server).request_ctx
 if log_level not in valid_levels:
     log_level = "ERROR"
-    print(f"Invalid log level {log_level}. Using ERROR. Valid levels are: {', '.join(valid_levels)}")
+    print("Invalid log level; using ERROR.", file=sys.stderr)
 
 logging.basicConfig(
     level=getattr(logging, log_level),
@@ -92,7 +93,7 @@ class _ConcurrentServer(Server):
             except Exception as error:
                 if raise_exceptions:
                     raise
-                response = types.ErrorData(code=0, message=str(error), data=None)
+                response = types.ErrorData(code=0, message="Request failed", data=None)
             finally:
                 _request_ctx.reset(token)
             await message.respond(response)
@@ -106,7 +107,9 @@ class _ConcurrentServer(Server):
             try:
                 await handler(notification)
             except Exception as error:
-                logging.error("Notification handler failed: %s", error)
+                logging.error(
+                    "Notification handler failed: %s", type(error).__name__
+                )
 
 class ElevenLabsServer:
     def __init__(
@@ -164,7 +167,7 @@ class ElevenLabsServer:
             elif needs_refresh:
                 logging.info("Skipping initial voices refresh: API key is not configured")
         except Exception as e:
-            logging.error(f"Error initializing voices cache: {e}")
+            logging.error("Error initializing voices cache: %s", type(e).__name__)
 
     def parse_script(
         self, script_json: str
@@ -189,7 +192,6 @@ class ElevenLabsServer:
                 - list of debug information strings
         """
         debug_info = []
-        debug_info.append(f"Raw input: {script_json}")
         
         script_array = []
         
@@ -208,19 +210,19 @@ class ElevenLabsServer:
             else:
                 # Treat as plain text if not JSON formatted
                 script_array = [{"text": script_json}]
-        except json.JSONDecodeError as e:
+        except json.JSONDecodeError:
             # If JSON parsing fails and input looks like JSON, raise error
             if script_json.startswith('{') or script_json.startswith('['):
-                debug_info.append(f"JSON parsing failed: {str(e)}")
+                debug_info.append("JSON parsing failed")
                 raise Exception("Invalid JSON format")
             # Otherwise treat as plain text
-            debug_info.append("Input is plain text")
+            debug_info.append("Parsed plain text input")
             script_array = [{"text": script_json}]
         
         script_parts = []
-        for part in script_array:
+        for index, part in enumerate(script_array):
             if not isinstance(part, dict):
-                debug_info.append(f"Skipping non-dict part: {part}")
+                debug_info.append(f"Skipped non-object script part at index {index}")
                 continue
                 
             text = part.get("text", "").strip()
@@ -233,10 +235,10 @@ class ElevenLabsServer:
                 "voice_id": part.get("voice_id"),
                 "actor": part.get("actor")
             }
-            debug_info.append(f"Created part: {new_part}")
+            debug_info.append(f"Parsed script part at index {index}")
             script_parts.append(new_part)
         
-        debug_info.append(f"Final script_parts: {script_parts}")
+        debug_info.append(f"Parsed script part count: {len(script_parts)}")
         return script_parts, debug_info
 
     def setup_resources(self) -> None:
@@ -274,7 +276,7 @@ class ElevenLabsServer:
                             await self.db.upsert_voices(fresh_voices)
                             voices = fresh_voices
                         except Exception as e:
-                            logging.error(f"Error refreshing voices: {e}")
+                            logging.error("Error refreshing voices: %s", type(e).__name__)
                             # Continue with cached data if refresh fails
                             if not voices:
                                 raise  # Re-raise if we have no data at all
@@ -285,7 +287,7 @@ class ElevenLabsServer:
                     
                     return json.dumps(voices, indent=2)
                 except Exception as e:
-                    return json.dumps({"error": str(e)}, indent=2)
+                    return json.dumps({"error": "Voice metadata unavailable"}, indent=2)
             
             if not uri_str.startswith("voiceover://history"):
                 raise ValueError(f"Invalid resource URI: {uri_str}")
@@ -308,7 +310,7 @@ class ElevenLabsServer:
                 return json.dumps(jobs_data, indent=2)
                 
             except Exception as e:
-                return json.dumps({"error": str(e)}, indent=2)
+                return json.dumps({"error": "History unavailable"}, indent=2)
 
     def setup_tools(self) -> None:
         @self.server.list_tools()
@@ -418,7 +420,6 @@ class ElevenLabsServer:
                 
                 if name == "generate_audio_simple":
                     debug_info.append(f"Processing simple audio request")
-                    debug_info.append(f"Arguments: {arguments}")
                     
                     text = arguments.get("text", "").strip()
                     voice_id = arguments.get("voice_id")
@@ -431,7 +432,6 @@ class ElevenLabsServer:
                         "voice_id": voice_id
                     }]
                     
-                    debug_info.append(f"Created script parts: {script_parts}")
                     
                     # Create job record
                     job_id = str(uuid.uuid4())
@@ -464,7 +464,10 @@ class ElevenLabsServer:
                         output_file, api_debug_info, completed_parts = (
                             await self._generate_full_audio(script_parts, job_id)
                         )
-                        debug_info.extend(api_debug_info)
+                        del api_debug_info
+                        debug_info.append(
+                            f"Generated part count: {completed_parts}/{len(script_parts)}"
+                        )
 
                         job.status = "completed"
                         job.output_file = str(output_file)
@@ -492,7 +495,7 @@ class ElevenLabsServer:
                         raise
                     except Exception as e:
                         job.status = "failed"
-                        job.error = str(e)
+                        job.error = "Audio generation failed"
                         await self.db.update_job(job)
                         raise
                     
@@ -548,7 +551,10 @@ class ElevenLabsServer:
                         output_file, api_debug_info, completed_parts = (
                             await self._generate_full_audio(script_parts, job_id)
                         )
-                        debug_info.extend(api_debug_info)
+                        del api_debug_info
+                        debug_info.append(
+                            f"Generated part count: {completed_parts}/{len(script_parts)}"
+                        )
 
                         job.status = "completed"
                         job.output_file = str(output_file)
@@ -563,7 +569,7 @@ class ElevenLabsServer:
                         raise
                     except Exception as e:
                         job.status = "failed"
-                        job.error = str(e)
+                        job.error = "Audio generation failed"
                         await self.db.update_job(job)
                         raise
                     
@@ -618,7 +624,7 @@ class ElevenLabsServer:
                         except Exception as e:
                             return [types.TextContent(
                                 type="text",
-                                text=f"Error deleting audio file: {str(e)}"
+                                text="Error deleting audio file"
                             )]
 
                     # Delete job from database
@@ -640,7 +646,9 @@ class ElevenLabsServer:
                                 await self.db.upsert_voices(fresh_voices)
                                 voices = fresh_voices
                             except Exception as e:
-                                logging.error(f"Error refreshing voices: {e}")
+                                logging.error(
+                                    "Error refreshing voices: %s", type(e).__name__
+                                )
                                 # Continue with cached data if refresh fails
                                 if not voices:
                                     raise  # Re-raise if we have no data at all
@@ -656,7 +664,9 @@ class ElevenLabsServer:
                     except Exception as e:
                         return [types.TextContent(
                             type="text",
-                            text=json.dumps({"error": str(e)}, indent=2)
+                            text=json.dumps(
+                                {"error": "Voice metadata unavailable"}, indent=2
+                            )
                         )]
 
                 elif name == "get_voiceover_history":
@@ -683,7 +693,7 @@ class ElevenLabsServer:
                     except Exception as e:
                         return [types.TextContent(
                             type="text",
-                            text=json.dumps({"error": str(e)}, indent=2)
+                            text=json.dumps({"error": "History unavailable"}, indent=2)
                         )]
 
                 elif name == "get_audio_file":
@@ -738,10 +748,15 @@ class ElevenLabsServer:
                     )]
                     
             except Exception as e:
+                error_detail = (
+                    str(e)
+                    if isinstance(e, PartialGenerationError)
+                    else "Audio generation failed"
+                )
                 error_msg = "\n".join([
                     "Error generating audio. Debug info:",
                     *debug_info,
-                    f"Error: {str(e)}"
+                    f"Error: {error_detail}"
                 ])
                 return [types.TextContent(
                     type="text",
@@ -754,7 +769,7 @@ class ElevenLabsServer:
         async def handle_cancelled(params: dict):
             request_id = params.get("requestId")
             reason = params.get("reason", "Unknown reason")
-            logging.info(f"Received cancellation for request {request_id}: {reason}")
+            logging.info("Received cancellation request %s", request_id)
             
             # Send proper cancellation notification
             if hasattr(self.server, 'session'):
@@ -764,7 +779,7 @@ class ElevenLabsServer:
                         "progressToken": str(request_id),
                         "progress": {
                             "kind": "cancelled",
-                            "message": f"Request cancelled: {reason}"
+                            "message": "Request cancelled"
                         }
                     }
                 })
@@ -774,7 +789,7 @@ class ElevenLabsServer:
         try:
             await self.initialize()
         except Exception as e:
-            print(f"Error initializing server: {e}")
+            logging.error("Server initialization failed: %s", type(e).__name__)
             raise
         async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
             await self.server.run(

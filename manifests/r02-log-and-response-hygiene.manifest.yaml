@@ -1,0 +1,161 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Keep MCP stdout protocol-clean and prevent raw scripts, credentials, request bodies, upstream bodies, or exception messages from leaking through legacy logs and tool text.
+description: |
+  R02/A11/A14 hygiene child. Invalid log-level diagnostics write only to
+  stderr. parse_script retains accepted text/voice/actor values but its debug
+  list contains structural counts/errors rather than raw input or parts. API
+  success debug is count/index/model metadata only; provider and network errors
+  expose status/exception class, never response bodies, request data, text,
+  voice IDs, or keys. Legacy generation responses preserve the exact first line
+  "Audio generation successful. Debug info:" on full success, but ignore
+  untrusted API debug and sanitize general failures in both persisted job.error
+  and returned MCP text. PartialGenerationError retains its already-reviewed
+  count/index/path message. Expected red: invalid log settings print to stdout,
+  parser/success text echoes sentinel scripts, and a fake 422 leaks provider
+  body/request text into exceptions and logs.
+temptations:
+  - risk: Redact only the API key while leaving raw scripts and provider bodies in debug output.
+    instead: Use an allowlist of structural counts, statuses, indexes, model IDs, and exception class names; never echo arbitrary payload strings.
+  - risk: Remove the legacy success signal while deleting verbose debug.
+    instead: Preserve the exact first line "Audio generation successful. Debug info:" and sanitize only subsequent text.
+  - risk: Put diagnostics on stdout before MCP startup.
+    instead: Send invalid configuration diagnostics to stderr in both imported modules and assert subprocess stdout is empty.
+  - risk: Persist raw general exception messages even if the client response is sanitized.
+    instead: Store a stable generic failure string for unexpected errors; keep typed partial count/index/path detail only.
+type: fix
+files:
+  edit:
+    - path: src/elevenlabs_mcp/server.py
+      artifacts:
+        - kind: method
+          name: parse_script
+          of: ElevenLabsServer
+          args:
+            - name: self
+            - name: script_json
+              type: str
+          returns: tuple[list[dict[str, Union[str, None]]], list[str]]
+    - path: src/elevenlabs_mcp/elevenlabs_api.py
+      artifacts:
+        - kind: method
+          name: get_voices
+          of: ElevenLabsAPI
+          args:
+            - name: self
+          returns: List[VoiceData]
+        - kind: method
+          name: generate_audio_segment
+          of: ElevenLabsAPI
+          args:
+            - name: self
+            - name: text
+              type: str
+            - name: voice_id
+              type: str
+            - name: output_file
+              type: Optional[str]
+              default: None
+            - name: previous_text
+              type: Optional[str]
+              default: None
+            - name: next_text
+              type: Optional[str]
+              default: None
+            - name: previous_request_ids
+              type: Optional[List[str]]
+              default: None
+            - name: debug_info
+              type: Optional[List[str]]
+              default: None
+          returns: tuple[bytes, str]
+        - kind: method
+          name: generate_full_audio
+          of: ElevenLabsAPI
+          args:
+            - name: self
+            - name: script_parts
+              type: List[Dict]
+            - name: output_dir
+              type: Path
+            - name: output_id
+              type: Optional[str]
+              default: None
+          returns: tuple[str, List[str], int]
+          raises: [PartialGenerationError]
+    - path: tests/acceptance/test_log_and_response_hygiene.py
+      artifacts:
+        - kind: test_function
+          name: test_invalid_log_level_never_writes_protocol_stdout
+          description: A11 imports server/API in a bounded subprocess with an invalid log level and observes empty stdout plus a stderr diagnostic.
+        - kind: test_function
+          name: test_parser_debug_never_echoes_script_or_voice_values
+          description: Parsed values remain intact while returned debug text contains no sentinel text, voice, or actor values.
+        - kind: test_function
+          name: test_provider_rejection_redacts_body_request_and_credentials
+          description: A fake 422 exception and captured logs include status but exclude sentinel provider body, script, voice, and key.
+        - kind: test_function
+          name: test_legacy_success_line_is_preserved_without_untrusted_debug
+          description: A real MCP tool success preserves the exact first line and excludes sentinel script/key/API-debug strings.
+        - kind: test_function
+          name: test_general_generation_failure_is_sanitized_in_job_and_response
+          description: A fake exception message is absent from the real MCP response and persisted AudioJob.error while failed status remains observable.
+        - kind: test_function
+          name: test_startup_failure_never_writes_exception_to_stdout
+          description: A sentinel-bearing initialize failure raises while stdout stays empty and stderr/log diagnostics exclude the sentinel message.
+        - kind: test_function
+          name: test_voice_network_failure_is_sanitized_in_api_and_tool
+          description: A sentinel-bearing Requests network exception is absent from the direct API error/logs and real list_voices MCP error JSON.
+  read:
+    - manifests/r01-credential-free-discovery.manifest.yaml
+    - manifests/r02-honest-partial-generation.manifest.yaml
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/03_TOOL_CONTRACTS.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - clients/web-ui/src/lib/elevenlabs-client.ts
+    - tests/characterization/test_legacy_server_surface.py
+  scope:
+    - path: src/elevenlabs_mcp/server.py
+      reason: Remove raw request/API debug accumulation and sanitize success/error/persisted general-failure text outside the declared parse_script method without changing tool schemas.
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_log_and_response_hygiene.py]
+  - [uv, run, pytest, -q, tests/acceptance/test_log_and_response_hygiene.py, tests/acceptance/test_honest_partial_generation.py, tests/characterization/test_legacy_server_surface.py]
+  - [uv, run, ruff, check, tests/acceptance/test_log_and_response_hygiene.py]
+  - [uv, run, pyright, tests/acceptance/test_log_and_response_hygiene.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_log_and_response_hygiene.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Stdio startup is protocol-clean and ordinary parser/API/server diagnostics no longer expose raw scripts, credentials, voice IDs, request bodies, provider bodies, or arbitrary exception messages while legacy success/error first lines remain compatible.
+  rationale: Allowlisted structural diagnostics and stable generic failures protect privacy without hiding job state; approved PartialGenerationError count/index/path detail and explicit history serialization remain intact.
+  lessons:
+    - lesson_type: diagnostic-hygiene
+      summary: Sanitizing the primary provider exception is insufficient; every cache, dispatcher, resource, tool, persistence, notification, and startup sink must apply the same allowlist policy.
+      tags: [privacy, logging, mcp, errors]
+      paths: [src/elevenlabs_mcp/server.py, src/elevenlabs_mcp/elevenlabs_api.py]
+  review_notes:
+    - source: maid-implementation-reviewer:r02_hygiene_review_3
+      severity: ready
+      summary: No blockers after exhaustive sink review; unused exception bindings remain a P2 cleanup advisory amid inherited Ruff debt.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 63 tests passed.
+    - command: [uv, run, maid, test, --manifest, manifests/r02-log-and-response-hygiene.manifest.yaml]
+      status: passed
+      summary: All four child commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, 6bf03b2, --summary, --packet]
+      status: passed
+      summary: All 11 deep stages passed.
+  completed_at: "2026-09-20T14:46:40+08:00"
+created: "2026-09-20T05:59:40Z"
+metadata:
+  author: Codex
+  tags: [revival, r02, logging, privacy, compatibility]
+  priority: critical
