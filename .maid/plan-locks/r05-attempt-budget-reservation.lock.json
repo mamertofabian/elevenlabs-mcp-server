@@ -1,0 +1,455 @@
+{
+  "manifest_path": "manifests/r05-attempt-budget-reservation.manifest.yaml",
+  "manifest_hash": "sha256-contract:4d7b111b8b0fcc062c00d401d3cda472919efefc8dceef75066762e53a8d58c0",
+  "test_hashes": {
+    "tests/integration/test_attempt_budget_reservation.py": "sha256-pyast:v2:837cb851be5d5293364f8f85c9a2f7ed2cefb79e452297c06e34b3e9146ea397"
+  },
+  "created_at": "2026-09-20T14:52:04.035700+00:00",
+  "revision": 5,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:584896f25eb1adaf6ef90205105adb30e0b21aa378a391881e1c18e614a84e15",
+      "prior_test_hashes": {
+        "tests/integration/test_attempt_budget_reservation.py": "sha256-pyast:v2:1ad4823ba865299093bb54b5e53d6a16705596f6d7721236153571771e9ec92f"
+      },
+      "revised_at": "2026-09-20T14:52:05.753664+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r05-attempt-budget-reservation.manifest.yaml -> manifests/r05-attempt-budget-reservation.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:6b00963c2ea496773e6e04f8b8f36cc551759d2dfa194ac684ee9a2bad4581a2",
+      "prior_test_hashes": {
+        "tests/integration/test_attempt_budget_reservation.py": "sha256-pyast:v2:1ad4823ba865299093bb54b5e53d6a16705596f6d7721236153571771e9ec92f"
+      },
+      "revised_at": "2026-09-20T14:53:10.254864+00:00",
+      "reason": "Clarify that the immutable replay result reports per-attempt exposure while durable job columns carry cumulative totals.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:6d9ed0cecffb4253fa6f5fb923ddf4b6d9abb9dbf0e2b49ebc219e96b4aecd74",
+      "prior_test_hashes": {
+        "tests/integration/test_attempt_budget_reservation.py": "sha256-pyast:v2:1ad4823ba865299093bb54b5e53d6a16705596f6d7721236153571771e9ec92f"
+      },
+      "revised_at": "2026-09-20T14:56:27.908592+00:00",
+      "reason": "Resolve review/spec conflict by reserving only queued/running jobs with pending chunks, leaving chunk state unchanged until dispatch, and preserving terminal/recovery states.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_id",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_id:kind=attribute",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_id:of=ReservationStateError",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_id:type=str",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_status",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_status:kind=attribute",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_status:of=ReservationStateError",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_status:type=str",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_id",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_id:kind=attribute",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_id:of=ReservationStateError",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_id:type=str",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_status",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_status:kind=attribute",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_status:of=ReservationStateError",
+          "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_status:type=str",
+          "src/elevenlabs_mcp/database.py:class:ReservationStateError",
+          "src/elevenlabs_mcp/database.py:class:ReservationStateError:base=RuntimeError",
+          "src/elevenlabs_mcp/database.py:class:ReservationStateError:kind=class",
+          "tests/integration/test_attempt_budget_reservation.py:test_ineligible_job_or_chunk_state_is_preserved_without_reservation",
+          "tests/integration/test_attempt_budget_reservation.py:test_ineligible_job_or_chunk_state_is_preserved_without_reservation:kind=test_function"
+        ],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:4d7b111b8b0fcc062c00d401d3cda472919efefc8dceef75066762e53a8d58c0",
+      "prior_test_hashes": {
+        "tests/integration/test_attempt_budget_reservation.py": "sha256-pyast:v2:837cb851be5d5293364f8f85c9a2f7ed2cefb79e452297c06e34b3e9146ea397"
+      },
+      "revised_at": "2026-09-20T14:58:35.057953+00:00",
+      "reason": "Capture the evidence-backed Outcome after independent Ready to merge review.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T14:56:29.344205+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/integration/test_attempt_budget_reservation.py",
+        "exit_code": 1,
+        "output_tail": "E       ImportError: cannot import name 'ReservationStateError' from 'elevenlabs_mcp.database' (/mnt/storage/development/elevenlabs-mcp-server/src/elevenlabs_mcp/database.py)\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_attempt_budget_reservation.py:169: ImportError\n=============================== warnings summary ===============================\ntests/integration/test_attempt_budget_reservation.py::test_reserve_attempt_atomically_updates_job_chunk_and_ledger\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/integration/test_attempt_budget_reservation.py::test_reserve_attempt_atomically_updates_job_chunk_and_ledger\nFAILED tests/integration/test_attempt_budget_reservation.py::test_attempt_id_replay_is_exact_and_conflicting_owner_fails\nFAILED tests/integration/test_attempt_budget_reservation.py::test_concurrent_reservations_cannot_exceed_cumulative_ceiling\nFAILED tests/integration/test_attempt_budget_reservation.py::test_missing_job_or_chunk_and_invalid_attempt_leave_ledger_unchanged\nFAILED tests/integration/test_attempt_budget_reservation.py::test_ineligible_job_or_chunk_state_is_preserved_without_reservation[completed-pending]\nFAILED tests/integration/test_attempt_budget_reservation.py::test_ineligible_job_or_chunk_state_is_preserved_without_reservation[cancelled-pending]\nFAILED tests/integration/test_attempt_budget_reservation.py::test_ineligible_job_or_chunk_state_is_preserved_without_reservation[paused-pending]\nFAILED tests/integration/test_attempt_budget_reservation.py::test_ineligible_job_or_chunk_state_is_preserved_without_reservation[queued-succeeded]\nFAILED tests/integration/test_attempt_budget_reservation.py::test_ineligible_job_or_chunk_state_is_preserved_without_reservation[running-unknown]\n9 failed, 1 warning in 0.22s",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/integration/test_attempt_budget_reservation.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run ruff format --check tests/integration/test_attempt_budget_reservation.py",
+        "exit_code": 0,
+        "output_tail": "1 file already formatted",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/integration/test_attempt_budget_reservation.py",
+        "exit_code": 1,
+        "output_tail": "  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_attempt_budget_reservation.py:94:21 - error: Cannot access attribute \"reserve_attempt\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"reserve_attempt\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_attempt_budget_reservation.py:109:17 - error: Cannot access attribute \"reserve_attempt\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"reserve_attempt\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_attempt_budget_reservation.py:111:24 - error: Cannot access attribute \"reserve_attempt\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"reserve_attempt\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_attempt_budget_reservation.py:112:24 - error: Cannot access attribute \"reserve_attempt\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"reserve_attempt\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_attempt_budget_reservation.py:129:41 - error: \"ChunkNotFoundError\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_attempt_budget_reservation.py:129:61 - error: \"JobNotFoundError\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_attempt_budget_reservation.py:133:21 - error: Cannot access attribute \"reserve_attempt\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"reserve_attempt\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_attempt_budget_reservation.py:138:21 - error: Cannot access attribute \"reserve_attempt\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"reserve_attempt\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_attempt_budget_reservation.py:144:21 - error: Cannot access attribute \"reserve_attempt\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"reserve_attempt\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_attempt_budget_reservation.py:169:41 - error: \"ReservationStateError\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_attempt_budget_reservation.py:182:21 - error: Cannot access attribute \"reserve_attempt\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"reserve_attempt\" is unknown (reportAttributeAccessIssue)\n16 errors, 0 warnings, 0 informations",
+        "classification": "red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.attempt_id",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.attempt_id:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.attempt_id:of=AttemptReservation",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.attempt_id:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.chunk_id",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.chunk_id:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.chunk_id:of=AttemptReservation",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.chunk_id:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.job_id",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.job_id:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.job_id:of=AttemptReservation",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.job_id:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.replayed",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.replayed:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.replayed:of=AttemptReservation",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.replayed:type=bool",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.reserved_characters",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.reserved_characters:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.reserved_characters:of=AttemptReservation",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.reserved_characters:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.reserved_requests",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.reserved_requests:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.reserved_requests:of=AttemptReservation",
+      "src/elevenlabs_mcp/contracts.py:attribute:AttemptReservation.reserved_requests:type=int",
+      "src/elevenlabs_mcp/contracts.py:class:AttemptReservation",
+      "src/elevenlabs_mcp/contracts.py:class:AttemptReservation:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:AttemptReservation:kind=class",
+      "src/elevenlabs_mcp/database.py:attribute:AttemptConflictError.attempt_id",
+      "src/elevenlabs_mcp/database.py:attribute:AttemptConflictError.attempt_id:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:AttemptConflictError.attempt_id:of=AttemptConflictError",
+      "src/elevenlabs_mcp/database.py:attribute:AttemptConflictError.attempt_id:type=str",
+      "src/elevenlabs_mcp/database.py:attribute:ChunkNotFoundError.chunk_id",
+      "src/elevenlabs_mcp/database.py:attribute:ChunkNotFoundError.chunk_id:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:ChunkNotFoundError.chunk_id:of=ChunkNotFoundError",
+      "src/elevenlabs_mcp/database.py:attribute:ChunkNotFoundError.chunk_id:type=str",
+      "src/elevenlabs_mcp/database.py:attribute:ChunkNotFoundError.job_id",
+      "src/elevenlabs_mcp/database.py:attribute:ChunkNotFoundError.job_id:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:ChunkNotFoundError.job_id:of=ChunkNotFoundError",
+      "src/elevenlabs_mcp/database.py:attribute:ChunkNotFoundError.job_id:type=str",
+      "src/elevenlabs_mcp/database.py:attribute:JobNotFoundError.job_id",
+      "src/elevenlabs_mcp/database.py:attribute:JobNotFoundError.job_id:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:JobNotFoundError.job_id:of=JobNotFoundError",
+      "src/elevenlabs_mcp/database.py:attribute:JobNotFoundError.job_id:type=str",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_id",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_id:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_id:of=ReservationStateError",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_id:type=str",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_status",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_status:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_status:of=ReservationStateError",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.chunk_status:type=str",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_id",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_id:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_id:of=ReservationStateError",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_id:type=str",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_status",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_status:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_status:of=ReservationStateError",
+      "src/elevenlabs_mcp/database.py:attribute:ReservationStateError.job_status:type=str",
+      "src/elevenlabs_mcp/database.py:class:AttemptConflictError",
+      "src/elevenlabs_mcp/database.py:class:AttemptConflictError:base=RuntimeError",
+      "src/elevenlabs_mcp/database.py:class:AttemptConflictError:kind=class",
+      "src/elevenlabs_mcp/database.py:class:ChunkNotFoundError",
+      "src/elevenlabs_mcp/database.py:class:ChunkNotFoundError:base=RuntimeError",
+      "src/elevenlabs_mcp/database.py:class:ChunkNotFoundError:kind=class",
+      "src/elevenlabs_mcp/database.py:class:JobNotFoundError",
+      "src/elevenlabs_mcp/database.py:class:JobNotFoundError:base=RuntimeError",
+      "src/elevenlabs_mcp/database.py:class:JobNotFoundError:kind=class",
+      "src/elevenlabs_mcp/database.py:class:ReservationStateError",
+      "src/elevenlabs_mcp/database.py:class:ReservationStateError:base=RuntimeError",
+      "src/elevenlabs_mcp/database.py:class:ReservationStateError:kind=class",
+      "src/elevenlabs_mcp/database.py:method:JobStore.reserve_attempt",
+      "src/elevenlabs_mcp/database.py:method:JobStore.reserve_attempt:arg=attempt_id:type=str:default=None",
+      "src/elevenlabs_mcp/database.py:method:JobStore.reserve_attempt:arg=chunk_id:type=str:default=None",
+      "src/elevenlabs_mcp/database.py:method:JobStore.reserve_attempt:arg=job_id:type=str:default=None",
+      "src/elevenlabs_mcp/database.py:method:JobStore.reserve_attempt:arg=self:type=JobStore:default=None",
+      "src/elevenlabs_mcp/database.py:method:JobStore.reserve_attempt:arg=started_at:type=datetime:default=None",
+      "src/elevenlabs_mcp/database.py:method:JobStore.reserve_attempt:async=true",
+      "src/elevenlabs_mcp/database.py:method:JobStore.reserve_attempt:kind=method",
+      "src/elevenlabs_mcp/database.py:method:JobStore.reserve_attempt:of=JobStore",
+      "src/elevenlabs_mcp/database.py:method:JobStore.reserve_attempt:returns=AttemptReservation",
+      "tests/integration/test_attempt_budget_reservation.py:test_attempt_id_replay_is_exact_and_conflicting_owner_fails",
+      "tests/integration/test_attempt_budget_reservation.py:test_attempt_id_replay_is_exact_and_conflicting_owner_fails:kind=test_function",
+      "tests/integration/test_attempt_budget_reservation.py:test_concurrent_reservations_cannot_exceed_cumulative_ceiling",
+      "tests/integration/test_attempt_budget_reservation.py:test_concurrent_reservations_cannot_exceed_cumulative_ceiling:kind=test_function",
+      "tests/integration/test_attempt_budget_reservation.py:test_ineligible_job_or_chunk_state_is_preserved_without_reservation",
+      "tests/integration/test_attempt_budget_reservation.py:test_ineligible_job_or_chunk_state_is_preserved_without_reservation:kind=test_function",
+      "tests/integration/test_attempt_budget_reservation.py:test_missing_job_or_chunk_and_invalid_attempt_leave_ledger_unchanged",
+      "tests/integration/test_attempt_budget_reservation.py:test_missing_job_or_chunk_and_invalid_attempt_leave_ledger_unchanged:kind=test_function",
+      "tests/integration/test_attempt_budget_reservation.py:test_reserve_attempt_atomically_updates_job_chunk_and_ledger",
+      "tests/integration/test_attempt_budget_reservation.py:test_reserve_attempt_atomically_updates_job_chunk_and_ledger:kind=test_function"
+    ],
+    "files": {
+      "create": [],
+      "edit": [
+        "src/elevenlabs_mcp/contracts.py",
+        "src/elevenlabs_mcp/database.py",
+        "tests/integration/test_attempt_budget_reservation.py"
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r05-atomic-idempotent-job-creation.manifest.yaml"
+      ],
+      "scope": [],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "edit": [
+        {
+          "path": "src/elevenlabs_mcp/contracts.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "AttemptReservation",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "attempt_id",
+              "of": "AttemptReservation",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "job_id",
+              "of": "AttemptReservation",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "chunk_id",
+              "of": "AttemptReservation",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "reserved_characters",
+              "of": "AttemptReservation",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "reserved_requests",
+              "of": "AttemptReservation",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "replayed",
+              "of": "AttemptReservation",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "path": "src/elevenlabs_mcp/database.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "JobNotFoundError",
+              "bases": [
+                "RuntimeError"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "job_id",
+              "of": "JobNotFoundError",
+              "type": "str"
+            },
+            {
+              "kind": "class",
+              "name": "ChunkNotFoundError",
+              "bases": [
+                "RuntimeError"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "job_id",
+              "of": "ChunkNotFoundError",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "chunk_id",
+              "of": "ChunkNotFoundError",
+              "type": "str"
+            },
+            {
+              "kind": "class",
+              "name": "AttemptConflictError",
+              "bases": [
+                "RuntimeError"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "attempt_id",
+              "of": "AttemptConflictError",
+              "type": "str"
+            },
+            {
+              "kind": "class",
+              "name": "ReservationStateError",
+              "bases": [
+                "RuntimeError"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "job_id",
+              "of": "ReservationStateError",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "chunk_id",
+              "of": "ReservationStateError",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "job_status",
+              "of": "ReservationStateError",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "chunk_status",
+              "of": "ReservationStateError",
+              "type": "str"
+            },
+            {
+              "kind": "method",
+              "name": "reserve_attempt",
+              "of": "JobStore",
+              "args": [
+                {
+                  "name": "self",
+                  "type": "JobStore"
+                },
+                {
+                  "name": "job_id",
+                  "type": "str"
+                },
+                {
+                  "name": "chunk_id",
+                  "type": "str"
+                },
+                {
+                  "name": "attempt_id",
+                  "type": "str"
+                },
+                {
+                  "name": "started_at",
+                  "type": "datetime"
+                }
+              ],
+              "returns": "AttemptReservation",
+              "async": true
+            }
+          ]
+        },
+        {
+          "path": "tests/integration/test_attempt_budget_reservation.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_reserve_attempt_atomically_updates_job_chunk_and_ledger",
+              "description": "Exact owned chunk characters and one request are reserved with aware time, durable attempt state, chunk state, per-attempt exposure result, and cumulative job totals before dispatch."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_attempt_id_replay_is_exact_and_conflicting_owner_fails",
+              "description": "Matching attempt ID returns original cumulative reservation without recounting; reuse for another chunk raises AttemptConflictError."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_concurrent_reservations_cannot_exceed_cumulative_ceiling",
+              "description": "Separate JobStore instances racing under a one-request ceiling commit exactly one attempt and one exposure while the other receives BudgetExceededError."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_missing_job_or_chunk_and_invalid_attempt_leave_ledger_unchanged",
+              "description": "Typed missing ownership and invalid attempt IDs create no attempts and do not alter stored reservation counters or chunk state."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_ineligible_job_or_chunk_state_is_preserved_without_reservation",
+              "description": "Completed/cancelled/paused jobs and non-pending chunks raise ReservationStateError with exact state evidence, persist no attempt, and retain counters/status."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r05-atomic-idempotent-job-creation.manifest.yaml"
+      ]
+    },
+    "test_files": [
+      "tests/integration/test_attempt_budget_reservation.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/integration/test_attempt_budget_reservation.py",
+      "uv run ruff check tests/integration/test_attempt_budget_reservation.py",
+      "uv run ruff format --check tests/integration/test_attempt_budget_reservation.py",
+      "uv run pyright tests/integration/test_attempt_budget_reservation.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/integration/test_attempt_budget_reservation.py"
+    ]
+  }
+}

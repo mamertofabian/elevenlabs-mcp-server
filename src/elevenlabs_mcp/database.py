@@ -11,7 +11,7 @@ from typing import List, Optional
 import aiosqlite
 
 from .models import AudioJob
-from .contracts import JobCreateResult, VoiceoverPlan
+from .contracts import AttemptReservation, JobCreateResult, VoiceoverPlan
 
 CREATE_VOICES_TABLE = """
 CREATE TABLE IF NOT EXISTS voices (
@@ -279,6 +279,38 @@ class BudgetExceededError(RuntimeError):
         super().__init__("initial plan exceeds cumulative attempt ceiling")
 
 
+class JobNotFoundError(RuntimeError):
+    def __init__(self, job_id: str) -> None:
+        self.job_id = job_id
+        super().__init__(f"job not found: {job_id}")
+
+
+class ChunkNotFoundError(RuntimeError):
+    def __init__(self, job_id: str, chunk_id: str) -> None:
+        self.job_id = job_id
+        self.chunk_id = chunk_id
+        super().__init__(f"chunk not found: {job_id}/{chunk_id}")
+
+
+class AttemptConflictError(RuntimeError):
+    def __init__(self, attempt_id: str) -> None:
+        self.attempt_id = attempt_id
+        super().__init__(f"attempt ID already belongs to another request: {attempt_id}")
+
+
+class ReservationStateError(RuntimeError):
+    def __init__(
+        self, job_id: str, chunk_id: str, job_status: str, chunk_status: str
+    ) -> None:
+        self.job_id = job_id
+        self.chunk_id = chunk_id
+        self.job_status = job_status
+        self.chunk_status = chunk_status
+        super().__init__(
+            f"cannot reserve {job_id}/{chunk_id} from {job_status}/{chunk_status}"
+        )
+
+
 class JobStore:
     def __init__(self, db_path: str | os.PathLike[str]) -> None:
         self.db_path = os.fspath(db_path)
@@ -506,6 +538,114 @@ class JobStore:
                 )
                 await connection.commit()
                 return created_result
+            except BaseException:
+                await connection.rollback()
+                raise
+
+    async def reserve_attempt(
+        self,
+        job_id: str,
+        chunk_id: str,
+        attempt_id: str,
+        started_at: datetime,
+    ) -> AttemptReservation:
+        async with self.connect() as connection:
+            await connection.execute("BEGIN IMMEDIATE")
+            try:
+                async with connection.execute(
+                    """
+                    SELECT job_id, chunk_id, reserved_characters
+                    FROM generation_attempts WHERE attempt_id = ?
+                    """,
+                    (attempt_id,),
+                ) as cursor:
+                    existing = await cursor.fetchone()
+                if existing is not None:
+                    if (existing[0], existing[1]) != (job_id, chunk_id):
+                        raise AttemptConflictError(attempt_id)
+                    await connection.commit()
+                    return AttemptReservation(
+                        attempt_id=attempt_id,
+                        job_id=job_id,
+                        chunk_id=chunk_id,
+                        reserved_characters=existing[2],
+                        reserved_requests=1,
+                        replayed=True,
+                    )
+
+                async with connection.execute(
+                    """
+                    SELECT max_total_characters, max_total_requests,
+                           reserved_characters, reserved_requests, status
+                    FROM voiceover_jobs
+                    WHERE job_id = ? AND deleted_at IS NULL
+                    """,
+                    (job_id,),
+                ) as cursor:
+                    job = await cursor.fetchone()
+                if job is None:
+                    raise JobNotFoundError(job_id)
+
+                async with connection.execute(
+                    """
+                    SELECT character_count, status FROM voiceover_chunks
+                    WHERE job_id = ? AND chunk_id = ?
+                    """,
+                    (job_id, chunk_id),
+                ) as cursor:
+                    chunk = await cursor.fetchone()
+                if chunk is None:
+                    raise ChunkNotFoundError(job_id, chunk_id)
+                if job[4] not in {"queued", "running"} or chunk[1] != "pending":
+                    raise ReservationStateError(job_id, chunk_id, job[4], chunk[1])
+
+                required_characters = job[2] + chunk[0]
+                required_requests = job[3] + 1
+                if required_characters > job[0] or required_requests > job[1]:
+                    raise BudgetExceededError(
+                        job[0], required_characters, job[1], required_requests
+                    )
+                if started_at.tzinfo is None or started_at.utcoffset() is None:
+                    raise ValueError("started_at must be timezone-aware")
+                result = AttemptReservation(
+                    attempt_id=attempt_id,
+                    job_id=job_id,
+                    chunk_id=chunk_id,
+                    reserved_characters=chunk[0],
+                    reserved_requests=1,
+                    replayed=False,
+                )
+                await connection.execute(
+                    """
+                    UPDATE voiceover_jobs
+                    SET reserved_characters = ?, reserved_requests = ?,
+                        updated_at = ?
+                    WHERE job_id = ?
+                    """,
+                    (
+                        required_characters,
+                        required_requests,
+                        started_at.astimezone(UTC).isoformat(),
+                        job_id,
+                    ),
+                )
+                await connection.execute(
+                    """
+                    INSERT INTO generation_attempts (
+                        attempt_id, job_id, chunk_id, dispatch_state,
+                        reserved_characters, started_at, outcome_unknown
+                    ) VALUES (?, ?, ?, 'reserved', ?, ?, 0)
+                    """,
+                    (
+                        attempt_id,
+                        job_id,
+                        chunk_id,
+                        chunk[0],
+                        started_at.astimezone(UTC).isoformat(),
+                    ),
+                )
+                await connection.commit()
+                return result
             except BaseException:
                 await connection.rollback()
                 raise

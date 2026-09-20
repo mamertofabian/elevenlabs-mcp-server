@@ -202,6 +202,15 @@ class JobCreateResult(_StrictModel):
     idempotent_replay: bool
 
 
+class AttemptReservation(_StrictModel):
+    attempt_id: str = Field(min_length=1, max_length=128)
+    job_id: str = Field(min_length=1, max_length=128)
+    chunk_id: str = Field(min_length=1, max_length=128)
+    reserved_characters: int = Field(ge=1)
+    reserved_requests: int = Field(default=1, ge=1)
+    replayed: bool
+
+
 class PlanVoiceoverInput(_StrictModel):
     script: Script
     options: VoiceoverOptions

@@ -1,0 +1,136 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Atomically reserve cumulative request and character exposure in a durable generation-attempt ledger before provider dispatch.
+description: |
+  Third R05 child covering A26's durable budget boundary. Add immutable
+  AttemptReservation, JobNotFoundError, ChunkNotFoundError, and
+  AttemptConflictError plus JobStore.reserve_attempt. In one BEGIN IMMEDIATE
+  transaction, resolve an existing attempt ID first for exact replay, reject
+  reuse against another job/chunk, load the owned pending chunk and active job,
+  verify stored cumulative request/character ceilings, require a queued/running
+  job and pending chunk, increment both reserved counters, and insert the
+  reserved attempt while leaving the chunk pending until actual dispatch. Concurrent
+  reservations cannot overspend. Failed ceiling checks persist nothing and
+  keep earlier exposure. This method performs no provider dispatch, retry
+  classification, artifact write, revision mutation, resume policy, or refund.
+  Expected red: reservation DTO/errors/method absent.
+temptations:
+  - risk: Check budget in application memory and insert the attempt afterward.
+    instead: Hold BEGIN IMMEDIATE from ledger read through job counter update, attempt insert, chunk state update, and commit.
+  - risk: Refund failed or uncertain attempts by decrementing reservations.
+    instead: Treat every committed reservation as cumulative dispatch exposure; later outcome updates never erase it.
+  - risk: Count original script characters rather than exact request character_count.
+    instead: Read the immutable owned chunk count inside the transaction and reserve that amount plus one request.
+  - risk: Double-charge a retried local call with the same attempt ID.
+    instead: Return the original reservation before budget/state checks when job and chunk ownership match.
+type: feature
+files:
+  edit:
+    - path: src/elevenlabs_mcp/contracts.py
+      artifacts:
+        - kind: class
+          name: AttemptReservation
+          bases: [_StrictModel]
+        - {kind: attribute, name: attempt_id, of: AttemptReservation, type: str}
+        - {kind: attribute, name: job_id, of: AttemptReservation, type: str}
+        - {kind: attribute, name: chunk_id, of: AttemptReservation, type: str}
+        - {kind: attribute, name: reserved_characters, of: AttemptReservation, type: int}
+        - {kind: attribute, name: reserved_requests, of: AttemptReservation, type: int}
+        - {kind: attribute, name: replayed, of: AttemptReservation, type: bool}
+    - path: src/elevenlabs_mcp/database.py
+      artifacts:
+        - kind: class
+          name: JobNotFoundError
+          bases: [RuntimeError]
+        - {kind: attribute, name: job_id, of: JobNotFoundError, type: str}
+        - kind: class
+          name: ChunkNotFoundError
+          bases: [RuntimeError]
+        - {kind: attribute, name: job_id, of: ChunkNotFoundError, type: str}
+        - {kind: attribute, name: chunk_id, of: ChunkNotFoundError, type: str}
+        - kind: class
+          name: AttemptConflictError
+          bases: [RuntimeError]
+        - {kind: attribute, name: attempt_id, of: AttemptConflictError, type: str}
+        - kind: class
+          name: ReservationStateError
+          bases: [RuntimeError]
+        - {kind: attribute, name: job_id, of: ReservationStateError, type: str}
+        - {kind: attribute, name: chunk_id, of: ReservationStateError, type: str}
+        - {kind: attribute, name: job_status, of: ReservationStateError, type: str}
+        - {kind: attribute, name: chunk_status, of: ReservationStateError, type: str}
+        - kind: method
+          name: reserve_attempt
+          of: JobStore
+          async: true
+          args:
+            - {name: self, type: JobStore}
+            - {name: job_id, type: str}
+            - {name: chunk_id, type: str}
+            - {name: attempt_id, type: str}
+            - {name: started_at, type: datetime}
+          returns: AttemptReservation
+    - path: tests/integration/test_attempt_budget_reservation.py
+      artifacts:
+        - kind: test_function
+          name: test_reserve_attempt_atomically_updates_job_chunk_and_ledger
+          description: Exact owned chunk characters and one request are reserved with aware time, durable attempt state, chunk state, per-attempt exposure result, and cumulative job totals before dispatch.
+        - kind: test_function
+          name: test_attempt_id_replay_is_exact_and_conflicting_owner_fails
+          description: Matching attempt ID returns original cumulative reservation without recounting; reuse for another chunk raises AttemptConflictError.
+        - kind: test_function
+          name: test_concurrent_reservations_cannot_exceed_cumulative_ceiling
+          description: Separate JobStore instances racing under a one-request ceiling commit exactly one attempt and one exposure while the other receives BudgetExceededError.
+        - kind: test_function
+          name: test_missing_job_or_chunk_and_invalid_attempt_leave_ledger_unchanged
+          description: Typed missing ownership and invalid attempt IDs create no attempts and do not alter stored reservation counters or chunk state.
+        - kind: test_function
+          name: test_ineligible_job_or_chunk_state_is_preserved_without_reservation
+          description: Completed/cancelled/paused jobs and non-pending chunks raise ReservationStateError with exact state evidence, persist no attempt, and retain counters/status.
+  read:
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/03_TOOL_CONTRACTS.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - manifests/r05-atomic-idempotent-job-creation.manifest.yaml
+validate:
+  - [uv, run, pytest, -q, tests/integration/test_attempt_budget_reservation.py]
+  - [uv, run, ruff, check, tests/integration/test_attempt_budget_reservation.py]
+  - [uv, run, ruff, format, --check, tests/integration/test_attempt_budget_reservation.py]
+  - [uv, run, pyright, tests/integration/test_attempt_budget_reservation.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/integration/test_attempt_budget_reservation.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: JobStore now reserves exact chunk character and request exposure atomically before dispatch, prevents concurrent overspend, replays attempt IDs without recounting, and preserves pending/terminal/recovery chunk states under typed eligibility failures.
+  rationale: The durable ledger establishes the conservative cumulative spend boundary R06/R08 can call before any provider request, without conflating reservation with dispatch or refunding failed/uncertain exposure.
+  lessons:
+    - lesson_type: persistence-contract
+      summary: Budget reservation belongs to the attempt ledger; chunk state remains pending until dispatch, and eligibility must preserve terminal or recovery states rather than overwrite them.
+      tags: [sqlite, attempts, budgets, state-machine, concurrency]
+      paths: [src/elevenlabs_mcp/database.py, tests/integration/test_attempt_budget_reservation.py]
+  review_notes:
+    - source: maid-implementation-reviewer:r05_attempt_review_2
+      severity: ready
+      summary: No findings; receipt-first attempt replay, atomic counters, concurrency ceilings, eligibility, pending chunk preservation, typed failures, scope, and validation are valid.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 131 credential-free tests passed.
+    - command: [uv, run, maid, test, --manifest, manifests/r05-attempt-budget-reservation.manifest.yaml]
+      status: passed
+      summary: All 4 manifest-local commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, ef3d565, --summary, --packet]
+      status: passed
+      summary: All 11 deep stages passed with zero blockers or warnings.
+  completed_at: "2026-09-20T22:58:05+08:00"
+created: "2026-09-20T14:52:05Z"
+metadata:
+  author: Codex
+  tags: [revival, r05, sqlite, attempts, budget, concurrency]
+  priority: high
