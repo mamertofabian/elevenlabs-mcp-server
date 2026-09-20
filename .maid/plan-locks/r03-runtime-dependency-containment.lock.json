@@ -1,0 +1,166 @@
+{
+  "manifest_path": "manifests/r03-runtime-dependency-containment.manifest.yaml",
+  "manifest_hash": "sha256-contract:e52ab7a41123c8564724c3bf52d7eda84210ac6dbdb57bc9f1de4c0a6f9d95b7",
+  "test_hashes": {
+    "tests/acceptance/test_runtime_dependency_metadata.py": "sha256-pyast:v2:c762ffbe6abc9daf05ea8d1cf58fb6418e9e971b15dc186442c9c7949aad7f74"
+  },
+  "created_at": "2026-09-20T07:07:22.941138+00:00",
+  "revision": 3,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:dd791f035e92b6504deaa2a0098de898c2ced0c2a3b050129a63fe26fdbf0620",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_dependency_metadata.py": "sha256-pyast:v2:c762ffbe6abc9daf05ea8d1cf58fb6418e9e971b15dc186442c9c7949aad7f74"
+      },
+      "revised_at": "2026-09-20T07:07:27.621072+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r03-runtime-dependency-containment.manifest.yaml -> manifests/r03-runtime-dependency-containment.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:e52ab7a41123c8564724c3bf52d7eda84210ac6dbdb57bc9f1de4c0a6f9d95b7",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_dependency_metadata.py": "sha256-pyast:v2:c762ffbe6abc9daf05ea8d1cf58fb6418e9e971b15dc186442c9c7949aad7f74"
+      },
+      "revised_at": "2026-09-20T07:10:41.425605+00:00",
+      "reason": "Capture reviewed runtime dependency containment Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T07:07:27.427737+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_runtime_dependency_metadata.py",
+        "exit_code": 1,
+        "output_tail": "            entry_name = next(\n                name for name in names if name.endswith(\".dist-info/entry_points.txt\")\n            )\n            metadata = email.message_from_bytes(wheel.read(metadata_name))\n            entries = wheel.read(entry_name).decode(\"utf-8\")\n    \n        requirements = metadata.get_all(\"Requires-Dist\") or []\n        mcp_requirement = next(item for item in requirements if item.startswith(\"mcp\"))\n        assert metadata[\"Name\"] == \"elevenlabs-mcp-server\"\n>       assert \">=1.1.2\" in mcp_requirement\nE       AssertionError: assert '>=1.1.2' in 'mcp>=1.0.0'\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_runtime_dependency_metadata.py:97: AssertionError\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_project_runtime_dependencies_bound_mcp_and_exclude_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_lock_resolves_tested_mcp_v1_without_runtime_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_built_wheel_preserves_identity_license_and_safe_requirements\n3 failed in 0.21s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run pytest -q",
+        "exit_code": 1,
+        "output_tail": "        requirements = metadata.get_all(\"Requires-Dist\") or []\n        mcp_requirement = next(item for item in requirements if item.startswith(\"mcp\"))\n        assert metadata[\"Name\"] == \"elevenlabs-mcp-server\"\n>       assert \">=1.1.2\" in mcp_requirement\nE       AssertionError: assert '>=1.1.2' in 'mcp>=1.0.0'\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_runtime_dependency_metadata.py:97: AssertionError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_project_runtime_dependencies_bound_mcp_and_exclude_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_lock_resolves_tested_mcp_v1_without_runtime_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_built_wheel_preserves_identity_license_and_safe_requirements\n3 failed, 67 passed, 1 warning in 3.32s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/acceptance/test_runtime_dependency_metadata.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/acceptance/test_runtime_dependency_metadata.py",
+        "exit_code": 0,
+        "output_tail": "0 errors, 0 warnings, 0 informations\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv lock --check",
+        "exit_code": 0,
+        "output_tail": "warning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead\nResolved 42 packages in 5ms",
+        "classification": "not_red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "tests/acceptance/test_runtime_dependency_metadata.py:test_built_wheel_preserves_identity_license_and_safe_requirements",
+      "tests/acceptance/test_runtime_dependency_metadata.py:test_built_wheel_preserves_identity_license_and_safe_requirements:kind=test_function",
+      "tests/acceptance/test_runtime_dependency_metadata.py:test_lock_resolves_tested_mcp_v1_without_runtime_pytest",
+      "tests/acceptance/test_runtime_dependency_metadata.py:test_lock_resolves_tested_mcp_v1_without_runtime_pytest:kind=test_function",
+      "tests/acceptance/test_runtime_dependency_metadata.py:test_project_runtime_dependencies_bound_mcp_and_exclude_pytest",
+      "tests/acceptance/test_runtime_dependency_metadata.py:test_project_runtime_dependencies_bound_mcp_and_exclude_pytest:kind=test_function"
+    ],
+    "files": {
+      "create": [
+        "tests/acceptance/test_runtime_dependency_metadata.py"
+      ],
+      "edit": [],
+      "read": [
+        "LICENSE",
+        "README.md",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md"
+      ],
+      "scope": [
+        "pyproject.toml",
+        "uv.lock"
+      ],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "create": [
+        {
+          "path": "tests/acceptance/test_runtime_dependency_metadata.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_project_runtime_dependencies_bound_mcp_and_exclude_pytest",
+              "description": "Parsed pyproject data preserves identity and optional dev support while runtime dependencies contain mcp>=1.1.2,<2 and no pytest."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_lock_resolves_tested_mcp_v1_without_runtime_pytest",
+              "description": "Parsed uv.lock project metadata and selected package version reflect the bounded v1/runtime-dev separation."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_built_wheel_preserves_identity_license_and_safe_requirements",
+              "description": "A real temporary wheel advertises bounded MCP, no unconditional pytest, the legacy console entry point/import package, and MIT license file."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md",
+        "LICENSE",
+        "README.md"
+      ],
+      "scope": [
+        {
+          "path": "pyproject.toml",
+          "reason": "Narrow runtime/dev dependency and packaging metadata edits; TOML has no discovered MAID validator artifact surface."
+        },
+        {
+          "path": "uv.lock",
+          "reason": "Generated lock reconciliation for the narrow pyproject dependency changes."
+        }
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_runtime_dependency_metadata.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_runtime_dependency_metadata.py",
+      "uv run pytest -q",
+      "uv run ruff check tests/acceptance/test_runtime_dependency_metadata.py",
+      "uv run pyright tests/acceptance/test_runtime_dependency_metadata.py",
+      "uv lock --check"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_runtime_dependency_metadata.py"
+    ]
+  }
+}

@@ -14,11 +14,10 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 dependencies = [
-    "mcp>=1.0.0",
+    "mcp>=1.1.2,<2",
     "requests",
     "pydub",
     "python-dotenv",
-    "pytest>=8.3.4",
     "tenacity>=9.0.0",
     "aiosqlite>=0.19.0",
 ]
@@ -39,10 +38,11 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/elevenlabs_mcp"]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "maid-runner==2.27.6",
     "pyright>=1.1.389",
     "pytest>=8.3.3",
+    "pytest-asyncio",
     "ruff>=0.8.1",
 ]

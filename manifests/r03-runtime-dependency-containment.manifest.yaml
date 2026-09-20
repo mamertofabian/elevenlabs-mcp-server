@@ -1,0 +1,94 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Bound recovery installs to the tested MCP v1 line and keep test/MAID tooling out of unconditional wheel runtime requirements.
+description: |
+  First R03 packaging child. Change the published runtime contract from
+  unbounded mcp>=1.0.0 to tested mcp>=1.1.2,<2, remove pytest from runtime
+  dependencies, preserve the project name/import/entry point/MIT license and
+  optional dev extra, and migrate repo-local uv tools from deprecated
+  tool.uv.dev-dependencies to dependency-groups.dev. Regenerate uv.lock without
+  upgrading unrelated resolutions. Behavioral tests build the real wheel into
+  a temporary directory, inspect METADATA and entry_points.txt, and parse the
+  lock to prove its selected MCP remains within the advertised v1 interval.
+  No package version bump, publication, SDK-v2 migration, CI workflow, or clean
+  install smoke is included; those are separate R03/R10 children. Expected
+  red: current wheel advertises unbounded MCP and unconditional pytest.
+  Outcome lesson applied: packaging claims are verified from produced artifacts
+  and generated lock data, never inferred from a source edit alone.
+temptations:
+  - risk: Rely on uv.lock to protect users installing the wheel from PyPI.
+    instead: Assert the built wheel METADATA itself contains both the tested lower bound and <2 upper bound.
+  - risk: Delete all developer dependency declarations to remove pytest from runtime.
+    instead: Preserve the optional dev extra and place repo-local tools in dependency-groups.dev while removing only unconditional pytest.
+  - risk: Run a broad dependency upgrade while regenerating the lock.
+    instead: Use uv lock after the narrow constraint edit and assert the resolved MCP version remains 1.1.2 within range.
+  - risk: Rename the distribution, import package, script, or license while touching metadata.
+    instead: Inspect the wheel name, console entry point, top-level package files, and License-File metadata exactly.
+type: fix
+files:
+  create:
+    - path: tests/acceptance/test_runtime_dependency_metadata.py
+      artifacts:
+        - kind: test_function
+          name: test_project_runtime_dependencies_bound_mcp_and_exclude_pytest
+          description: Parsed pyproject data preserves identity and optional dev support while runtime dependencies contain mcp>=1.1.2,<2 and no pytest.
+        - kind: test_function
+          name: test_lock_resolves_tested_mcp_v1_without_runtime_pytest
+          description: Parsed uv.lock project metadata and selected package version reflect the bounded v1/runtime-dev separation.
+        - kind: test_function
+          name: test_built_wheel_preserves_identity_license_and_safe_requirements
+          description: A real temporary wheel advertises bounded MCP, no unconditional pytest, the legacy console entry point/import package, and MIT license file.
+  read:
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md
+    - LICENSE
+    - README.md
+  scope:
+    - path: pyproject.toml
+      reason: Narrow runtime/dev dependency and packaging metadata edits; TOML has no discovered MAID validator artifact surface.
+    - path: uv.lock
+      reason: Generated lock reconciliation for the narrow pyproject dependency changes.
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_runtime_dependency_metadata.py]
+  - [uv, run, pytest, -q]
+  - [uv, run, ruff, check, tests/acceptance/test_runtime_dependency_metadata.py]
+  - [uv, run, pyright, tests/acceptance/test_runtime_dependency_metadata.py]
+  - [uv, lock, --check]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_runtime_dependency_metadata.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Built wheels now advertise the tested MCP v1 range mcp>=1.1.2,<2, exclude pytest from unconditional runtime requirements, preserve the optional dev extra, and use current uv dependency groups without changing resolved package versions.
+  rationale: Wheel metadata—not the lockfile alone—now protects downstream installers from MCP v2 while repo-local test/MAID tooling remains development-only and package identity/license/entry point remain unchanged.
+  lessons:
+    - lesson_type: packaging-contract
+      summary: Dependency containment must be asserted from built wheel METADATA and entry points; a lockfile cannot constrain downstream package resolution.
+      tags: [packaging, dependencies, wheel, mcp]
+      paths: [pyproject.toml, uv.lock, tests/acceptance/test_runtime_dependency_metadata.py]
+  review_notes:
+    - source: maid-implementation-reviewer:r03_dependency_review
+      severity: ready
+      summary: No findings; lock diff is minimal, wheel artifact preserves identity/license/imports, and no unrelated resolution changed.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 70 tests passed.
+    - command: [uv, lock, --check]
+      status: passed
+      summary: Generated lock is current and retains MCP 1.1.2.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, d42473b, --summary, --packet]
+      status: passed
+      summary: All 11 deep stages passed.
+  completed_at: "2026-09-20T15:10:16+08:00"
+created: "2026-09-20T07:07:27Z"
+metadata:
+  author: Codex
+  tags: [revival, r03, packaging, dependencies, mcp-v1]
+  priority: high

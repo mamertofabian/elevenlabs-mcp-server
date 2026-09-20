@@ -138,7 +138,6 @@ dependencies = [
     { name = "aiosqlite" },
     { name = "mcp" },
     { name = "pydub" },
-    { name = "pytest" },
     { name = "python-dotenv" },
     { name = "requests" },
     { name = "tenacity" },
@@ -155,15 +154,15 @@ dev = [
     { name = "maid-runner" },
     { name = "pyright" },
     { name = "pytest" },
+    { name = "pytest-asyncio" },
     { name = "ruff" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "aiosqlite", specifier = ">=0.19.0" },
-    { name = "mcp", specifier = ">=1.0.0" },
+    { name = "mcp", specifier = ">=1.1.2,<2" },
     { name = "pydub" },
-    { name = "pytest", specifier = ">=8.3.4" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-asyncio", marker = "extra == 'dev'" },
     { name = "python-dotenv" },
@@ -177,6 +176,7 @@ dev = [
     { name = "maid-runner", specifier = "==2.27.6" },
     { name = "pyright", specifier = ">=1.1.389" },
     { name = "pytest", specifier = ">=8.3.3" },
+    { name = "pytest-asyncio" },
     { name = "ruff", specifier = ">=0.8.1" },
 ]
 
