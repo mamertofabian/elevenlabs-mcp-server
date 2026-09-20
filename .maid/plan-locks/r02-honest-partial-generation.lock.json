@@ -1,0 +1,248 @@
+{
+  "manifest_path": "manifests/r02-honest-partial-generation.manifest.yaml",
+  "manifest_hash": "sha256-contract:3b68279d77087c5b5ec3e8114d58161298c2c6e830b08f26fe27f7466a5e7523",
+  "test_hashes": {
+    "tests/acceptance/test_collision_proof_output.py": "sha256-pyast:v2:911c3e4f0bc521fc47ab666e265138660aad16a6d2b862daa8ce794d6cd47ee4",
+    "tests/acceptance/test_honest_partial_generation.py": "sha256-pyast:v2:c4b323edd6e5ef734b1370577b3789ca256eb480276835cdfef5b100b508916d",
+    "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9"
+  },
+  "created_at": "2026-09-20T05:26:35.571701+00:00",
+  "revision": 3,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:d51a65076cf6ab33e36616bd48f3bcff881f1c7d39ed9d6847a04c2efb085894",
+      "prior_test_hashes": {
+        "tests/acceptance/test_collision_proof_output.py": "sha256-pyast:v2:911c3e4f0bc521fc47ab666e265138660aad16a6d2b862daa8ce794d6cd47ee4",
+        "tests/acceptance/test_honest_partial_generation.py": "sha256-pyast:v2:c4b323edd6e5ef734b1370577b3789ca256eb480276835cdfef5b100b508916d",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9"
+      },
+      "revised_at": "2026-09-20T05:26:37.848210+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r02-honest-partial-generation.manifest.yaml -> manifests/r02-honest-partial-generation.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:3b68279d77087c5b5ec3e8114d58161298c2c6e830b08f26fe27f7466a5e7523",
+      "prior_test_hashes": {
+        "tests/acceptance/test_collision_proof_output.py": "sha256-pyast:v2:911c3e4f0bc521fc47ab666e265138660aad16a6d2b862daa8ce794d6cd47ee4",
+        "tests/acceptance/test_honest_partial_generation.py": "sha256-pyast:v2:c4b323edd6e5ef734b1370577b3789ca256eb480276835cdfef5b100b508916d",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9"
+      },
+      "revised_at": "2026-09-20T05:31:22.491089+00:00",
+      "reason": "Capture reviewed honest partial-generation Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T05:26:37.621883+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_honest_partial_generation.py",
+        "exit_code": 1,
+        "output_tail": "    def test_legacy_tool_persists_failed_partial_job_without_success_substring(\n        tmp_path: Path, monkeypatch: pytest.MonkeyPatch\n    ) -> None:\n>       from elevenlabs_mcp.elevenlabs_api import PartialGenerationError\nE       ImportError: cannot import name 'PartialGenerationError' from 'elevenlabs_mcp.elevenlabs_api' (/mnt/storage/development/elevenlabs-mcp-server/src/elevenlabs_mcp/elevenlabs_api.py)\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_honest_partial_generation.py:105: ImportError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_honest_partial_generation.py::test_middle_part_failure_raises_with_explicit_partial_artifact\nFAILED tests/acceptance/test_honest_partial_generation.py::test_all_parts_failed_raises_without_publishing_artifact\nFAILED tests/acceptance/test_honest_partial_generation.py::test_legacy_tool_persists_failed_partial_job_without_success_substring\n3 failed, 1 warning in 0.15s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run pytest -q tests/acceptance/test_honest_partial_generation.py tests/acceptance/test_collision_proof_output.py tests/characterization/test_legacy_server_surface.py",
+        "exit_code": 1,
+        "output_tail": "    def test_legacy_tool_persists_failed_partial_job_without_success_substring(\n        tmp_path: Path, monkeypatch: pytest.MonkeyPatch\n    ) -> None:\n>       from elevenlabs_mcp.elevenlabs_api import PartialGenerationError\nE       ImportError: cannot import name 'PartialGenerationError' from 'elevenlabs_mcp.elevenlabs_api' (/mnt/storage/development/elevenlabs-mcp-server/src/elevenlabs_mcp/elevenlabs_api.py)\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_honest_partial_generation.py:105: ImportError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_honest_partial_generation.py::test_middle_part_failure_raises_with_explicit_partial_artifact\nFAILED tests/acceptance/test_honest_partial_generation.py::test_all_parts_failed_raises_without_publishing_artifact\nFAILED tests/acceptance/test_honest_partial_generation.py::test_legacy_tool_persists_failed_partial_job_without_success_substring\n3 failed, 9 passed, 1 warning in 0.58s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/acceptance/test_honest_partial_generation.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/acceptance/test_honest_partial_generation.py",
+        "exit_code": 1,
+        "output_tail": "/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_honest_partial_generation.py\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_honest_partial_generation.py:63:47 - error: \"PartialGenerationError\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_honest_partial_generation.py:67:18 - error: Cannot access attribute \"completed_parts\" for class \"RuntimeError\"\n  \u00a0\u00a0Attribute \"completed_parts\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_honest_partial_generation.py:68:18 - error: Cannot access attribute \"failed_part_indexes\" for class \"RuntimeError\"\n  \u00a0\u00a0Attribute \"failed_part_indexes\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_honest_partial_generation.py:69:18 - error: Cannot access attribute \"partial_output_file\" for class \"RuntimeError\"\n  \u00a0\u00a0Attribute \"partial_output_file\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_honest_partial_generation.py:70:26 - error: Cannot access attribute \"partial_output_file\" for class \"RuntimeError\"\n  \u00a0\u00a0Attribute \"partial_output_file\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_honest_partial_generation.py:79:47 - error: \"PartialGenerationError\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_honest_partial_generation.py:105:47 - error: \"PartialGenerationError\" is unknown import symbol (reportAttributeAccessIssue)\n7 errors, 0 warnings, 0 informations\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:PartialGenerationError.completed_parts",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:PartialGenerationError.completed_parts:kind=attribute",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:PartialGenerationError.completed_parts:of=PartialGenerationError",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:PartialGenerationError.completed_parts:type=int",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:PartialGenerationError.failed_part_indexes",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:PartialGenerationError.failed_part_indexes:kind=attribute",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:PartialGenerationError.failed_part_indexes:of=PartialGenerationError",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:PartialGenerationError.failed_part_indexes:type=tuple[int, ...]",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:PartialGenerationError.partial_output_file",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:PartialGenerationError.partial_output_file:kind=attribute",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:PartialGenerationError.partial_output_file:of=PartialGenerationError",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:PartialGenerationError.partial_output_file:type=Optional[str]",
+      "src/elevenlabs_mcp/elevenlabs_api.py:class:PartialGenerationError",
+      "src/elevenlabs_mcp/elevenlabs_api.py:class:PartialGenerationError:base=RuntimeError",
+      "src/elevenlabs_mcp/elevenlabs_api.py:class:PartialGenerationError:kind=class",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:arg=output_dir:type=Path:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:arg=output_id:type=Optional[str]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:arg=script_parts:type=List[Dict]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:kind=method",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:of=ElevenLabsAPI",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:raises=PartialGenerationError",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_full_audio:returns=tuple[str, List[str], int]",
+      "tests/acceptance/test_honest_partial_generation.py:test_all_parts_failed_raises_without_publishing_artifact",
+      "tests/acceptance/test_honest_partial_generation.py:test_all_parts_failed_raises_without_publishing_artifact:kind=test_function",
+      "tests/acceptance/test_honest_partial_generation.py:test_legacy_tool_persists_failed_partial_job_without_success_substring",
+      "tests/acceptance/test_honest_partial_generation.py:test_legacy_tool_persists_failed_partial_job_without_success_substring:kind=test_function",
+      "tests/acceptance/test_honest_partial_generation.py:test_middle_part_failure_raises_with_explicit_partial_artifact",
+      "tests/acceptance/test_honest_partial_generation.py:test_middle_part_failure_raises_with_explicit_partial_artifact:kind=test_function"
+    ],
+    "files": {
+      "create": [],
+      "edit": [
+        "src/elevenlabs_mcp/elevenlabs_api.py",
+        "tests/acceptance/test_honest_partial_generation.py"
+      ],
+      "read": [
+        "clients/web-ui/src/lib/elevenlabs-client.ts",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r01-credential-free-discovery.manifest.yaml",
+        "manifests/r02-collision-proof-output.manifest.yaml",
+        "tests/acceptance/test_collision_proof_output.py"
+      ],
+      "scope": [
+        "src/elevenlabs_mcp/server.py"
+      ],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "edit": [
+        {
+          "path": "src/elevenlabs_mcp/elevenlabs_api.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "PartialGenerationError",
+              "bases": [
+                "RuntimeError"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "partial_output_file",
+              "of": "PartialGenerationError",
+              "type": "Optional[str]"
+            },
+            {
+              "kind": "attribute",
+              "name": "completed_parts",
+              "of": "PartialGenerationError",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "failed_part_indexes",
+              "of": "PartialGenerationError",
+              "type": "tuple[int, ...]"
+            },
+            {
+              "kind": "method",
+              "name": "generate_full_audio",
+              "of": "ElevenLabsAPI",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "script_parts",
+                  "type": "List[Dict]"
+                },
+                {
+                  "name": "output_dir",
+                  "type": "Path"
+                },
+                {
+                  "name": "output_id",
+                  "type": "Optional[str]",
+                  "default": "None"
+                }
+              ],
+              "returns": "tuple[str, List[str], int]",
+              "raises": [
+                "PartialGenerationError"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "tests/acceptance/test_honest_partial_generation.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_middle_part_failure_raises_with_explicit_partial_artifact",
+              "description": "A08 retains successful segments in order under partial_audio UUID naming and raises exact completed/failed-index data instead of returning success."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_all_parts_failed_raises_without_publishing_artifact",
+              "description": "A08 reports every failed index and zero completions without creating full or partial output."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_legacy_tool_persists_failed_partial_job_without_success_substring",
+              "description": "Real in-memory MCP script generation persists failed status/count/path/index error and returns an error first line that the old client cannot parse as success."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "manifests/r01-credential-free-discovery.manifest.yaml",
+        "manifests/r02-collision-proof-output.manifest.yaml",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "clients/web-ui/src/lib/elevenlabs-client.ts",
+        "tests/acceptance/test_collision_proof_output.py"
+      ],
+      "scope": [
+        {
+          "path": "src/elevenlabs_mcp/server.py",
+          "reason": "Catch PartialGenerationError in both legacy generation branches and persist failed state, counts, partial path, and error before returning the existing outer error envelope."
+        }
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_collision_proof_output.py",
+      "tests/acceptance/test_honest_partial_generation.py",
+      "tests/characterization/test_legacy_server_surface.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_honest_partial_generation.py",
+      "uv run pytest -q tests/acceptance/test_honest_partial_generation.py tests/acceptance/test_collision_proof_output.py tests/characterization/test_legacy_server_surface.py",
+      "uv run ruff check tests/acceptance/test_honest_partial_generation.py",
+      "uv run pyright tests/acceptance/test_honest_partial_generation.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_honest_partial_generation.py"
+    ]
+  }
+}

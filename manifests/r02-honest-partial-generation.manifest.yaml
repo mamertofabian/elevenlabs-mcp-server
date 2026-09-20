@@ -1,0 +1,123 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Prevent partial synthesis from being returned or persisted as successful while retaining completed counts, failed indexes, and any explicitly partial artifact.
+description: |
+  R02/A08/A14 child. Add PartialGenerationError with typed partial path,
+  completed count, and failed indexes. generate_full_audio raises it whenever
+  any non-empty required part fails, publishing successful segments only under
+  partial_audio_<uuid>.mp3; it returns the legacy success tuple only when every
+  required part succeeds. Both legacy MCP handlers persist failed state,
+  completed_parts, sanitized error text, and the partial path when present.
+  Their first error line remains "Error generating audio. Debug info:" and may
+  contain neither "successful" nor "unsuccessful", preserving the old UI's
+  first-line parser without a false positive. Retry policy, debug redaction,
+  transport responsiveness, and durable chunk records remain later children.
+  Expected red: current API returns a normal full_audio success tuple after a
+  middle-part failure and server handlers mark the job completed.
+temptations:
+  - risk: Return a normal output tuple plus a warning when some parts fail.
+    instead: Publish only an explicitly partial filename and raise PartialGenerationError with exact completed and failed-index data.
+  - risk: Drop successful segments whenever one part fails.
+    instead: Atomically retain the assembled successful segments as a partial artifact without presenting it as the requested final output.
+  - risk: Put "unsuccessful" in the legacy error status line.
+    instead: Keep the stable first line "Error generating audio. Debug info:" because the old client searches for the substring "successful".
+  - risk: Store failure data only in transient debug output.
+    instead: Persist failed status, completed_parts, partial output_file, and an error message containing failed indexes on the AudioJob.
+type: fix
+files:
+  edit:
+    - path: src/elevenlabs_mcp/elevenlabs_api.py
+      artifacts:
+        - kind: class
+          name: PartialGenerationError
+          bases: [RuntimeError]
+        - kind: attribute
+          name: partial_output_file
+          of: PartialGenerationError
+          type: Optional[str]
+        - kind: attribute
+          name: completed_parts
+          of: PartialGenerationError
+          type: int
+        - kind: attribute
+          name: failed_part_indexes
+          of: PartialGenerationError
+          type: tuple[int, ...]
+        - kind: method
+          name: generate_full_audio
+          of: ElevenLabsAPI
+          args:
+            - name: self
+            - name: script_parts
+              type: List[Dict]
+            - name: output_dir
+              type: Path
+            - name: output_id
+              type: Optional[str]
+              default: None
+          returns: tuple[str, List[str], int]
+          raises: [PartialGenerationError]
+    - path: tests/acceptance/test_honest_partial_generation.py
+      artifacts:
+        - kind: test_function
+          name: test_middle_part_failure_raises_with_explicit_partial_artifact
+          description: A08 retains successful segments in order under partial_audio UUID naming and raises exact completed/failed-index data instead of returning success.
+        - kind: test_function
+          name: test_all_parts_failed_raises_without_publishing_artifact
+          description: A08 reports every failed index and zero completions without creating full or partial output.
+        - kind: test_function
+          name: test_legacy_tool_persists_failed_partial_job_without_success_substring
+          description: Real in-memory MCP script generation persists failed status/count/path/index error and returns an error first line that the old client cannot parse as success.
+  read:
+    - manifests/r01-credential-free-discovery.manifest.yaml
+    - manifests/r02-collision-proof-output.manifest.yaml
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/03_TOOL_CONTRACTS.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - clients/web-ui/src/lib/elevenlabs-client.ts
+    - tests/acceptance/test_collision_proof_output.py
+  scope:
+    - path: src/elevenlabs_mcp/server.py
+      reason: Catch PartialGenerationError in both legacy generation branches and persist failed state, counts, partial path, and error before returning the existing outer error envelope.
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_honest_partial_generation.py]
+  - [uv, run, pytest, -q, tests/acceptance/test_honest_partial_generation.py, tests/acceptance/test_collision_proof_output.py, tests/characterization/test_legacy_server_surface.py]
+  - [uv, run, ruff, check, tests/acceptance/test_honest_partial_generation.py]
+  - [uv, run, pyright, tests/acceptance/test_honest_partial_generation.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_honest_partial_generation.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Any required-part failure now raises typed partial state instead of returning success; retained audio is explicitly partial, all-failed renders publish nothing, and legacy jobs persist failed status, counts, path, and failed indexes.
+  rationale: Honest failure state prevents missing dialogue and old-client false positives while retaining locally useful successful segments without presenting them as the requested final artifact.
+  lessons:
+    - lesson_type: partial-result-integrity
+      summary: A partial artifact must be distinguished in both control flow and naming; warnings inside a normal success tuple cannot enforce honest job state.
+      tags: [partial-results, compatibility, persistence, audio]
+      paths: [src/elevenlabs_mcp/elevenlabs_api.py, src/elevenlabs_mcp/server.py]
+  review_notes:
+    - source: maid-implementation-reviewer:r02_partial_review_2
+      severity: ready
+      summary: No blockers; simple-handler and partial retrieval/deletion paths remain advisory coverage gaps but inspected behavior matches the locked contract.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 47 tests passed.
+    - command: [uv, run, maid, test, --manifest, manifests/r02-honest-partial-generation.manifest.yaml]
+      status: passed
+      summary: All four child commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, bc5207e, --summary, --packet]
+      status: passed
+      summary: Authoritative exact gate passed all 11 stages in 7393 ms.
+  completed_at: "2026-09-20T13:30:52+08:00"
+created: "2026-09-20T05:26:37Z"
+metadata:
+  author: Codex
+  tags: [revival, r02, partial-generation, legacy-compatibility]
+  priority: high

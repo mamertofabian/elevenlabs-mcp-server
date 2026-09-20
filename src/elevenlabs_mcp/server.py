@@ -13,7 +13,7 @@ from datetime import datetime
 import logging
 from urllib.parse import unquote
 
-from .elevenlabs_api import ElevenLabsAPI
+from .elevenlabs_api import ElevenLabsAPI, PartialGenerationError
 from .config import (
     Settings,
     environment_from_dotenv,
@@ -399,6 +399,13 @@ class ElevenLabsServer:
                         #             }
                         #         }
                         #     })
+                    except PartialGenerationError as e:
+                        job.status = "failed"
+                        job.output_file = e.partial_output_file
+                        job.completed_parts = e.completed_parts
+                        job.error = str(e)
+                        await self.db.update_job(job)
+                        raise
                     except Exception as e:
                         job.status = "failed"
                         job.error = str(e)
@@ -465,6 +472,13 @@ class ElevenLabsServer:
                         job.output_file = str(output_file)
                         job.completed_parts = completed_parts
                         await self.db.update_job(job)
+                    except PartialGenerationError as e:
+                        job.status = "failed"
+                        job.output_file = e.partial_output_file
+                        job.completed_parts = e.completed_parts
+                        job.error = str(e)
+                        await self.db.update_job(job)
+                        raise
                     except Exception as e:
                         job.status = "failed"
                         job.error = str(e)

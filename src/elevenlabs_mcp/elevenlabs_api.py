@@ -33,6 +33,26 @@ class _MissingAPIKeyError(ValueError):
     """Credential absence detected before provider dispatch."""
 
 
+class PartialGenerationError(RuntimeError):
+    """A required script part failed after zero or more parts were retained."""
+
+    def __init__(
+        self,
+        partial_output_file: Optional[str],
+        completed_parts: int,
+        failed_part_indexes: tuple[int, ...],
+    ) -> None:
+        self.partial_output_file = partial_output_file
+        self.completed_parts = completed_parts
+        self.failed_part_indexes = failed_part_indexes
+        indexes = ", ".join(str(index) for index in failed_part_indexes)
+        partial = partial_output_file or "none"
+        super().__init__(
+            f"Audio generation failed after {completed_parts} completed parts; "
+            f"failed part indexes: {indexes}; partial audio: {partial}"
+        )
+
+
 from pydub import AudioSegment
 import io
 from tenacity import (
@@ -192,8 +212,6 @@ class ElevenLabsAPI:
         # Create output directory if it doesn't exist
         output_dir.mkdir(exist_ok=True)
 
-        output_file = output_dir / f"full_audio_{canonical_output_id}.mp3"
-        
         debug_info = []
         debug_info.append("ElevenLabsAPI - Starting generate_full_audio")
         debug_info.append(f"Input script_parts: {script_parts}")
@@ -201,7 +219,7 @@ class ElevenLabsAPI:
         # Initialize segments list and request IDs tracking
         segments = []
         previous_request_ids = []
-        failed_parts = []
+        failed_part_indexes: list[int] = []
         completed_parts = 0
         
         debug_info.append("Processing all_texts")
@@ -246,25 +264,26 @@ class ElevenLabsAPI:
                     debug_info=debug_info
                 )
                 
-                debug_info.append(f"Successfully generated audio for part {i}")
-                completed_parts += 1
-                
                 # Add request ID to history
                 previous_request_ids.append(request_id)
                 
                 # Convert audio content to AudioSegment and add to segments
                 audio_segment = AudioSegment.from_mp3(io.BytesIO(audio_content))
                 segments.append(audio_segment)
+                completed_parts += 1
+                debug_info.append(f"Generated audio for part {i}")
 
                 # Wait for the specified wait_time
                 time.sleep(self.MODELS[self.model_id]["wait_time"])
             except Exception as e:
                 debug_info.append(f"Error generating audio: {e}")
-                failed_parts.append(part)
+                failed_part_indexes.append(i)
                 continue
         
         # Combine all segments
         if segments:
+            output_prefix = "partial_audio" if failed_part_indexes else "full_audio"
+            output_file = output_dir / f"{output_prefix}_{canonical_output_id}.mp3"
             final_audio = segments[0]
             for segment in segments[1:]:
                 final_audio = final_audio + segment
@@ -284,16 +303,26 @@ class ElevenLabsAPI:
             finally:
                 temporary_path.unlink(missing_ok=True)
 
-            if failed_parts:
-                debug_info.append(f"Failed parts: {failed_parts}")
-            else:
+            if not failed_part_indexes:
                 logging.debug("All parts generated successfully")
                 debug_info.append("All parts generated successfully")
             
             debug_info.append(f"Model: {self.model_id}")
             logging.debug(f"Model: {self.model_id}")
             
+            if failed_part_indexes:
+                raise PartialGenerationError(
+                    partial_output_file=str(output_file),
+                    completed_parts=completed_parts,
+                    failed_part_indexes=tuple(failed_part_indexes),
+                )
             return str(output_file), debug_info, completed_parts
+        if failed_part_indexes:
+            raise PartialGenerationError(
+                partial_output_file=None,
+                completed_parts=0,
+                failed_part_indexes=tuple(failed_part_indexes),
+            )
         else:
             error_msg = "\n".join([
                 "No audio segments were generated. Debug info:",
