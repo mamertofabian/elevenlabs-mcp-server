@@ -1,0 +1,125 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Add an idempotent versioned SQLite JobStore schema without modifying or importing legacy history.
+description: |
+  First R05 child. Add SchemaVersionError and JobStore with explicit db_path,
+  async initialize(), and async get_schema_version(). Initialization uses one
+  SQLite transaction to add schema_migrations, voiceover_jobs,
+  voiceover_chunks, generation_attempts, production_artifacts,
+  operation_receipts, and legacy_imports alongside existing audio_jobs/voices.
+  Job rows carry normalized script/options/plan versions and progress/budget
+  summaries; chunk rows carry source spans, immutable request payload,
+  successful artifact reference, latest error, and generation metadata.
+  Composite foreign keys prevent attempts and artifacts from crossing job and
+  chunk ownership boundaries.
+  Enable foreign keys and WAL, record schema version 1, remain idempotent under
+  concurrent initialization, and reject a database advertising a newer schema
+  without mutation. Preserve every legacy table, column, row, ID, timestamp,
+  path, and JSON value. This child defines durable structure only: it does not
+  import legacy rows, create jobs, reserve budgets, mutate revisions, write
+  artifacts, delete records, back up files, or acquire workspace ownership.
+  Expected red: JobStore and SchemaVersionError are absent.
+temptations:
+  - risk: Rename, DROP, rewrite, or eagerly import legacy audio_jobs/voices during schema setup.
+    instead: Create only new namespaced production tables and verify legacy schema/data byte-for-value unchanged.
+  - risk: Treat CREATE TABLE IF NOT EXISTS calls outside a transaction as a migration.
+    instead: Hold BEGIN IMMEDIATE through version inspection, all DDL, migration record, and user_version commit.
+  - risk: Downgrade or continue when PRAGMA user_version is newer than supported.
+    instead: Roll back and raise SchemaVersionError carrying supported and discovered versions before any DDL.
+  - risk: Rely on one connection's foreign-key setting for future operations.
+    instead: Configure foreign_keys=ON on every JobStore connection and assert constraints using a fresh connection.
+type: feature
+files:
+  edit:
+    - path: src/elevenlabs_mcp/database.py
+      artifacts:
+        - kind: class
+          name: SchemaVersionError
+          bases: [RuntimeError]
+        - {kind: attribute, name: supported_version, of: SchemaVersionError, type: int}
+        - {kind: attribute, name: discovered_version, of: SchemaVersionError, type: int}
+        - kind: class
+          name: JobStore
+        - {kind: attribute, name: db_path, of: JobStore, type: str}
+        - kind: method
+          name: connect
+          of: JobStore
+          args: [{name: self, type: JobStore}]
+          returns: "AsyncIterator[aiosqlite.Connection]"
+        - kind: method
+          name: initialize
+          of: JobStore
+          async: true
+          args: [{name: self, type: JobStore}]
+          returns: None
+        - kind: method
+          name: get_schema_version
+          of: JobStore
+          async: true
+          args: [{name: self, type: JobStore}]
+          returns: int
+    - path: tests/integration/test_job_store_schema.py
+      artifacts:
+        - kind: test_function
+          name: test_initialize_creates_complete_versioned_additive_schema
+          description: Fresh database reports version 1, WAL, all production tables/required columns, indexes, and foreign-key relationships.
+        - kind: test_function
+          name: test_initialize_preserves_real_shaped_legacy_tables_and_rows
+          description: Existing audio_jobs and voices schemas and sentinel rows remain exactly readable after production schema initialization.
+        - kind: test_function
+          name: test_initialize_is_idempotent_and_concurrency_safe
+          description: Repeated, separate-instance, and separate-process concurrent initialization produces one migration record and one stable schema without lock failures.
+        - kind: test_function
+          name: test_newer_schema_version_is_rejected_without_mutation
+          description: A future user_version raises typed supported/discovered evidence and creates no production tables or migration rows.
+        - kind: test_function
+          name: test_foreign_keys_reject_orphan_production_records
+          description: A fresh JobStore-configured connection rejects orphan chunks plus attempts/artifacts whose job, chunk, or attempt ownership contradicts.
+  read:
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/03_TOOL_CONTRACTS.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - manifests/r01-runtime-path-injection.manifest.yaml
+    - manifests/r04-canonical-voiceover-plan.manifest.yaml
+validate:
+  - [uv, run, pytest, -q, tests/integration/test_job_store_schema.py]
+  - [uv, run, ruff, check, tests/integration/test_job_store_schema.py]
+  - [uv, run, ruff, format, --check, tests/integration/test_job_store_schema.py]
+  - [uv, run, pyright, tests/integration/test_job_store_schema.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/integration/test_job_store_schema.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: JobStore now initializes a transactional schema-v1 SQLite foundation with complete production job/chunk/attempt/artifact/receipt/import records, composite ownership constraints, WAL and foreign-key configuration, future-version refusal, and exact legacy preservation.
+  rationale: R05 begins with additive durable structure so later idempotency, budgets, migration, artifacts, and deletion children can transact against one reviewed ownership model without rewriting historical tables.
+  lessons:
+    - lesson_type: persistence-contract
+      summary: A first durable schema must include later-required record content and composite ownership constraints before version 1 becomes history; independent foreign keys do not prevent cross-job contradictions.
+      tags: [sqlite, schema, ownership, migration, legacy]
+      paths: [src/elevenlabs_mcp/database.py, tests/integration/test_job_store_schema.py]
+  review_notes:
+    - source: maid-implementation-reviewer:r05_schema_review_2
+      severity: ready
+      summary: No blockers; transactional versioning, complete durable fields, composite ownership, separate-process concurrency, future-version refusal, legacy preservation, and scope are valid. Exhaustive circular-FK introspection remains advisory only.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 112 credential-free tests passed.
+    - command: [uv, run, maid, test, --manifest, manifests/r05-additive-job-store-schema.manifest.yaml]
+      status: passed
+      summary: All 4 manifest-local commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, c6e160a, --summary, --packet]
+      status: passed
+      summary: All 11 deep stages passed with zero blockers or warnings.
+  completed_at: "2026-09-20T22:25:52+08:00"
+created: "2026-09-20T14:14:14Z"
+metadata:
+  author: Codex
+  tags: [revival, r05, sqlite, schema, migration, legacy]
+  priority: high
