@@ -67,6 +67,47 @@ from tenacity import (
     wait_exponential,
 )
 
+_legacy_retry_wait = wait_exponential(multiplier=1, min=4, max=10)
+
+
+class _RetryableRateLimitError(RuntimeError):
+    def __init__(self, retry_after_seconds: float | None) -> None:
+        self.retry_after_seconds = retry_after_seconds
+        super().__init__("Provider rate limit")
+
+
+class UpstreamOutcomeUnknownError(RuntimeError):
+    """Synthesis may have reached the provider and must not be replayed blindly."""
+
+    def __init__(self, operation: str, cause_type: str) -> None:
+        self.operation = operation
+        self.cause_type = cause_type
+        self.retryable = False
+        super().__init__(
+            f"{operation} upstream outcome is unknown after {cause_type}; "
+            "retryable: false"
+        )
+
+
+def _retry_wait(retry_state):
+    exception = retry_state.outcome.exception()
+    if isinstance(exception, _RetryableRateLimitError):
+        retry_after = exception.retry_after_seconds
+        if retry_after is not None:
+            return retry_after
+    return _legacy_retry_wait(retry_state)
+
+
+def _retry_after_seconds(response) -> float | None:
+    value = response.headers.get("Retry-After")
+    if value is None:
+        return None
+    try:
+        seconds = float(value)
+    except (TypeError, ValueError):
+        return None
+    return seconds if 0.0 <= seconds <= 10.0 else None
+
 class ElevenLabsAPI:
     # Add model list as class constant
     MODELS = {
@@ -80,9 +121,13 @@ class ElevenLabsAPI:
 
     @retry(
         stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=4, max=10),
+        wait=_retry_wait,
         retry=retry_if_not_exception_type(
-            (_MissingAPIKeyError, _NonRetryableProviderError)
+            (
+                _MissingAPIKeyError,
+                _NonRetryableProviderError,
+                UpstreamOutcomeUnknownError,
+            )
         ),
     )
     def get_voices(self) -> List[VoiceData]:
@@ -127,6 +172,8 @@ class ElevenLabsAPI:
                 raise Exception(error_message)
         else:
             error_message = f"Voice metadata request failed with status {response.status_code}"
+            if response.status_code == 429:
+                raise _RetryableRateLimitError(_retry_after_seconds(response))
             if response.status_code in {400, 401, 403, 404, 422}:
                 raise _NonRetryableProviderError(error_message)
             raise Exception(error_message)
@@ -158,9 +205,13 @@ class ElevenLabsAPI:
 
     @retry(
         stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=4, max=10),
+        wait=_retry_wait,
         retry=retry_if_not_exception_type(
-            (_MissingAPIKeyError, _NonRetryableProviderError)
+            (
+                _MissingAPIKeyError,
+                _NonRetryableProviderError,
+                UpstreamOutcomeUnknownError,
+            )
         ),
     )
     def generate_audio_segment(self, text: str, voice_id: str, output_file: Optional[str] = None,
@@ -219,13 +270,22 @@ class ElevenLabsAPI:
                     f"Audio provider request failed with status {response.status_code}"
                 )
                 logging.error(f"API error response: {response.status_code}")
+                if response.status_code == 429:
+                    raise _RetryableRateLimitError(_retry_after_seconds(response))
                 if response.status_code in {400, 401, 403, 404, 422}:
                     raise _NonRetryableProviderError(error_message)
                 raise Exception(error_message)
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.ConnectTimeout as e:
             error_message = f"Network error during API call: {type(e).__name__}"
             logging.error(error_message)
             raise Exception(error_message)
+        except (
+            requests.exceptions.ReadTimeout,
+            requests.exceptions.ConnectionError,
+        ) as e:
+            raise UpstreamOutcomeUnknownError("synthesis", type(e).__name__)
+        except requests.exceptions.RequestException as e:
+            raise UpstreamOutcomeUnknownError("synthesis", type(e).__name__)
 
     def generate_full_audio(
         self,

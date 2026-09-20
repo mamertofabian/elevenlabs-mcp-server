@@ -1,0 +1,275 @@
+{
+  "manifest_path": "manifests/r02-synthesis-uncertainty-policy.manifest.yaml",
+  "manifest_hash": "sha256-contract:737ed77bc4e69b39c0769a152705c7d4718bab6c61913aefe0a17db2b3037cd3",
+  "test_hashes": {
+    "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:bb30a0e395017ff4549ca53c9e419309464160fe2e2a14cfb6212d6315d4f9ef",
+    "tests/acceptance/test_synthesis_uncertainty_policy.py": "sha256-pyast:v2:a3ba691491b9d9cfa704f0aef1419b96e4c2cacd03af606c748312ee4d955b0c",
+    "tests/acceptance/test_log_and_response_hygiene.py": "sha256-pyast:v2:e389b572ea9d5a8b5e6deee1a9453dc358bd7d3e63e5a28157a82ba9729b60a4"
+  },
+  "created_at": "2026-09-20T06:55:47.394697+00:00",
+  "revision": 3,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:4af9de6bd3f14662c1bfc96e764756599ea907a7ddca1f79598c0753e5e610be",
+      "prior_test_hashes": {
+        "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:bb30a0e395017ff4549ca53c9e419309464160fe2e2a14cfb6212d6315d4f9ef",
+        "tests/acceptance/test_synthesis_uncertainty_policy.py": "sha256-pyast:v2:a3ba691491b9d9cfa704f0aef1419b96e4c2cacd03af606c748312ee4d955b0c",
+        "tests/acceptance/test_log_and_response_hygiene.py": "sha256-pyast:v2:e389b572ea9d5a8b5e6deee1a9453dc358bd7d3e63e5a28157a82ba9729b60a4"
+      },
+      "revised_at": "2026-09-20T06:55:49.485690+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r02-synthesis-uncertainty-policy.manifest.yaml -> manifests/r02-synthesis-uncertainty-policy.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:737ed77bc4e69b39c0769a152705c7d4718bab6c61913aefe0a17db2b3037cd3",
+      "prior_test_hashes": {
+        "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:bb30a0e395017ff4549ca53c9e419309464160fe2e2a14cfb6212d6315d4f9ef",
+        "tests/acceptance/test_synthesis_uncertainty_policy.py": "sha256-pyast:v2:a3ba691491b9d9cfa704f0aef1419b96e4c2cacd03af606c748312ee4d955b0c",
+        "tests/acceptance/test_log_and_response_hygiene.py": "sha256-pyast:v2:e389b572ea9d5a8b5e6deee1a9453dc358bd7d3e63e5a28157a82ba9729b60a4"
+      },
+      "revised_at": "2026-09-20T06:59:31.955707+00:00",
+      "reason": "Capture reviewed synthesis uncertainty Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T06:55:49.261065+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_synthesis_uncertainty_policy.py",
+        "exit_code": 1,
+        "output_tail": "    def test_legacy_job_persists_and_returns_unknown_outcome(\n        tmp_path: Path, monkeypatch: pytest.MonkeyPatch\n    ) -> None:\n>       from elevenlabs_mcp.elevenlabs_api import UpstreamOutcomeUnknownError\nE       ImportError: cannot import name 'UpstreamOutcomeUnknownError' from 'elevenlabs_mcp.elevenlabs_api' (/mnt/storage/development/elevenlabs-mcp-server/src/elevenlabs_mcp/elevenlabs_api.py)\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_synthesis_uncertainty_policy.py:121: ImportError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_synthesis_uncertainty_policy.py::test_numeric_retry_after_controls_bounded_429_retries\nFAILED tests/acceptance/test_synthesis_uncertainty_policy.py::test_read_timeout_and_reset_dispatch_once_as_unknown\nFAILED tests/acceptance/test_synthesis_uncertainty_policy.py::test_legacy_job_persists_and_returns_unknown_outcome\n3 failed, 1 passed, 1 warning in 0.14s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run pytest -q tests/acceptance/test_synthesis_uncertainty_policy.py tests/acceptance/test_bounded_http_policy.py tests/acceptance/test_log_and_response_hygiene.py",
+        "exit_code": 1,
+        "output_tail": "    def test_legacy_job_persists_and_returns_unknown_outcome(\n        tmp_path: Path, monkeypatch: pytest.MonkeyPatch\n    ) -> None:\n>       from elevenlabs_mcp.elevenlabs_api import UpstreamOutcomeUnknownError\nE       ImportError: cannot import name 'UpstreamOutcomeUnknownError' from 'elevenlabs_mcp.elevenlabs_api' (/mnt/storage/development/elevenlabs-mcp-server/src/elevenlabs_mcp/elevenlabs_api.py)\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_synthesis_uncertainty_policy.py:121: ImportError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_synthesis_uncertainty_policy.py::test_numeric_retry_after_controls_bounded_429_retries\nFAILED tests/acceptance/test_synthesis_uncertainty_policy.py::test_read_timeout_and_reset_dispatch_once_as_unknown\nFAILED tests/acceptance/test_synthesis_uncertainty_policy.py::test_legacy_job_persists_and_returns_unknown_outcome\n3 failed, 11 passed, 1 warning in 0.41s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/acceptance/test_synthesis_uncertainty_policy.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/acceptance/test_synthesis_uncertainty_policy.py",
+        "exit_code": 1,
+        "output_tail": "/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_synthesis_uncertainty_policy.py\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_synthesis_uncertainty_policy.py:66:47 - error: \"UpstreamOutcomeUnknownError\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_synthesis_uncertainty_policy.py:121:47 - error: \"UpstreamOutcomeUnknownError\" is unknown import symbol (reportAttributeAccessIssue)\n2 errors, 0 warnings, 0 informations\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:UpstreamOutcomeUnknownError.cause_type",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:UpstreamOutcomeUnknownError.cause_type:kind=attribute",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:UpstreamOutcomeUnknownError.cause_type:of=UpstreamOutcomeUnknownError",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:UpstreamOutcomeUnknownError.cause_type:type=str",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:UpstreamOutcomeUnknownError.operation",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:UpstreamOutcomeUnknownError.operation:kind=attribute",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:UpstreamOutcomeUnknownError.operation:of=UpstreamOutcomeUnknownError",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:UpstreamOutcomeUnknownError.operation:type=str",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:UpstreamOutcomeUnknownError.retryable",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:UpstreamOutcomeUnknownError.retryable:kind=attribute",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:UpstreamOutcomeUnknownError.retryable:of=UpstreamOutcomeUnknownError",
+      "src/elevenlabs_mcp/elevenlabs_api.py:attribute:UpstreamOutcomeUnknownError.retryable:type=bool",
+      "src/elevenlabs_mcp/elevenlabs_api.py:class:UpstreamOutcomeUnknownError",
+      "src/elevenlabs_mcp/elevenlabs_api.py:class:UpstreamOutcomeUnknownError:base=RuntimeError",
+      "src/elevenlabs_mcp/elevenlabs_api.py:class:UpstreamOutcomeUnknownError:kind=class",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=debug_info:type=Optional[List[str]]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=next_text:type=Optional[str]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=output_file:type=Optional[str]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=previous_request_ids:type=Optional[List[str]]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=previous_text:type=Optional[str]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=text:type=str:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=voice_id:type=str:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:kind=method",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:of=ElevenLabsAPI",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:raises=UpstreamOutcomeUnknownError",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:returns=tuple[bytes, str]",
+      "tests/acceptance/test_synthesis_uncertainty_policy.py:test_connect_timeout_retains_three_bounded_attempts",
+      "tests/acceptance/test_synthesis_uncertainty_policy.py:test_connect_timeout_retains_three_bounded_attempts:kind=test_function",
+      "tests/acceptance/test_synthesis_uncertainty_policy.py:test_legacy_job_persists_and_returns_unknown_outcome",
+      "tests/acceptance/test_synthesis_uncertainty_policy.py:test_legacy_job_persists_and_returns_unknown_outcome:kind=test_function",
+      "tests/acceptance/test_synthesis_uncertainty_policy.py:test_numeric_retry_after_controls_bounded_429_retries",
+      "tests/acceptance/test_synthesis_uncertainty_policy.py:test_numeric_retry_after_controls_bounded_429_retries:kind=test_function",
+      "tests/acceptance/test_synthesis_uncertainty_policy.py:test_read_timeout_and_reset_dispatch_once_as_unknown",
+      "tests/acceptance/test_synthesis_uncertainty_policy.py:test_read_timeout_and_reset_dispatch_once_as_unknown:kind=test_function"
+    ],
+    "files": {
+      "create": [],
+      "edit": [
+        "src/elevenlabs_mcp/elevenlabs_api.py",
+        "tests/acceptance/test_synthesis_uncertainty_policy.py"
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r02-bounded-http-policy.manifest.yaml",
+        "manifests/r02-log-and-response-hygiene.manifest.yaml",
+        "tests/acceptance/test_bounded_http_policy.py"
+      ],
+      "scope": [
+        "src/elevenlabs_mcp/server.py"
+      ],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "edit": [
+        {
+          "path": "src/elevenlabs_mcp/elevenlabs_api.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "UpstreamOutcomeUnknownError",
+              "bases": [
+                "RuntimeError"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "operation",
+              "of": "UpstreamOutcomeUnknownError",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "cause_type",
+              "of": "UpstreamOutcomeUnknownError",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "retryable",
+              "of": "UpstreamOutcomeUnknownError",
+              "type": "bool"
+            },
+            {
+              "kind": "method",
+              "name": "generate_audio_segment",
+              "of": "ElevenLabsAPI",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "text",
+                  "type": "str"
+                },
+                {
+                  "name": "voice_id",
+                  "type": "str"
+                },
+                {
+                  "name": "output_file",
+                  "type": "Optional[str]",
+                  "default": "None"
+                },
+                {
+                  "name": "previous_text",
+                  "type": "Optional[str]",
+                  "default": "None"
+                },
+                {
+                  "name": "next_text",
+                  "type": "Optional[str]",
+                  "default": "None"
+                },
+                {
+                  "name": "previous_request_ids",
+                  "type": "Optional[List[str]]",
+                  "default": "None"
+                },
+                {
+                  "name": "debug_info",
+                  "type": "Optional[List[str]]",
+                  "default": "None"
+                }
+              ],
+              "returns": "tuple[bytes, str]",
+              "raises": [
+                "UpstreamOutcomeUnknownError"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "tests/acceptance/test_synthesis_uncertainty_policy.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_numeric_retry_after_controls_bounded_429_retries",
+              "description": "Two fake 429 responses followed by success dispatch three times and sleep exactly the capped numeric Retry-After duration."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_read_timeout_and_reset_dispatch_once_as_unknown",
+              "description": "ReadTimeout and ConnectionError each reach requests.post once and raise typed retryable=false unknown state with no raw sentinel."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_connect_timeout_retains_three_bounded_attempts",
+              "description": "ConnectTimeout still dispatches three times with sleep disabled in the test."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_legacy_job_persists_and_returns_unknown_outcome",
+              "description": "A real MCP generation failure persists the typed unknown message and returns it without marking the job completed or retryable."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "manifests/r02-bounded-http-policy.manifest.yaml",
+        "manifests/r02-log-and-response-hygiene.manifest.yaml",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "tests/acceptance/test_bounded_http_policy.py"
+      ],
+      "scope": [
+        {
+          "path": "src/elevenlabs_mcp/server.py",
+          "reason": "Catch UpstreamOutcomeUnknownError in both legacy generation branches, persist its safe message, and allow that typed safe detail through the existing sanitized outer envelope."
+        }
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_bounded_http_policy.py",
+      "tests/acceptance/test_log_and_response_hygiene.py",
+      "tests/acceptance/test_synthesis_uncertainty_policy.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_synthesis_uncertainty_policy.py",
+      "uv run pytest -q tests/acceptance/test_synthesis_uncertainty_policy.py tests/acceptance/test_bounded_http_policy.py tests/acceptance/test_log_and_response_hygiene.py",
+      "uv run ruff check tests/acceptance/test_synthesis_uncertainty_policy.py",
+      "uv run pyright tests/acceptance/test_synthesis_uncertainty_policy.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_synthesis_uncertainty_policy.py"
+    ]
+  }
+}

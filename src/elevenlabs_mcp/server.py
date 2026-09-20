@@ -21,7 +21,11 @@ from datetime import datetime
 import logging
 from urllib.parse import unquote
 
-from .elevenlabs_api import ElevenLabsAPI, PartialGenerationError
+from .elevenlabs_api import (
+    ElevenLabsAPI,
+    PartialGenerationError,
+    UpstreamOutcomeUnknownError,
+)
 from .config import (
     Settings,
     environment_from_dotenv,
@@ -486,6 +490,11 @@ class ElevenLabsServer:
                         #             }
                         #         }
                         #     })
+                    except UpstreamOutcomeUnknownError as e:
+                        job.status = "failed"
+                        job.error = str(e)
+                        await self.db.update_job(job)
+                        raise
                     except PartialGenerationError as e:
                         job.status = "failed"
                         job.output_file = e.partial_output_file
@@ -560,6 +569,11 @@ class ElevenLabsServer:
                         job.output_file = str(output_file)
                         job.completed_parts = completed_parts
                         await self.db.update_job(job)
+                    except UpstreamOutcomeUnknownError as e:
+                        job.status = "failed"
+                        job.error = str(e)
+                        await self.db.update_job(job)
+                        raise
                     except PartialGenerationError as e:
                         job.status = "failed"
                         job.output_file = e.partial_output_file
@@ -750,7 +764,9 @@ class ElevenLabsServer:
             except Exception as e:
                 error_detail = (
                     str(e)
-                    if isinstance(e, PartialGenerationError)
+                    if isinstance(
+                        e, (PartialGenerationError, UpstreamOutcomeUnknownError)
+                    )
                     else "Audio generation failed"
                 )
                 error_msg = "\n".join([

@@ -1,0 +1,138 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Honor bounded 429 Retry-After while preventing automatic synthesis replay after read timeout or connection reset with an unknown upstream outcome.
+description: |
+  R02/A28-A31 uncertainty child. Add public UpstreamOutcomeUnknownError with
+  operation, sanitized cause type, and retryable=false. Synthesis ReadTimeout
+  and generic ConnectionError dispatch once and raise this type; ConnectTimeout
+  retains the existing bounded three attempts because transmission was not
+  established. Numeric Retry-After on 429 controls Tenacity sleep but is capped
+  to 0..10 seconds; invalid/missing values use the existing exponential wait.
+  Both legacy job paths persist the typed unknown message and return it through
+  the already-sanitized error envelope so blind automatic replay is not
+  encouraged. Metadata read retries remain unchanged. Uncertain 5xx evolution
+  is intentionally separate because the durable bounded-HTTP contract currently
+  characterizes 500 as three attempts and must be superseded with its test in a
+  dedicated child. Expected red: ReadTimeout/ConnectionError each dispatch
+  three times and no typed unknown error exists; 429 sleeps use exponential
+  values rather than Retry-After.
+temptations:
+  - risk: Retry every RequestException because Tenacity already bounds attempts.
+    instead: Retry ConnectTimeout only; classify read timeout and connection reset as unknown after one actual POST dispatch.
+  - risk: Trust an arbitrary Retry-After value and sleep without a ceiling.
+    instead: Accept numeric values only in the inclusive 0..10 second range and otherwise use the bounded exponential wait.
+  - risk: Store a generic failed job that loses uncertainty semantics.
+    instead: Persist the sanitized UpstreamOutcomeUnknownError text and surface retryable=false through its public field.
+  - risk: Quietly change the locked 500 retry characterization in this child.
+    instead: Preserve it here and use an explicit superseding contract for uncertain 5xx behavior.
+type: fix
+files:
+  edit:
+    - path: src/elevenlabs_mcp/elevenlabs_api.py
+      artifacts:
+        - kind: class
+          name: UpstreamOutcomeUnknownError
+          bases: [RuntimeError]
+        - kind: attribute
+          name: operation
+          of: UpstreamOutcomeUnknownError
+          type: str
+        - kind: attribute
+          name: cause_type
+          of: UpstreamOutcomeUnknownError
+          type: str
+        - kind: attribute
+          name: retryable
+          of: UpstreamOutcomeUnknownError
+          type: bool
+        - kind: method
+          name: generate_audio_segment
+          of: ElevenLabsAPI
+          args:
+            - name: self
+            - name: text
+              type: str
+            - name: voice_id
+              type: str
+            - name: output_file
+              type: Optional[str]
+              default: None
+            - name: previous_text
+              type: Optional[str]
+              default: None
+            - name: next_text
+              type: Optional[str]
+              default: None
+            - name: previous_request_ids
+              type: Optional[List[str]]
+              default: None
+            - name: debug_info
+              type: Optional[List[str]]
+              default: None
+          returns: tuple[bytes, str]
+          raises: [UpstreamOutcomeUnknownError]
+    - path: tests/acceptance/test_synthesis_uncertainty_policy.py
+      artifacts:
+        - kind: test_function
+          name: test_numeric_retry_after_controls_bounded_429_retries
+          description: Two fake 429 responses followed by success dispatch three times and sleep exactly the capped numeric Retry-After duration.
+        - kind: test_function
+          name: test_read_timeout_and_reset_dispatch_once_as_unknown
+          description: ReadTimeout and ConnectionError each reach requests.post once and raise typed retryable=false unknown state with no raw sentinel.
+        - kind: test_function
+          name: test_connect_timeout_retains_three_bounded_attempts
+          description: ConnectTimeout still dispatches three times with sleep disabled in the test.
+        - kind: test_function
+          name: test_legacy_job_persists_and_returns_unknown_outcome
+          description: A real MCP generation failure persists the typed unknown message and returns it without marking the job completed or retryable.
+  read:
+    - manifests/r02-bounded-http-policy.manifest.yaml
+    - manifests/r02-log-and-response-hygiene.manifest.yaml
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - tests/acceptance/test_bounded_http_policy.py
+  scope:
+    - path: src/elevenlabs_mcp/server.py
+      reason: Catch UpstreamOutcomeUnknownError in both legacy generation branches, persist its safe message, and allow that typed safe detail through the existing sanitized outer envelope.
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_synthesis_uncertainty_policy.py]
+  - [uv, run, pytest, -q, tests/acceptance/test_synthesis_uncertainty_policy.py, tests/acceptance/test_bounded_http_policy.py, tests/acceptance/test_log_and_response_hygiene.py]
+  - [uv, run, ruff, check, tests/acceptance/test_synthesis_uncertainty_policy.py]
+  - [uv, run, pyright, tests/acceptance/test_synthesis_uncertainty_policy.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_synthesis_uncertainty_policy.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Numeric 429 Retry-After is bounded and honored, ConnectTimeout retains three attempts, and synthesis ReadTimeout/ConnectionError dispatch once before producing a typed non-retryable unknown outcome persisted by legacy jobs.
+  rationale: The policy distinguishes clearly rejected or pre-transmission failures from outcomes that may have consumed provider work, preventing blind paid replay while preserving established bounded behavior outside this child.
+  lessons:
+    - lesson_type: upstream-uncertainty
+      summary: Retry ceilings do not make replay safe; post-transmission failures need a distinct non-retryable state that survives persistence and client presentation.
+      tags: [retries, spend-safety, uncertainty, provider]
+      paths: [src/elevenlabs_mcp/elevenlabs_api.py, src/elevenlabs_mcp/server.py]
+  review_notes:
+    - source: maid-implementation-reviewer:r02_uncertainty_review
+      severity: ready
+      summary: No blockers; Retry-After fallback variants and the symmetric script persistence path remain P2 test coverage advisories.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 67 tests passed.
+    - command: [uv, run, maid, test, --manifest, manifests/r02-synthesis-uncertainty-policy.manifest.yaml]
+      status: passed
+      summary: All four child commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, ff51c03, --summary, --packet]
+      status: passed
+      summary: All 11 deep stages passed.
+  completed_at: "2026-09-20T14:59:02+08:00"
+created: "2026-09-20T06:55:49Z"
+metadata:
+  author: Codex
+  tags: [revival, r02, retries, uncertainty, spend-safety]
+  priority: critical
