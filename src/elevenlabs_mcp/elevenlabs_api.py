@@ -2,11 +2,9 @@ import logging
 import os
 import time
 import requests
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Dict, List, Optional, TypedDict
-from dotenv import load_dotenv
-
-load_dotenv()
 
 log_level = os.getenv("ELEVENLABS_LOG_LEVEL", "ERROR").upper()
 valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
@@ -89,11 +87,12 @@ class ElevenLabsAPI:
         else:
             raise Exception(f"Failed to fetch voices: {response.text}")
 
-    def __init__(self):
-        self.api_key = os.getenv("ELEVENLABS_API_KEY") or None
-            
-        self.voice_id = os.getenv("ELEVENLABS_VOICE_ID") or "iEw1wkYocsNy7I7pteSN"
-        self.model_id = os.getenv("ELEVENLABS_MODEL_ID") or "eleven_multilingual_v2"
+    def __init__(self, environ: Mapping[str, str] | None = None):
+        environment = os.environ if environ is None else environ
+        self.api_key = environment.get("ELEVENLABS_API_KEY") or None
+
+        self.voice_id = environment.get("ELEVENLABS_VOICE_ID") or "iEw1wkYocsNy7I7pteSN"
+        self.model_id = environment.get("ELEVENLABS_MODEL_ID") or "eleven_multilingual_v2"
         
         logging.info(f"Initializing ElevenLabsAPI with model_id: {self.model_id}")
         
@@ -101,9 +100,11 @@ class ElevenLabsAPI:
         if self.model_id not in self.MODELS:
             logging.error(f"Invalid model_id: {self.model_id}. Valid models: {list(self.MODELS.keys())}")
             raise ValueError(f"Invalid model_id: {self.model_id}. Must be one of {list(self.MODELS.keys())}")
-        self.stability = float(os.getenv("ELEVENLABS_STABILITY", "0.5"))
-        self.similarity_boost = float(os.getenv("ELEVENLABS_SIMILARITY_BOOST", "0.75"))
-        self.style = float(os.getenv("ELEVENLABS_STYLE", "0.1"))
+        self.stability = float(environment.get("ELEVENLABS_STABILITY", "0.5"))
+        self.similarity_boost = float(
+            environment.get("ELEVENLABS_SIMILARITY_BOOST", "0.75")
+        )
+        self.style = float(environment.get("ELEVENLABS_STYLE", "0.1"))
         self.base_url = "https://api.elevenlabs.io/v1"
 
     def _require_api_key(self) -> str:

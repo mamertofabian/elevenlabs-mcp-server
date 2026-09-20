@@ -1,0 +1,249 @@
+{
+  "manifest_path": "manifests/r01-explicit-dotenv-startup.manifest.yaml",
+  "manifest_hash": "sha256-contract:5227533940832305b36e8b7d174d9fd7d6eac6977036ccdef5234da9cc91b177",
+  "test_hashes": {
+    "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:c96efbdb30917d662d254b2d8b9809b67feadeabda3aaa9c1a03b2bd71463a68",
+    "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+    "tests/acceptance/test_explicit_dotenv_startup.py": "sha256-pyast:v2:097e99ffa1ad38d315b2d2554d4830fd0c842d0f19cae49d5c56ff19daf70b48"
+  },
+  "created_at": "2026-09-20T05:04:27.585830+00:00",
+  "revision": 5,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:19387f40b59425b0d5675347bbafbea40f6d10b882aa4a91cc1a39e108952ec7",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:c96efbdb30917d662d254b2d8b9809b67feadeabda3aaa9c1a03b2bd71463a68",
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_explicit_dotenv_startup.py": "sha256-pyast:v2:3445d479b69a42edd319313ca2f9fecb65026c55fbb2dca78b421d74c5b21fcf"
+      },
+      "revised_at": "2026-09-20T05:04:30.260865+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r01-explicit-dotenv-startup.manifest.yaml -> manifests/r01-explicit-dotenv-startup.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:342112d1d144331060d0fb07e7ad5faf5066cfa4bd832e02eef37d3614d89949",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:c96efbdb30917d662d254b2d8b9809b67feadeabda3aaa9c1a03b2bd71463a68",
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_explicit_dotenv_startup.py": "sha256-pyast:v2:3445d479b69a42edd319313ca2f9fecb65026c55fbb2dca78b421d74c5b21fcf"
+      },
+      "revised_at": "2026-09-20T05:05:29.956792+00:00",
+      "reason": "Run every chain-discovered configuration and credential behavioral test explicitly",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [
+          "uv run pytest -q tests/acceptance/test_explicit_dotenv_startup.py tests/acceptance/test_runtime_configuration.py tests/acceptance/test_credential_free_discovery.py"
+        ],
+        "validate_commands_removed": [
+          "uv run pytest -q"
+        ]
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:b14931990455a61fd838f6d15585c363576d3d925d4e0070523269f81eea6025",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:c96efbdb30917d662d254b2d8b9809b67feadeabda3aaa9c1a03b2bd71463a68",
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_explicit_dotenv_startup.py": "sha256-pyast:v2:3445d479b69a42edd319313ca2f9fecb65026c55fbb2dca78b421d74c5b21fcf"
+      },
+      "revised_at": "2026-09-20T05:07:52.354989+00:00",
+      "reason": "Disable ambient dotenv interpolation and prove explicit mapping isolation with a process-only sentinel",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:5227533940832305b36e8b7d174d9fd7d6eac6977036ccdef5234da9cc91b177",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:c96efbdb30917d662d254b2d8b9809b67feadeabda3aaa9c1a03b2bd71463a68",
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_explicit_dotenv_startup.py": "sha256-pyast:v2:097e99ffa1ad38d315b2d2554d4830fd0c842d0f19cae49d5c56ff19daf70b48"
+      },
+      "revised_at": "2026-09-20T05:10:42.686354+00:00",
+      "reason": "Capture reviewed explicit dotenv startup Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T05:07:54.326926+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_explicit_dotenv_startup.py",
+        "exit_code": 1,
+        "output_tail": "        process_key_before = os.environ.get(\"ELEVENLABS_API_KEY\")\n    \n>       server = ElevenLabsServer(environ=operator)\nE       TypeError: ElevenLabsServer.__init__() got an unexpected keyword argument 'environ'\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_explicit_dotenv_startup.py:134: TypeError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_explicit_dotenv_startup.py::test_importing_api_and_server_never_calls_dotenv_loader\nFAILED tests/acceptance/test_explicit_dotenv_startup.py::test_launch_dotenv_is_exact_and_operator_environment_wins\nFAILED tests/acceptance/test_explicit_dotenv_startup.py::test_environment_merge_does_not_mutate_inputs_or_process\nFAILED tests/acceptance/test_explicit_dotenv_startup.py::test_server_composition_passes_one_resolved_mapping\n4 failed, 1 warning in 0.33s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run pytest -q tests/acceptance/test_explicit_dotenv_startup.py tests/acceptance/test_runtime_configuration.py tests/acceptance/test_credential_free_discovery.py",
+        "exit_code": 1,
+        "output_tail": "        process_key_before = os.environ.get(\"ELEVENLABS_API_KEY\")\n    \n>       server = ElevenLabsServer(environ=operator)\nE       TypeError: ElevenLabsServer.__init__() got an unexpected keyword argument 'environ'\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_explicit_dotenv_startup.py:134: TypeError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_explicit_dotenv_startup.py::test_importing_api_and_server_never_calls_dotenv_loader\nFAILED tests/acceptance/test_explicit_dotenv_startup.py::test_launch_dotenv_is_exact_and_operator_environment_wins\nFAILED tests/acceptance/test_explicit_dotenv_startup.py::test_environment_merge_does_not_mutate_inputs_or_process\nFAILED tests/acceptance/test_explicit_dotenv_startup.py::test_server_composition_passes_one_resolved_mapping\n4 failed, 8 passed, 1 warning in 0.62s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check src/elevenlabs_mcp/config.py tests/acceptance/test_explicit_dotenv_startup.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright src/elevenlabs_mcp/config.py tests/acceptance/test_explicit_dotenv_startup.py",
+        "exit_code": 1,
+        "output_tail": "/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_explicit_dotenv_startup.py\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_explicit_dotenv_startup.py:63:39 - error: \"environment_from_dotenv\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_explicit_dotenv_startup.py:97:39 - error: \"environment_from_dotenv\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_explicit_dotenv_startup.py:134:31 - error: No parameter named \"environ\" (reportCallIssue)\n3 errors, 0 warnings, 0 informations\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/config.py:function:environment_from_dotenv",
+      "src/elevenlabs_mcp/config.py:function:environment_from_dotenv:arg=environ:type=Mapping[str, str]:default=None",
+      "src/elevenlabs_mcp/config.py:function:environment_from_dotenv:arg=launch_cwd:type=Path:default=None",
+      "src/elevenlabs_mcp/config.py:function:environment_from_dotenv:kind=function",
+      "src/elevenlabs_mcp/config.py:function:environment_from_dotenv:returns=dict[str, str]",
+      "tests/acceptance/test_explicit_dotenv_startup.py:test_environment_merge_does_not_mutate_inputs_or_process",
+      "tests/acceptance/test_explicit_dotenv_startup.py:test_environment_merge_does_not_mutate_inputs_or_process:kind=test_function",
+      "tests/acceptance/test_explicit_dotenv_startup.py:test_importing_api_and_server_never_calls_dotenv_loader",
+      "tests/acceptance/test_explicit_dotenv_startup.py:test_importing_api_and_server_never_calls_dotenv_loader:kind=test_function",
+      "tests/acceptance/test_explicit_dotenv_startup.py:test_launch_dotenv_is_exact_and_operator_environment_wins",
+      "tests/acceptance/test_explicit_dotenv_startup.py:test_launch_dotenv_is_exact_and_operator_environment_wins:kind=test_function",
+      "tests/acceptance/test_explicit_dotenv_startup.py:test_server_composition_passes_one_resolved_mapping",
+      "tests/acceptance/test_explicit_dotenv_startup.py:test_server_composition_passes_one_resolved_mapping:kind=test_function"
+    ],
+    "files": {
+      "create": [],
+      "edit": [
+        "src/elevenlabs_mcp/config.py",
+        "tests/acceptance/test_explicit_dotenv_startup.py"
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r01-credential-free-discovery.manifest.yaml",
+        "manifests/r01-legacy-database-ambiguity.manifest.yaml",
+        "manifests/r01-runtime-path-injection.manifest.yaml",
+        "tests/acceptance/test_credential_free_discovery.py",
+        "tests/acceptance/test_runtime_configuration.py",
+        "tests/conftest.py"
+      ],
+      "scope": [
+        "src/elevenlabs_mcp/elevenlabs_api.py",
+        "src/elevenlabs_mcp/server.py"
+      ],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "edit": [
+        {
+          "path": "src/elevenlabs_mcp/config.py",
+          "artifacts": [
+            {
+              "kind": "function",
+              "name": "environment_from_dotenv",
+              "description": "Read only launch_cwd/.env into a new mapping and overlay the supplied environment without mutating either input or os.environ.",
+              "args": [
+                {
+                  "name": "environ",
+                  "type": "Mapping[str, str]"
+                },
+                {
+                  "name": "launch_cwd",
+                  "type": "Path"
+                }
+              ],
+              "returns": "dict[str, str]"
+            }
+          ]
+        },
+        {
+          "path": "tests/acceptance/test_explicit_dotenv_startup.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_importing_api_and_server_never_calls_dotenv_loader",
+              "description": "A bounded isolated subprocess replaces dotenv.load_dotenv with a marker and observes no call while importing API and server modules."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_launch_dotenv_is_exact_and_operator_environment_wins",
+              "description": "Only launch_cwd/.env is read, parent files are ignored, None values are removed, and supplied environment values override dotenv."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_environment_merge_does_not_mutate_inputs_or_process",
+              "description": "The returned dict is independent while the supplied mapping and os.environ remain unchanged."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_server_composition_passes_one_resolved_mapping",
+              "description": "Server Settings and ElevenLabsAPI consume the same explicit mapping with no ambient os.environ coordination."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "manifests/r01-runtime-path-injection.manifest.yaml",
+        "manifests/r01-legacy-database-ambiguity.manifest.yaml",
+        "manifests/r01-credential-free-discovery.manifest.yaml",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "tests/conftest.py",
+        "tests/acceptance/test_runtime_configuration.py",
+        "tests/acceptance/test_credential_free_discovery.py"
+      ],
+      "scope": [
+        {
+          "path": "src/elevenlabs_mcp/server.py",
+          "reason": "Remove import-time load_dotenv and pass one explicitly merged mapping to Settings and ElevenLabsAPI without changing public server artifacts."
+        },
+        {
+          "path": "src/elevenlabs_mcp/elevenlabs_api.py",
+          "reason": "Remove import-time load_dotenv and allow constructor configuration from an explicit Mapping without changing declared public API artifacts."
+        }
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_credential_free_discovery.py",
+      "tests/acceptance/test_explicit_dotenv_startup.py",
+      "tests/acceptance/test_runtime_configuration.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_explicit_dotenv_startup.py",
+      "uv run pytest -q tests/acceptance/test_explicit_dotenv_startup.py tests/acceptance/test_runtime_configuration.py tests/acceptance/test_credential_free_discovery.py",
+      "uv run ruff check src/elevenlabs_mcp/config.py tests/acceptance/test_explicit_dotenv_startup.py",
+      "uv run pyright src/elevenlabs_mcp/config.py tests/acceptance/test_explicit_dotenv_startup.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_explicit_dotenv_startup.py"
+    ]
+  }
+}

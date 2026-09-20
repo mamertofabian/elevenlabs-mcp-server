@@ -1,0 +1,117 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Replace import-time dotenv loading with one explicit launch-directory environment merge that preserves operator precedence and avoids process-environment mutation.
+description: |
+  Final R01 configuration child completing A01 path/configuration hygiene.
+  Add environment_from_dotenv as the only .env reader: it checks exactly
+  launch_cwd/.env, returns a new string mapping, ignores unset dotenv values,
+  disables interpolation from ambient process state, and overlays the supplied operator environment last. Server composition uses
+  that resolved mapping once for Settings and ElevenLabsAPI, while direct API
+  construction may receive an explicit mapping. Remove module-import calls to
+  load_dotenv from server.py and elevenlabs_api.py. Do not search parent/home
+  directories, mutate os.environ, print values, add a new config framework, or
+  change the six tool contracts.
+  Expected red: a subprocess monkeypatching dotenv.load_dotenv records calls
+  while importing the current API/server modules, and config.py has no
+  environment_from_dotenv artifact.
+  Outcome lessons applied: configuration is resolved once and passed directly;
+  the subprocess redirects writable roots, bounds execution, and records only
+  loader invocation—not secret values.
+temptations:
+  - risk: Keep load_dotenv at module import and merely pass override=False.
+    instead: Remove both import-time calls and invoke environment_from_dotenv only from explicit server composition.
+  - risk: Update os.environ so ElevenLabsAPI and Settings can discover merged values implicitly.
+    instead: Return a new dict and pass the same mapping directly to settings_from_environment and ElevenLabsAPI.
+  - risk: Use find_dotenv or default load_dotenv search behavior that walks parent directories.
+    instead: Read only launch_cwd / ".env" through dotenv_values and test that a parent-only file is ignored.
+  - risk: Log merged keys or values for diagnostics.
+    instead: Assert precedence and object state with synthetic sentinels; never emit the mapping.
+type: fix
+files:
+  edit:
+    - path: src/elevenlabs_mcp/config.py
+      artifacts:
+        - kind: function
+          name: environment_from_dotenv
+          description: Read only launch_cwd/.env into a new mapping and overlay the supplied environment without mutating either input or os.environ.
+          args:
+            - name: environ
+              type: Mapping[str, str]
+            - name: launch_cwd
+              type: Path
+          returns: dict[str, str]
+    - path: tests/acceptance/test_explicit_dotenv_startup.py
+      artifacts:
+        - kind: test_function
+          name: test_importing_api_and_server_never_calls_dotenv_loader
+          description: A bounded isolated subprocess replaces dotenv.load_dotenv with a marker and observes no call while importing API and server modules.
+        - kind: test_function
+          name: test_launch_dotenv_is_exact_and_operator_environment_wins
+          description: Only launch_cwd/.env is read, parent files are ignored, None values are removed, and supplied environment values override dotenv.
+        - kind: test_function
+          name: test_environment_merge_does_not_mutate_inputs_or_process
+          description: The returned dict is independent while the supplied mapping and os.environ remain unchanged.
+        - kind: test_function
+          name: test_server_composition_passes_one_resolved_mapping
+          description: Server Settings and ElevenLabsAPI consume the same explicit mapping with no ambient os.environ coordination.
+  read:
+    - manifests/r01-runtime-path-injection.manifest.yaml
+    - manifests/r01-legacy-database-ambiguity.manifest.yaml
+    - manifests/r01-credential-free-discovery.manifest.yaml
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - tests/conftest.py
+    - tests/acceptance/test_runtime_configuration.py
+    - tests/acceptance/test_credential_free_discovery.py
+  scope:
+    - path: src/elevenlabs_mcp/server.py
+      reason: Remove import-time load_dotenv and pass one explicitly merged mapping to Settings and ElevenLabsAPI without changing public server artifacts.
+    - path: src/elevenlabs_mcp/elevenlabs_api.py
+      reason: Remove import-time load_dotenv and allow constructor configuration from an explicit Mapping without changing declared public API artifacts.
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_explicit_dotenv_startup.py]
+  - [uv, run, pytest, -q, tests/acceptance/test_explicit_dotenv_startup.py, tests/acceptance/test_runtime_configuration.py, tests/acceptance/test_credential_free_discovery.py]
+  - [uv, run, ruff, check, src/elevenlabs_mcp/config.py, tests/acceptance/test_explicit_dotenv_startup.py]
+  - [uv, run, pyright, src/elevenlabs_mcp/config.py, tests/acceptance/test_explicit_dotenv_startup.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_explicit_dotenv_startup.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Import-time dotenv loading is removed; startup now reads only launch_cwd/.env once, disables ambient interpolation, overlays operator values, and passes the resulting mapping directly to Settings and ElevenLabsAPI without mutating process state.
+  rationale: Explicit composition preserves local .env convenience and operator precedence while preventing parent-directory searches, ambient-secret interpolation, and environment-variable coordination between classes.
+  lessons:
+    - lesson_type: configuration-isolation
+      summary: An explicit dotenv path is not fully isolated unless interpolation is disabled; otherwise values can still resolve from ambient os.environ despite an isolated input mapping.
+      tags: [dotenv, configuration, secrets, startup]
+      paths:
+        - src/elevenlabs_mcp/config.py
+        - tests/acceptance/test_explicit_dotenv_startup.py
+  review_notes:
+    - source: maid-implementation-reviewer:r01_dotenv_review_2
+      severity: ready
+      summary: No implementation findings; configuration flow, isolation, precedence, secret handling, compatibility, and locked tests align with the contract.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 34 tests passed.
+    - command: [uv, run, maid, validate, manifests/r01-explicit-dotenv-startup.manifest.yaml, --mode, implementation]
+      status: passed
+      summary: The declared environment_from_dotenv artifact and scoped wiring matched implementation.
+    - command: [uv, run, maid, test, --manifest, manifests/r01-explicit-dotenv-startup.manifest.yaml]
+      status: passed
+      summary: All four child validation commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, 44859b5, --summary, --packet]
+      status: passed
+      summary: All 11 deep verification stages passed in the correctly provisioned environment.
+  completed_at: "2026-09-20T13:10:03+08:00"
+created: "2026-09-20T05:04:30Z"
+metadata:
+  author: Codex
+  tags: [revival, r01, configuration, dotenv, startup]
+  priority: high

@@ -6,6 +6,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from dotenv import dotenv_values
+
 
 @dataclass(frozen=True, slots=True)
 class Settings:
@@ -31,6 +33,19 @@ class DatabasePathAmbiguityError(RuntimeError):
             f"ELEVENLABS_DATABASE_PATH selection. Requested: {requested_path}; "
             f"existing candidates: {candidates}"
         )
+
+
+def environment_from_dotenv(
+    environ: Mapping[str, str], launch_cwd: Path
+) -> dict[str, str]:
+    """Merge exactly launch_cwd/.env with an explicit environment mapping."""
+
+    dotenv_environment = {
+        key: value
+        for key, value in dotenv_values(launch_cwd / ".env", interpolate=False).items()
+        if value is not None
+    }
+    return {**dotenv_environment, **environ}
 
 
 def settings_from_environment(environ: Mapping[str, str], launch_cwd: Path) -> Settings:

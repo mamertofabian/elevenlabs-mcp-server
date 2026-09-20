@@ -1,24 +1,27 @@
 import asyncio
 import base64
 import os
+from collections.abc import Mapping
 from pathlib import Path
 import uuid
 import mcp.types as types
 from mcp.server import Server, NotificationOptions
 from mcp.server.models import InitializationOptions
 import mcp.server.stdio
-from dotenv import load_dotenv
 import json
 from datetime import datetime
 import logging
 from urllib.parse import unquote
 
 from .elevenlabs_api import ElevenLabsAPI
-from .config import Settings, select_database_path, settings_from_environment
+from .config import (
+    Settings,
+    environment_from_dotenv,
+    select_database_path,
+    settings_from_environment,
+)
 from .database import Database
 from .models import AudioJob
-
-load_dotenv()
 
 log_level = os.getenv("ELEVENLABS_LOG_LEVEL", "ERROR").upper()
 valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
@@ -32,10 +35,21 @@ logging.basicConfig(
 )
 
 class ElevenLabsServer:
-    def __init__(self, settings: Settings | None = None):
-        self.settings = settings or settings_from_environment(os.environ, Path.cwd())
+    def __init__(
+        self,
+        settings: Settings | None = None,
+        environ: Mapping[str, str] | None = None,
+    ):
+        launch_cwd = settings.launch_cwd if settings is not None else Path.cwd()
+        runtime_environment = environment_from_dotenv(
+            os.environ if environ is None else environ,
+            launch_cwd,
+        )
+        self.settings = settings or settings_from_environment(
+            runtime_environment, launch_cwd
+        )
         self.server = Server("elevenlabs-server")
-        self.api = ElevenLabsAPI()
+        self.api = ElevenLabsAPI(runtime_environment)
         self.output_dir = self.settings.output_dir
         self.db = Database(self.settings.database_path)
         
