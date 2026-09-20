@@ -1,0 +1,98 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Send supported legacy TTS style values only inside voice_settings and omit them entirely for unsupported models.
+description: |
+  Narrow R02/A09 child. Preserve generate_audio_segment's public signature,
+  return tuple, model selection, stitching fields, and retry behavior while
+  moving style from the invalid request top level into voice_settings for
+  models whose existing capability profile supports it. Unsupported profiles
+  send no style key at either level. All HTTP is fake and captured before any
+  live dispatch. Expected red: multilingual-v2 currently places style at the
+  request root.
+temptations:
+  - risk: Duplicate style at both top level and voice_settings for compatibility.
+    instead: Assert the top-level key is absent and the supported value exists only under voice_settings.
+  - risk: Send style to every model and rely on the provider to ignore it.
+    instead: Preserve the existing supports_style capability check and assert unsupported models omit the key.
+  - risk: Broaden this request-body repair into model-list or provider-SDK redesign.
+    instead: Keep every other captured field and the response tuple unchanged.
+type: fix
+files:
+  edit:
+    - path: src/elevenlabs_mcp/elevenlabs_api.py
+      artifacts:
+        - kind: method
+          name: generate_audio_segment
+          of: ElevenLabsAPI
+          args:
+            - name: self
+            - name: text
+              type: str
+            - name: voice_id
+              type: str
+            - name: output_file
+              type: Optional[str]
+              default: None
+            - name: previous_text
+              type: Optional[str]
+              default: None
+            - name: next_text
+              type: Optional[str]
+              default: None
+            - name: previous_request_ids
+              type: Optional[List[str]]
+              default: None
+            - name: debug_info
+              type: Optional[List[str]]
+              default: None
+          returns: tuple[bytes, str]
+    - path: tests/acceptance/test_tts_style_nesting.py
+      artifacts:
+        - kind: test_function
+          name: test_supported_model_sends_style_only_inside_voice_settings
+          description: A09 captures the fake HTTP body and observes stability, similarity_boost, and style together under voice_settings with no root style.
+        - kind: test_function
+          name: test_unsupported_model_omits_style_at_every_level
+          description: A09 captures a flash-model body and observes no style key while preserving the successful audio/request-id tuple.
+  read:
+    - manifests/r01-credential-free-discovery.manifest.yaml
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - tests/acceptance/test_credential_free_discovery.py
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_tts_style_nesting.py]
+  - [uv, run, pytest, -q, tests/acceptance/test_tts_style_nesting.py, tests/acceptance/test_credential_free_discovery.py]
+  - [uv, run, ruff, check, tests/acceptance/test_tts_style_nesting.py]
+  - [uv, run, pyright, tests/acceptance/test_tts_style_nesting.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_tts_style_nesting.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Supported legacy TTS style is now sent only under voice_settings, while unsupported models omit it entirely and all other request/response behavior remains unchanged.
+  rationale: The one-field nesting repair matches the provider contract without broadening model support or changing retries, stitching, or legacy tuples.
+  review_notes:
+    - source: maid-implementation-reviewer:r02_style_review
+      severity: ready
+      summary: No findings; captured supported/unsupported HTTP shapes and compatibility behavior match the locked contract.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 49 tests passed.
+    - command: [uv, run, maid, test, --manifest, manifests/r02-tts-style-nesting.manifest.yaml]
+      status: passed
+      summary: All four child commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, ce8458a, --summary, --packet]
+      status: passed
+      summary: All 11 deep stages passed.
+  completed_at: "2026-09-20T13:35:45+08:00"
+created: "2026-09-20T05:32:39Z"
+metadata:
+  author: Codex
+  tags: [revival, r02, tts, request-body]
+  priority: high

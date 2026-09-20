@@ -159,7 +159,7 @@ class ElevenLabsAPI:
         }
 
         if self.MODELS[self.model_id]["supports_style"]:
-            data["style"] = self.style
+            data["voice_settings"]["style"] = self.style
 
         # Add context conditioning if model supports it
         if self.MODELS[self.model_id]["supports_stitching"]:
