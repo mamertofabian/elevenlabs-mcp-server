@@ -1,0 +1,283 @@
+{
+  "manifest_path": "manifests/r01-legacy-database-ambiguity.manifest.yaml",
+  "manifest_hash": "sha256-contract:555308b1690cb59f472fcb88bbe40493b00bae60b4aac1fc94566eb1f0a3f205",
+  "test_hashes": {
+    "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:c96efbdb30917d662d254b2d8b9809b67feadeabda3aaa9c1a03b2bd71463a68",
+    "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+    "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9",
+    "tests/acceptance/test_legacy_database_discovery.py": "sha256-pyast:v2:5077def0bada8062eaf8173d4ce546432bc14ba44e7c5253f7591ff9cdcc4079",
+    "tests/test_server.py": "sha256-pyast:v2:bd62ad082c438b681839f55abc87dafe77eb68958faf2925056b877dde3b72fe"
+  },
+  "created_at": "2026-09-20T04:33:22.017049+00:00",
+  "revision": 4,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:a6248c0ee7c2f6bff9128f537f0a151b425145b49019e6a1ee697f7041959436",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:c96efbdb30917d662d254b2d8b9809b67feadeabda3aaa9c1a03b2bd71463a68",
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9",
+        "tests/acceptance/test_legacy_database_discovery.py": "sha256-pyast:v2:2667a1d8ad7fa2f067e8df0b2df1ac5f9f4d28eadc6fa09681192dea7e238c14",
+        "tests/test_server.py": "sha256-pyast:v2:bd62ad082c438b681839f55abc87dafe77eb68958faf2925056b877dde3b72fe"
+      },
+      "revised_at": "2026-09-20T04:33:24.144617+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r01-legacy-database-ambiguity.manifest.yaml -> manifests/r01-legacy-database-ambiguity.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:cb93de8af854658f0dfebfb7ef21c04b71c055433d837e87772169143a50cc06",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:c96efbdb30917d662d254b2d8b9809b67feadeabda3aaa9c1a03b2bd71463a68",
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9",
+        "tests/acceptance/test_legacy_database_discovery.py": "sha256-pyast:v2:2667a1d8ad7fa2f067e8df0b2df1ac5f9f4d28eadc6fa09681192dea7e238c14",
+        "tests/test_server.py": "sha256-pyast:v2:bd62ad082c438b681839f55abc87dafe77eb68958faf2925056b877dde3b72fe"
+      },
+      "revised_at": "2026-09-20T04:37:29.283958+00:00",
+      "reason": "Capture explicit database selection once in Settings and strengthen review-driven startup coverage for environment mutation and package-root history",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "src/elevenlabs_mcp/config.py:attribute:Settings.database_path_explicit",
+          "src/elevenlabs_mcp/config.py:attribute:Settings.database_path_explicit:kind=attribute",
+          "src/elevenlabs_mcp/config.py:attribute:Settings.database_path_explicit:of=Settings",
+          "src/elevenlabs_mcp/config.py:attribute:Settings.database_path_explicit:type=bool"
+        ],
+        "artifacts_removed": [
+          "src/elevenlabs_mcp/config.py:function:select_database_path:arg=environ:type=Mapping[str, str]:default=None"
+        ],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:555308b1690cb59f472fcb88bbe40493b00bae60b4aac1fc94566eb1f0a3f205",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:c96efbdb30917d662d254b2d8b9809b67feadeabda3aaa9c1a03b2bd71463a68",
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9",
+        "tests/acceptance/test_legacy_database_discovery.py": "sha256-pyast:v2:5077def0bada8062eaf8173d4ce546432bc14ba44e7c5253f7591ff9cdcc4079",
+        "tests/test_server.py": "sha256-pyast:v2:bd62ad082c438b681839f55abc87dafe77eb68958faf2925056b877dde3b72fe"
+      },
+      "revised_at": "2026-09-20T04:40:35.655638+00:00",
+      "reason": "Capture reviewed A04 Outcome and validation evidence",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T04:37:31.197212+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_legacy_database_discovery.py",
+        "exit_code": 1,
+        "output_tail": "            select_database_path,\n            settings_from_environment,\n        )\nE       ImportError: cannot import name 'DatabasePathAmbiguityError' from 'elevenlabs_mcp.config' (/mnt/storage/development/elevenlabs-mcp-server/src/elevenlabs_mcp/config.py)\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_legacy_database_discovery.py:102: ImportError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_legacy_database_discovery.py::test_startup_refuses_fresh_database_when_different_legacy_history_exists\nFAILED tests/acceptance/test_legacy_database_discovery.py::test_explicit_database_override_resolves_ambiguity\nFAILED tests/acceptance/test_legacy_database_discovery.py::test_requested_database_is_selected_without_filesystem_writes\nFAILED tests/acceptance/test_legacy_database_discovery.py::test_ambiguity_reports_deduplicated_known_candidates\n4 failed, 1 warning in 0.15s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run pytest -q tests/acceptance/test_runtime_configuration.py tests/characterization/test_legacy_database.py tests/characterization/test_legacy_server_surface.py tests/test_server.py",
+        "exit_code": 0,
+        "output_tail": "...................                                                      [100%]\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n19 passed, 1 warning in 0.65s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run ruff check src/elevenlabs_mcp/config.py tests/acceptance/test_legacy_database_discovery.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright src/elevenlabs_mcp/config.py tests/acceptance/test_legacy_database_discovery.py",
+        "exit_code": 1,
+        "output_tail": "/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_legacy_database_discovery.py\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_legacy_database_discovery.py:44:39 - error: \"DatabasePathAmbiguityError\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_legacy_database_discovery.py:47:27 - error: Cannot access attribute \"existing_candidates\" for class \"RuntimeError\"\n  \u00a0\u00a0Attribute \"existing_candidates\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_legacy_database_discovery.py:58:39 - error: \"select_database_path\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_legacy_database_discovery.py:75:21 - error: Cannot access attribute \"database_path_explicit\" for class \"Settings\"\n  \u00a0\u00a0Attribute \"database_path_explicit\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_legacy_database_discovery.py:84:39 - error: \"select_database_path\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_legacy_database_discovery.py:96:21 - error: Cannot access attribute \"database_path_explicit\" for class \"Settings\"\n  \u00a0\u00a0Attribute \"database_path_explicit\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_legacy_database_discovery.py:103:9 - error: \"DatabasePathAmbiguityError\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_legacy_database_discovery.py:104:9 - error: \"select_database_path\" is unknown import symbol (reportAttributeAccessIssue)\n8 errors, 0 warnings, 0 informations\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/config.py:attribute:DatabasePathAmbiguityError.existing_candidates",
+      "src/elevenlabs_mcp/config.py:attribute:DatabasePathAmbiguityError.existing_candidates:kind=attribute",
+      "src/elevenlabs_mcp/config.py:attribute:DatabasePathAmbiguityError.existing_candidates:of=DatabasePathAmbiguityError",
+      "src/elevenlabs_mcp/config.py:attribute:DatabasePathAmbiguityError.existing_candidates:type=tuple[Path, ...]",
+      "src/elevenlabs_mcp/config.py:attribute:DatabasePathAmbiguityError.requested_path",
+      "src/elevenlabs_mcp/config.py:attribute:DatabasePathAmbiguityError.requested_path:kind=attribute",
+      "src/elevenlabs_mcp/config.py:attribute:DatabasePathAmbiguityError.requested_path:of=DatabasePathAmbiguityError",
+      "src/elevenlabs_mcp/config.py:attribute:DatabasePathAmbiguityError.requested_path:type=Path",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.database_path_explicit",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.database_path_explicit:kind=attribute",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.database_path_explicit:of=Settings",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.database_path_explicit:type=bool",
+      "src/elevenlabs_mcp/config.py:class:DatabasePathAmbiguityError",
+      "src/elevenlabs_mcp/config.py:class:DatabasePathAmbiguityError:base=RuntimeError",
+      "src/elevenlabs_mcp/config.py:class:DatabasePathAmbiguityError:kind=class",
+      "src/elevenlabs_mcp/config.py:function:select_database_path",
+      "src/elevenlabs_mcp/config.py:function:select_database_path:arg=legacy_package_root:type=Path:default=None",
+      "src/elevenlabs_mcp/config.py:function:select_database_path:arg=settings:type=Settings:default=None",
+      "src/elevenlabs_mcp/config.py:function:select_database_path:kind=function",
+      "src/elevenlabs_mcp/config.py:function:select_database_path:raises=DatabasePathAmbiguityError",
+      "src/elevenlabs_mcp/config.py:function:select_database_path:returns=Path",
+      "tests/acceptance/test_legacy_database_discovery.py:test_ambiguity_reports_deduplicated_known_candidates",
+      "tests/acceptance/test_legacy_database_discovery.py:test_ambiguity_reports_deduplicated_known_candidates:kind=test_function",
+      "tests/acceptance/test_legacy_database_discovery.py:test_explicit_database_override_resolves_ambiguity",
+      "tests/acceptance/test_legacy_database_discovery.py:test_explicit_database_override_resolves_ambiguity:kind=test_function",
+      "tests/acceptance/test_legacy_database_discovery.py:test_requested_database_is_selected_without_filesystem_writes",
+      "tests/acceptance/test_legacy_database_discovery.py:test_requested_database_is_selected_without_filesystem_writes:kind=test_function",
+      "tests/acceptance/test_legacy_database_discovery.py:test_startup_refuses_fresh_database_when_different_legacy_history_exists",
+      "tests/acceptance/test_legacy_database_discovery.py:test_startup_refuses_fresh_database_when_different_legacy_history_exists:kind=test_function"
+    ],
+    "files": {
+      "create": [],
+      "edit": [
+        "src/elevenlabs_mcp/config.py",
+        "tests/acceptance/test_legacy_database_discovery.py"
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md",
+        "manifests/r01-runtime-path-injection.manifest.yaml",
+        "tests/acceptance/test_runtime_configuration.py",
+        "tests/characterization/test_legacy_database.py",
+        "tests/characterization/test_legacy_server_surface.py",
+        "tests/conftest.py"
+      ],
+      "scope": [
+        "src/elevenlabs_mcp/server.py"
+      ],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "edit": [
+        {
+          "path": "src/elevenlabs_mcp/config.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "DatabasePathAmbiguityError",
+              "description": "Sanitized RuntimeError raised when known legacy history exists at a path different from the unresolved requested default.",
+              "bases": [
+                "RuntimeError"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "requested_path",
+              "of": "DatabasePathAmbiguityError",
+              "type": "Path"
+            },
+            {
+              "kind": "attribute",
+              "name": "existing_candidates",
+              "of": "DatabasePathAmbiguityError",
+              "type": "tuple[Path, ...]"
+            },
+            {
+              "kind": "attribute",
+              "name": "database_path_explicit",
+              "of": "Settings",
+              "type": "bool"
+            },
+            {
+              "kind": "function",
+              "name": "select_database_path",
+              "description": "Inspect only known candidates and return the requested path, or require an explicit database override when different legacy history exists.",
+              "args": [
+                {
+                  "name": "settings",
+                  "type": "Settings"
+                },
+                {
+                  "name": "legacy_package_root",
+                  "type": "Path"
+                }
+              ],
+              "returns": "Path",
+              "raises": [
+                "DatabasePathAmbiguityError"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "tests/acceptance/test_legacy_database_discovery.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_startup_refuses_fresh_database_when_different_legacy_history_exists",
+              "description": "A04 observes the typed ambiguity failure before writes for both launch-root and package-root legacy history, even if process environment changes after Settings resolution."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_explicit_database_override_resolves_ambiguity",
+              "description": "A04 observes a nonempty ELEVENLABS_DATABASE_PATH select the exact resolved path without searching or migrating alternatives."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_requested_database_is_selected_without_filesystem_writes",
+              "description": "Selection returns the requested default when no different candidate exists and does not create any path."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_ambiguity_reports_deduplicated_known_candidates",
+              "description": "The typed error exposes the requested path and only unique existing known candidates without database contents or recursive search results."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "manifests/r01-runtime-path-injection.manifest.yaml",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md",
+        "tests/conftest.py",
+        "tests/acceptance/test_runtime_configuration.py",
+        "tests/characterization/test_legacy_database.py",
+        "tests/characterization/test_legacy_server_surface.py"
+      ],
+      "scope": [
+        {
+          "path": "src/elevenlabs_mcp/server.py",
+          "reason": "Call select_database_path at explicit startup before any output-directory or database creation; no public server signature or artifact changes."
+        }
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_legacy_database_discovery.py",
+      "tests/acceptance/test_runtime_configuration.py",
+      "tests/characterization/test_legacy_database.py",
+      "tests/characterization/test_legacy_server_surface.py",
+      "tests/test_server.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_legacy_database_discovery.py",
+      "uv run pytest -q tests/acceptance/test_runtime_configuration.py tests/characterization/test_legacy_database.py tests/characterization/test_legacy_server_surface.py tests/test_server.py",
+      "uv run ruff check src/elevenlabs_mcp/config.py tests/acceptance/test_legacy_database_discovery.py",
+      "uv run pyright src/elevenlabs_mcp/config.py tests/acceptance/test_legacy_database_discovery.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_legacy_database_discovery.py"
+    ]
+  }
+}

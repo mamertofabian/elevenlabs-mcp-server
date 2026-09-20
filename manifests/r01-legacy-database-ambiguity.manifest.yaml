@@ -1,0 +1,134 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Refuse fresh database initialization when a different known legacy history database exists unless the operator explicitly selects a database path.
+description: |
+  Second implementation-sized R01 child covering A04 only. Add a typed,
+  read-only database-selection function that compares the resolved requested
+  path with the limited known legacy candidates: launch-working-directory
+  output and the baseline package-relative output. An explicit
+  ELEVENLABS_DATABASE_PATH is captured in immutable Settings as the operator's
+  decision and wins. Without that resolved override, a different existing legacy database raises a sanitized typed
+  ambiguity error before startup creates directories or a fresh database.
+  Narrow server wiring calls this selection gate before Database.initialize;
+  no files are moved, copied, opened, searched recursively, or migrated.
+  Expected red: current ElevenLabsServer.initialize silently creates the new
+  configured database even when launch-working-directory legacy history
+  already exists, and config.py has no DatabasePathAmbiguityError or
+  select_database_path artifacts.
+  Outcome lesson applied: tests use temporary roots and the existing
+  credential/network-isolated harness; no child process may inherit writable
+  or network access merely to exercise discovery.
+temptations:
+  - risk: Silently choose or copy the first legacy database that exists.
+    instead: Raise DatabasePathAmbiguityError with the requested path and deduplicated existing candidates until ELEVENLABS_DATABASE_PATH explicitly selects one.
+  - risk: Recursively search the home directory or inspect arbitrary stored rows while resolving startup paths.
+    instead: Check only the resolved requested path, launch output candidate, and supplied baseline package-root output candidate with Path.is_file.
+  - risk: Create the configured output directory or empty database before ambiguity detection completes.
+    instead: Run select_database_path before output_dir.mkdir and Database.initialize, and assert the rejected target remains absent.
+  - risk: Fold migration, path rewriting, or cleanup into the discovery fix.
+    instead: Return or reject paths only; leave all historical migration and artifact ownership work to R05.
+type: fix
+files:
+  edit:
+    - path: src/elevenlabs_mcp/config.py
+      artifacts:
+        - kind: class
+          name: DatabasePathAmbiguityError
+          description: Sanitized RuntimeError raised when known legacy history exists at a path different from the unresolved requested default.
+          bases: [RuntimeError]
+        - kind: attribute
+          name: requested_path
+          of: DatabasePathAmbiguityError
+          type: Path
+        - kind: attribute
+          name: existing_candidates
+          of: DatabasePathAmbiguityError
+          type: tuple[Path, ...]
+        - kind: attribute
+          name: database_path_explicit
+          of: Settings
+          type: bool
+        - kind: function
+          name: select_database_path
+          description: Inspect only known candidates and return the requested path, or require an explicit database override when different legacy history exists.
+          args:
+            - name: settings
+              type: Settings
+            - name: legacy_package_root
+              type: Path
+          returns: Path
+          raises: [DatabasePathAmbiguityError]
+    - path: tests/acceptance/test_legacy_database_discovery.py
+      artifacts:
+        - kind: test_function
+          name: test_startup_refuses_fresh_database_when_different_legacy_history_exists
+          description: A04 observes the typed ambiguity failure before writes for both launch-root and package-root legacy history, even if process environment changes after Settings resolution.
+        - kind: test_function
+          name: test_explicit_database_override_resolves_ambiguity
+          description: A04 observes a nonempty ELEVENLABS_DATABASE_PATH select the exact resolved path without searching or migrating alternatives.
+        - kind: test_function
+          name: test_requested_database_is_selected_without_filesystem_writes
+          description: Selection returns the requested default when no different candidate exists and does not create any path.
+        - kind: test_function
+          name: test_ambiguity_reports_deduplicated_known_candidates
+          description: The typed error exposes the requested path and only unique existing known candidates without database contents or recursive search results.
+  read:
+    - manifests/r01-runtime-path-injection.manifest.yaml
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md
+    - tests/conftest.py
+    - tests/acceptance/test_runtime_configuration.py
+    - tests/characterization/test_legacy_database.py
+    - tests/characterization/test_legacy_server_surface.py
+  scope:
+    - path: src/elevenlabs_mcp/server.py
+      reason: Call select_database_path at explicit startup before any output-directory or database creation; no public server signature or artifact changes.
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_legacy_database_discovery.py]
+  - [uv, run, pytest, -q, tests/acceptance/test_runtime_configuration.py, tests/characterization/test_legacy_database.py, tests/characterization/test_legacy_server_surface.py, tests/test_server.py]
+  - [uv, run, ruff, check, src/elevenlabs_mcp/config.py, tests/acceptance/test_legacy_database_discovery.py]
+  - [uv, run, pyright, src/elevenlabs_mcp/config.py, tests/acceptance/test_legacy_database_discovery.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_legacy_database_discovery.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Startup now refuses to create fresh history when different known legacy database files exist, while an explicitly resolved database path wins without migration or recursive search.
+  rationale: Database selection is resolved once in immutable Settings and checked before any directory or SQLite creation, preserving historical files and keeping migration owner-controlled.
+  lessons:
+    - lesson_type: configuration-consistency
+      summary: Configuration precedence must be captured once with the resolved settings; rereading process environment during startup can make validation select a different path than the already-constructed dependency.
+      tags: [configuration, database, startup, legacy-data]
+      paths:
+        - src/elevenlabs_mcp/config.py
+        - src/elevenlabs_mcp/server.py
+        - tests/acceptance/test_legacy_database_discovery.py
+  review_notes:
+    - source: maid-implementation-reviewer:r01_a04_review_2
+      severity: ready
+      summary: No blockers; explicit-override startup and symlink-equivalence cases remain low-risk advisory follow-ups outside the locked A04 contract.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 26 credential-free tests passed.
+    - command: [uv, run, maid, validate, manifests/r01-legacy-database-ambiguity.manifest.yaml, --mode, implementation]
+      status: passed
+      summary: Declared artifacts and signatures matched the implementation.
+    - command: [uv, run, maid, test, --manifest, manifests/r01-legacy-database-ambiguity.manifest.yaml]
+      status: passed
+      summary: All four child validation commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, 3c5c98c, --summary, --packet]
+      status: passed
+      summary: All 11 deep verification stages passed.
+  completed_at: "2026-09-20T12:40:15+08:00"
+created: "2026-09-20T04:33:24Z"
+metadata:
+  author: Codex
+  tags: [revival, r01, configuration, database, legacy-data]
+  priority: high

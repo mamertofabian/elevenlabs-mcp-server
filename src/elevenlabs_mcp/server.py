@@ -14,7 +14,7 @@ import logging
 from urllib.parse import unquote
 
 from .elevenlabs_api import ElevenLabsAPI
-from .config import Settings, settings_from_environment
+from .config import Settings, select_database_path, settings_from_environment
 from .database import Database
 from .models import AudioJob
 
@@ -46,6 +46,10 @@ class ElevenLabsServer:
     
     async def initialize(self) -> None:
         """Initialize server components."""
+        select_database_path(
+            self.settings,
+            Path(__file__).resolve().parents[2],
+        )
         self.output_dir.mkdir(parents=True, exist_ok=True)
         await self.db.initialize()
         
