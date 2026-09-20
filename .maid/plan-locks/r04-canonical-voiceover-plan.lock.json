@@ -1,0 +1,461 @@
+{
+  "manifest_path": "manifests/r04-canonical-voiceover-plan.manifest.yaml",
+  "manifest_hash": "sha256-contract:d25c310706936fa84e5913eaa4f1b1febc98150b96fa2a533e7167af69944131",
+  "test_hashes": {
+    "tests/acceptance/test_canonical_voiceover_plan.py": "sha256-pyast:v2:81954707ea8ba8c23d03ec81876adc79d33925d719a5e88024d9131580886e2e"
+  },
+  "created_at": "2026-09-20T14:05:49.043572+00:00",
+  "revision": 4,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:90fd4fec58c31a46e735820f66a12f229f8c5d2c820253a57747ea0b19a43fe7",
+      "prior_test_hashes": {
+        "tests/acceptance/test_canonical_voiceover_plan.py": "sha256-pyast:v2:af54f7a16add06e0eb69dc379684a62d9965c51faf3de96deb92c32cbbc4bea4"
+      },
+      "revised_at": "2026-09-20T14:05:50.664118+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r04-canonical-voiceover-plan.manifest.yaml -> manifests/r04-canonical-voiceover-plan.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:d25c310706936fa84e5913eaa4f1b1febc98150b96fa2a533e7167af69944131",
+      "prior_test_hashes": {
+        "tests/acceptance/test_canonical_voiceover_plan.py": "sha256-pyast:v2:af54f7a16add06e0eb69dc379684a62d9965c51faf3de96deb92c32cbbc4bea4"
+      },
+      "revised_at": "2026-09-20T14:08:43.394857+00:00",
+      "reason": "Make the documented example fixture hermetic so MAID knockout sandboxes can run the behavioral baseline without undeclared filesystem context.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:d25c310706936fa84e5913eaa4f1b1febc98150b96fa2a533e7167af69944131",
+      "prior_test_hashes": {
+        "tests/acceptance/test_canonical_voiceover_plan.py": "sha256-pyast:v2:81954707ea8ba8c23d03ec81876adc79d33925d719a5e88024d9131580886e2e"
+      },
+      "revised_at": "2026-09-20T14:11:41.018538+00:00",
+      "reason": "Capture the evidence-backed Outcome after independent Ready to merge review.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T14:08:44.714080+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_canonical_voiceover_plan.py",
+        "exit_code": 1,
+        "output_tail": ">       from elevenlabs_mcp.planner import PlanningLimitError, ScriptPlanner\nE       ImportError: cannot import name 'ScriptPlanner' from 'elevenlabs_mcp.planner' (/mnt/storage/development/elevenlabs-mcp-server/src/elevenlabs_mcp/planner.py)\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_canonical_voiceover_plan.py:218: ImportError\n=============================== warnings summary ===============================\ntests/acceptance/test_canonical_voiceover_plan.py::test_identical_input_produces_independently_reproducible_plan_hash\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_canonical_voiceover_plan.py::test_identical_input_produces_independently_reproducible_plan_hash\nFAILED tests/acceptance/test_canonical_voiceover_plan.py::test_line_ending_equivalence_and_other_text_changes_affect_identity\nFAILED tests/acceptance/test_canonical_voiceover_plan.py::test_request_ids_fingerprints_and_seeds_are_stable_and_input_bound\nFAILED tests/acceptance/test_canonical_voiceover_plan.py::test_plan_summaries_and_safe_preview_fields_are_complete\nFAILED tests/acceptance/test_canonical_voiceover_plan.py::test_job_wide_resource_limits_fail_before_chunking_side_effects[max_total_characters-1-87]\nFAILED tests/acceptance/test_canonical_voiceover_plan.py::test_job_wide_resource_limits_fail_before_chunking_side_effects[max_parts-1-3]\nFAILED tests/acceptance/test_canonical_voiceover_plan.py::test_job_wide_resource_limits_fail_before_chunking_side_effects[max_scenes-1-2]\nFAILED tests/acceptance/test_canonical_voiceover_plan.py::test_job_wide_resource_limits_fail_before_chunking_side_effects[max_cast_entries-1-2]\n8 failed, 1 warning in 0.17s",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/acceptance/test_canonical_voiceover_plan.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run ruff format --check tests/acceptance/test_canonical_voiceover_plan.py",
+        "exit_code": 0,
+        "output_tail": "1 file already formatted",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/acceptance/test_canonical_voiceover_plan.py",
+        "exit_code": 1,
+        "output_tail": "/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_canonical_voiceover_plan.py\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_canonical_voiceover_plan.py:64:40 - error: \"ScriptPlanner\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_canonical_voiceover_plan.py:73:58 - error: \"VoiceoverPlan\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_canonical_voiceover_plan.py:74:40 - error: \"ScriptPlanner\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_canonical_voiceover_plan.py:129:9 - error: \"PlannedRequest\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_canonical_voiceover_plan.py:133:40 - error: \"ScriptPlanner\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_canonical_voiceover_plan.py:218:60 - error: \"ScriptPlanner\" is unknown import symbol (reportAttributeAccessIssue)\n6 errors, 0 warnings, 0 informations",
+        "classification": "red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.chunk",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.chunk:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.chunk:of=PlannedRequest",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.chunk:type=PlannedChunk",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.chunk_id",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.chunk_id:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.chunk_id:of=PlannedRequest",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.chunk_id:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.generation_fingerprint",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.generation_fingerprint:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.generation_fingerprint:of=PlannedRequest",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.generation_fingerprint:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.seed",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.seed:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.seed:of=PlannedRequest",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlannedRequest.seed:type=int | None",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_cast_entries",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_cast_entries:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_cast_entries:of=PlanningLimits",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_cast_entries:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_parts",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_parts:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_parts:of=PlanningLimits",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_parts:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_scenes",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_scenes:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_scenes:of=PlanningLimits",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_scenes:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_total_characters",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_total_characters:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_total_characters:of=PlanningLimits",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanningLimits.max_total_characters:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.cost_estimate",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.cost_estimate:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.cost_estimate:of=VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.cost_estimate:type=None",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.distinct_voice_count",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.distinct_voice_count:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.distinct_voice_count:of=VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.distinct_voice_count:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.effective_limits",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.effective_limits:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.effective_limits:of=VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.effective_limits:type=PlanningLimits",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.normalized_script",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.normalized_script:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.normalized_script:of=VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.normalized_script:type=Script",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.plan_hash",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.plan_hash:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.plan_hash:of=VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.plan_hash:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.planner_version",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.planner_version:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.planner_version:of=VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.planner_version:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.provider_access_checked",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.provider_access_checked:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.provider_access_checked:of=VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.provider_access_checked:type=Literal[False]",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.requests",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.requests:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.requests:of=VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.requests:type=tuple[PlannedRequest, ...]",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.resolved_options",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.resolved_options:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.resolved_options:of=VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.resolved_options:type=VoiceoverOptions",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.schema_version",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.schema_version:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.schema_version:of=VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.schema_version:type=Literal['1']",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.total_characters",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.total_characters:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.total_characters:of=VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.total_characters:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.total_parts",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.total_parts:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.total_parts:of=VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.total_parts:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.warnings",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.warnings:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.warnings:of=VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverPlan.warnings:type=tuple[str, ...]",
+      "src/elevenlabs_mcp/contracts.py:class:PlannedRequest",
+      "src/elevenlabs_mcp/contracts.py:class:PlannedRequest:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:PlannedRequest:kind=class",
+      "src/elevenlabs_mcp/contracts.py:class:VoiceoverPlan",
+      "src/elevenlabs_mcp/contracts.py:class:VoiceoverPlan:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:VoiceoverPlan:kind=class",
+      "src/elevenlabs_mcp/planner.py:class:ScriptPlanner",
+      "src/elevenlabs_mcp/planner.py:class:ScriptPlanner:kind=class",
+      "src/elevenlabs_mcp/planner.py:method:ScriptPlanner.plan",
+      "src/elevenlabs_mcp/planner.py:method:ScriptPlanner.plan:arg=limits:type=PlanningLimits:default=None",
+      "src/elevenlabs_mcp/planner.py:method:ScriptPlanner.plan:arg=options:type=VoiceoverOptions:default=None",
+      "src/elevenlabs_mcp/planner.py:method:ScriptPlanner.plan:arg=script:type=Script:default=None",
+      "src/elevenlabs_mcp/planner.py:method:ScriptPlanner.plan:arg=self:type=ScriptPlanner:default=None",
+      "src/elevenlabs_mcp/planner.py:method:ScriptPlanner.plan:kind=method",
+      "src/elevenlabs_mcp/planner.py:method:ScriptPlanner.plan:of=ScriptPlanner",
+      "src/elevenlabs_mcp/planner.py:method:ScriptPlanner.plan:returns=VoiceoverPlan",
+      "tests/acceptance/test_canonical_voiceover_plan.py:test_identical_input_produces_independently_reproducible_plan_hash",
+      "tests/acceptance/test_canonical_voiceover_plan.py:test_identical_input_produces_independently_reproducible_plan_hash:kind=test_function",
+      "tests/acceptance/test_canonical_voiceover_plan.py:test_job_wide_resource_limits_fail_before_chunking_side_effects",
+      "tests/acceptance/test_canonical_voiceover_plan.py:test_job_wide_resource_limits_fail_before_chunking_side_effects:kind=test_function",
+      "tests/acceptance/test_canonical_voiceover_plan.py:test_line_ending_equivalence_and_other_text_changes_affect_identity",
+      "tests/acceptance/test_canonical_voiceover_plan.py:test_line_ending_equivalence_and_other_text_changes_affect_identity:kind=test_function",
+      "tests/acceptance/test_canonical_voiceover_plan.py:test_plan_summaries_and_safe_preview_fields_are_complete",
+      "tests/acceptance/test_canonical_voiceover_plan.py:test_plan_summaries_and_safe_preview_fields_are_complete:kind=test_function",
+      "tests/acceptance/test_canonical_voiceover_plan.py:test_request_ids_fingerprints_and_seeds_are_stable_and_input_bound",
+      "tests/acceptance/test_canonical_voiceover_plan.py:test_request_ids_fingerprints_and_seeds_are_stable_and_input_bound:kind=test_function"
+    ],
+    "files": {
+      "create": [],
+      "edit": [
+        "src/elevenlabs_mcp/contracts.py",
+        "src/elevenlabs_mcp/planner.py",
+        "tests/acceptance/test_canonical_voiceover_plan.py"
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/examples/plan_voiceover.input.json",
+        "manifests/r04-deterministic-chunk-grouping.manifest.yaml",
+        "manifests/r04-lossless-text-fragmentation.manifest.yaml",
+        "manifests/r04-typed-script-contracts.manifest.yaml"
+      ],
+      "scope": [],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "edit": [
+        {
+          "path": "src/elevenlabs_mcp/contracts.py",
+          "artifacts": [
+            {
+              "kind": "attribute",
+              "name": "max_total_characters",
+              "of": "PlanningLimits",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "max_parts",
+              "of": "PlanningLimits",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "max_scenes",
+              "of": "PlanningLimits",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "max_cast_entries",
+              "of": "PlanningLimits",
+              "type": "int"
+            },
+            {
+              "kind": "class",
+              "name": "PlannedRequest",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "chunk_id",
+              "of": "PlannedRequest",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "chunk",
+              "of": "PlannedRequest",
+              "type": "PlannedChunk"
+            },
+            {
+              "kind": "attribute",
+              "name": "seed",
+              "of": "PlannedRequest",
+              "type": "int | None"
+            },
+            {
+              "kind": "attribute",
+              "name": "generation_fingerprint",
+              "of": "PlannedRequest",
+              "type": "str"
+            },
+            {
+              "kind": "class",
+              "name": "VoiceoverPlan",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "schema_version",
+              "of": "VoiceoverPlan",
+              "type": "Literal['1']"
+            },
+            {
+              "kind": "attribute",
+              "name": "plan_hash",
+              "of": "VoiceoverPlan",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "planner_version",
+              "of": "VoiceoverPlan",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "normalized_script",
+              "of": "VoiceoverPlan",
+              "type": "Script"
+            },
+            {
+              "kind": "attribute",
+              "name": "resolved_options",
+              "of": "VoiceoverPlan",
+              "type": "VoiceoverOptions"
+            },
+            {
+              "kind": "attribute",
+              "name": "effective_limits",
+              "of": "VoiceoverPlan",
+              "type": "PlanningLimits"
+            },
+            {
+              "kind": "attribute",
+              "name": "requests",
+              "of": "VoiceoverPlan",
+              "type": "tuple[PlannedRequest, ...]"
+            },
+            {
+              "kind": "attribute",
+              "name": "total_parts",
+              "of": "VoiceoverPlan",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "total_characters",
+              "of": "VoiceoverPlan",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "distinct_voice_count",
+              "of": "VoiceoverPlan",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "warnings",
+              "of": "VoiceoverPlan",
+              "type": "tuple[str, ...]"
+            },
+            {
+              "kind": "attribute",
+              "name": "provider_access_checked",
+              "of": "VoiceoverPlan",
+              "type": "Literal[False]"
+            },
+            {
+              "kind": "attribute",
+              "name": "cost_estimate",
+              "of": "VoiceoverPlan",
+              "type": "None"
+            }
+          ]
+        },
+        {
+          "path": "src/elevenlabs_mcp/planner.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "ScriptPlanner"
+            },
+            {
+              "kind": "method",
+              "name": "plan",
+              "of": "ScriptPlanner",
+              "args": [
+                {
+                  "name": "self",
+                  "type": "ScriptPlanner"
+                },
+                {
+                  "name": "script",
+                  "type": "Script"
+                },
+                {
+                  "name": "options",
+                  "type": "VoiceoverOptions"
+                },
+                {
+                  "name": "limits",
+                  "type": "PlanningLimits"
+                }
+              ],
+              "returns": "VoiceoverPlan"
+            }
+          ]
+        },
+        {
+          "path": "tests/acceptance/test_canonical_voiceover_plan.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_identical_input_produces_independently_reproducible_plan_hash",
+              "description": "Supplied fixture plans byte-stably twice and plan_hash equals an independently serialized canonical payload digest without credentials or I/O."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_line_ending_equivalence_and_other_text_changes_affect_identity",
+              "description": "CRLF/CR normalize to LF identity while preserved whitespace or spoken text changes produce a different plan hash."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_request_ids_fingerprints_and_seeds_are_stable_and_input_bound",
+              "description": "Request IDs derive from plan hash/index, modular seeds and fingerprints are stable, and option/limit changes alter identity/fingerprints."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_plan_summaries_and_safe_preview_fields_are_complete",
+              "description": "Immutable plan exposes normalized script, resolved defaults, exact totals, distinct cast voices, requests, warnings, effective limits, false provider check, null cost, and JSON-compatible output."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_job_wide_resource_limits_fail_before_chunking_side_effects",
+              "description": "Lowered total-character, part, scene, and cast ceilings raise PlanningLimitError with exact name/limit/actual evidence."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/examples/plan_voiceover.input.json",
+        "manifests/r04-typed-script-contracts.manifest.yaml",
+        "manifests/r04-lossless-text-fragmentation.manifest.yaml",
+        "manifests/r04-deterministic-chunk-grouping.manifest.yaml"
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_canonical_voiceover_plan.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_canonical_voiceover_plan.py",
+      "uv run ruff check tests/acceptance/test_canonical_voiceover_plan.py",
+      "uv run ruff format --check tests/acceptance/test_canonical_voiceover_plan.py",
+      "uv run pyright tests/acceptance/test_canonical_voiceover_plan.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_canonical_voiceover_plan.py"
+    ]
+  }
+}

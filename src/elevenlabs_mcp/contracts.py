@@ -132,6 +132,10 @@ class SourceSpan(_StrictModel):
 
 
 class PlanningLimits(_StrictModel):
+    max_total_characters: int = Field(default=100_000, ge=1, le=100_000)
+    max_parts: int = Field(default=2_000, ge=1, le=2_000)
+    max_scenes: int = Field(default=256, ge=1, le=256)
+    max_cast_entries: int = Field(default=128, ge=1, le=128)
     max_text_characters: int = Field(default=2_000, ge=1, le=2_000)
     max_unique_voices: int = Field(default=10, ge=1, le=10)
     max_planned_chunks: int = Field(default=2_048, ge=1, le=2_048)
@@ -166,6 +170,29 @@ class PlannedChunk(_StrictModel):
         if self.voice_ids != resolved:
             raise ValueError("voice_ids must be stable unique fragment voice IDs")
         return self
+
+
+class PlannedRequest(_StrictModel):
+    chunk_id: str = Field(pattern=r"^chk_[0-9a-f]{16}_[0-9]{6}$")
+    chunk: PlannedChunk
+    seed: int | None = Field(default=None, ge=0, le=4_294_967_295)
+    generation_fingerprint: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+
+
+class VoiceoverPlan(_StrictModel):
+    schema_version: Literal["1"] = "1"
+    plan_hash: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    planner_version: str = Field(min_length=1, max_length=64)
+    normalized_script: Script
+    resolved_options: VoiceoverOptions
+    effective_limits: PlanningLimits
+    requests: tuple[PlannedRequest, ...] = Field(min_length=1, max_length=2_048)
+    total_parts: int = Field(ge=1, le=2_000)
+    total_characters: int = Field(ge=1, le=100_000)
+    distinct_voice_count: int = Field(ge=1, le=128)
+    warnings: tuple[str, ...] = Field(max_length=100)
+    provider_access_checked: Literal[False] = False
+    cost_estimate: None = None
 
 
 class PlanVoiceoverInput(_StrictModel):

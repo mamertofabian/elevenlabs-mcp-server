@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from bisect import bisect_right
 from dataclasses import dataclass
 from typing import TypeAlias
@@ -11,11 +13,13 @@ import regex
 from elevenlabs_mcp.contracts import (
     PlannedChunk,
     PlannedFragment,
+    PlannedRequest,
     PlanningLimits,
     Script,
     ScriptPart,
     SourceSpan,
     VoiceoverOptions,
+    VoiceoverPlan,
 )
 
 _TOKEN_PATTERN = regex.compile(r"\[[^\[\]]*\]|\X")
@@ -60,6 +64,59 @@ class TextFragment:
 
 TextFragments: TypeAlias = tuple[TextFragment, ...]
 PlannedChunks: TypeAlias = tuple[PlannedChunk, ...]
+
+
+class ScriptPlanner:
+    def plan(
+        self, script: Script, options: VoiceoverOptions, limits: PlanningLimits
+    ) -> VoiceoverPlan:
+        normalized_script = _normalize_script(script)
+        total_parts = sum(len(scene.parts) for scene in normalized_script.scenes)
+        total_characters = sum(
+            len(part.text) for scene in normalized_script.scenes for part in scene.parts
+        )
+        totals = (
+            ("max_total_characters", limits.max_total_characters, total_characters),
+            ("max_parts", limits.max_parts, total_parts),
+            ("max_scenes", limits.max_scenes, len(normalized_script.scenes)),
+            ("max_cast_entries", limits.max_cast_entries, len(normalized_script.cast)),
+        )
+        for limit_name, limit, actual in totals:
+            if actual > limit:
+                raise PlanningLimitError(limit_name, limit, actual)
+
+        planner_version = "1"
+        identity_payload = {
+            "effective_limits": limits.model_dump(mode="json"),
+            "normalized_script": normalized_script.model_dump(mode="json"),
+            "planner_version": planner_version,
+            "resolved_options": options.model_dump(mode="json"),
+        }
+        plan_hash = _sha256_json(identity_payload)
+        chunks = chunk_script(normalized_script, options, limits)
+        hash_prefix = plan_hash.removeprefix("sha256:")[:16]
+        requests = tuple(
+            _planned_request(chunk, options, hash_prefix) for chunk in chunks
+        )
+        warnings = (
+            ("Acting continuity across generation requests is not guaranteed.",)
+            if len(requests) > 1
+            else ()
+        )
+        return VoiceoverPlan(
+            plan_hash=plan_hash,
+            planner_version=planner_version,
+            normalized_script=normalized_script,
+            resolved_options=options,
+            effective_limits=limits,
+            requests=requests,
+            total_parts=total_parts,
+            total_characters=total_characters,
+            distinct_voice_count=len(
+                {voice.voice_id for voice in normalized_script.cast.values()}
+            ),
+            warnings=warnings,
+        )
 
 
 def fragment_text(part: ScriptPart, max_characters: int) -> TextFragments:
@@ -176,6 +233,52 @@ def chunk_script(
         flush()
 
     return tuple(chunks)
+
+
+def _normalize_script(script: Script) -> Script:
+    data = script.model_dump(mode="json")
+    for scene in data["scenes"]:
+        for part in scene["parts"]:
+            part["text"] = part["text"].replace("\r\n", "\n").replace("\r", "\n")
+    return Script.model_validate(data)
+
+
+def _planned_request(
+    chunk: PlannedChunk, options: VoiceoverOptions, hash_prefix: str
+) -> PlannedRequest:
+    seed = (
+        None if options.seed is None else (options.seed + chunk.index) % 4_294_967_296
+    )
+    fingerprint_payload = {
+        "chunk": chunk.model_dump(mode="json"),
+        "engine": options.engine,
+        "export_format": options.export_format,
+        "language_code": options.language_code,
+        "model_id": options.model_id,
+        "seed": seed,
+        "voice_settings": (
+            None
+            if options.voice_settings is None
+            else options.voice_settings.model_dump(mode="json")
+        ),
+    }
+    return PlannedRequest(
+        chunk_id=f"chk_{hash_prefix}_{chunk.index:06d}",
+        chunk=chunk,
+        seed=seed,
+        generation_fingerprint=_sha256_json(fingerprint_payload),
+    )
+
+
+def _sha256_json(value: object) -> str:
+    canonical = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
+    return "sha256:" + hashlib.sha256(canonical).hexdigest()
 
 
 def _boundary_ends(
