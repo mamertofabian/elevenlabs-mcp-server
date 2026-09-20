@@ -27,10 +27,21 @@ class VoiceData(TypedDict):
     description: str
     preview_url: str
     high_quality_base_model_ids: List[str]
+
+
+class _MissingAPIKeyError(ValueError):
+    """Credential absence detected before provider dispatch."""
+
+
 from pydub import AudioSegment
 import io
 from datetime import datetime
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import (
+    retry,
+    retry_if_not_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 class ElevenLabsAPI:
     # Add model list as class constant
@@ -43,12 +54,17 @@ class ElevenLabsAPI:
                              "supports_stitching": False, "supports_style": False, "wait_time": 0.1}
     }
 
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_not_exception_type(_MissingAPIKeyError),
+    )
     def get_voices(self) -> List[VoiceData]:
         """Fetch available voices from ElevenLabs API"""
+        api_key = self._require_api_key()
         headers = {
             "Accept": "application/json",
-            "xi-api-key": self.api_key
+            "xi-api-key": api_key
         }
         
         response = requests.get(
@@ -74,10 +90,7 @@ class ElevenLabsAPI:
             raise Exception(f"Failed to fetch voices: {response.text}")
 
     def __init__(self):
-        self.api_key = os.getenv("ELEVENLABS_API_KEY")
-        if not self.api_key:
-            logging.error("ELEVENLABS_API_KEY environment variable not set")
-            raise ValueError("ELEVENLABS_API_KEY environment variable not set")
+        self.api_key = os.getenv("ELEVENLABS_API_KEY") or None
             
         self.voice_id = os.getenv("ELEVENLABS_VOICE_ID") or "iEw1wkYocsNy7I7pteSN"
         self.model_id = os.getenv("ELEVENLABS_MODEL_ID") or "eleven_multilingual_v2"
@@ -92,15 +105,25 @@ class ElevenLabsAPI:
         self.similarity_boost = float(os.getenv("ELEVENLABS_SIMILARITY_BOOST", "0.75"))
         self.style = float(os.getenv("ELEVENLABS_STYLE", "0.1"))
         self.base_url = "https://api.elevenlabs.io/v1"
-    
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+
+    def _require_api_key(self) -> str:
+        if not self.api_key:
+            raise _MissingAPIKeyError("ELEVENLABS_API_KEY environment variable not set")
+        return self.api_key
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_not_exception_type(_MissingAPIKeyError),
+    )
     def generate_audio_segment(self, text: str, voice_id: str, output_file: Optional[str] = None,
                       previous_text: Optional[str] = None, next_text: Optional[str] = None,
                       previous_request_ids: Optional[List[str]] = None, debug_info: Optional[List[str]] = None) -> tuple[bytes, str]:
         """Generate audio using specified voice with context conditioning"""
+        api_key = self._require_api_key()
         headers = {
             "Accept": "application/json",
-            "xi-api-key": self.api_key,
+            "xi-api-key": api_key,
             "Content-Type": "application/json"
         }
         
@@ -157,6 +180,7 @@ class ElevenLabsAPI:
 
     def generate_full_audio(self, script_parts: List[Dict], output_dir: Path) -> tuple[str, List[str], int]:
         """Generate audio for multiple parts using request stitching. Returns tuple of (output_file_path, debug_info, completed_parts)"""
+        self._require_api_key()
         # Create output directory if it doesn't exist
         output_dir.mkdir(exist_ok=True)
         

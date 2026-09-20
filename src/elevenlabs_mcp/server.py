@@ -56,11 +56,13 @@ class ElevenLabsServer:
         # Initialize voices cache
         try:
             voices, needs_refresh = await self.db.get_voices()
-            if needs_refresh:
+            if needs_refresh and self.api.api_key:
                 logging.info("Fetching initial voices data")
                 fresh_voices = await asyncio.to_thread(self.api.get_voices)
                 await self.db.upsert_voices(fresh_voices)
                 logging.info(f"Cached {len(fresh_voices)} voices")
+            elif needs_refresh:
+                logging.info("Skipping initial voices refresh: API key is not configured")
         except Exception as e:
             logging.error(f"Error initializing voices cache: {e}")
 
