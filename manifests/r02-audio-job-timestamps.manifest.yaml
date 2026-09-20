@@ -1,0 +1,174 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Generate fresh timezone-aware UTC timestamps per AudioJob and provide an injectable clock for new server-created jobs without changing legacy history fields.
+description: |
+  First R02 child covering A06 timestamp correctness only. Replace evaluated
+  dataclass datetime defaults with per-instance UTC factories. Add a public
+  AudioJob.create factory whose Callable clock is invoked once so created_at
+  and updated_at share an injected deterministic instant. Normalize historical
+  naive timestamps to timezone-aware UTC during from_dict while leaving stored
+  rows untouched and preserving the exact legacy to_dict field set. Narrow
+  server wiring uses AudioJob.create at both legacy generation call sites.
+  Output naming, partial generation, HTTP policy, logging, and migration remain
+  separate children. Expected red: two directly constructed jobs currently
+  share the same evaluated datetime objects, timestamps are naive, and
+  AudioJob.create does not exist.
+temptations:
+  - risk: Fix only one timestamp field or call the injected clock separately for created_at and updated_at.
+    instead: Capture one aware UTC instant in AudioJob.create and assign it to both fields; use independent default factories for direct construction.
+  - risk: Add timestamp provenance keys to the legacy to_dict response and break existing client history parsing.
+    instead: Normalize naive values in memory while preserving the existing nine serialized history fields; richer migration provenance belongs to R05.
+  - risk: Rewrite historical database timestamp strings during reads.
+    instead: Interpret naive values as UTC in AudioJob.from_dict without database writes.
+type: fix
+files:
+  edit:
+    - path: src/elevenlabs_mcp/models.py
+      artifacts:
+        - kind: class
+          name: ScriptPart
+        - kind: attribute
+          name: text
+          of: ScriptPart
+          type: str
+        - kind: attribute
+          name: voice_id
+          of: ScriptPart
+          type: Optional[str]
+        - kind: attribute
+          name: actor
+          of: ScriptPart
+          type: Optional[str]
+        - kind: class
+          name: AudioJob
+        - kind: attribute
+          name: id
+          of: AudioJob
+          type: str
+        - kind: attribute
+          name: status
+          of: AudioJob
+          type: str
+        - kind: attribute
+          name: script_parts
+          of: AudioJob
+          type: List[Dict]
+        - kind: attribute
+          name: output_file
+          of: AudioJob
+          type: Optional[str]
+        - kind: attribute
+          name: error
+          of: AudioJob
+          type: Optional[str]
+        - kind: attribute
+          name: created_at
+          of: AudioJob
+          type: datetime
+        - kind: attribute
+          name: updated_at
+          of: AudioJob
+          type: datetime
+        - kind: attribute
+          name: total_parts
+          of: AudioJob
+          type: int
+        - kind: attribute
+          name: completed_parts
+          of: AudioJob
+          type: int
+        - kind: method
+          name: create
+          of: AudioJob
+          args:
+            - name: cls
+            - name: id
+              type: str
+            - name: status
+              type: str
+            - name: script_parts
+              type: List[Dict]
+            - name: total_parts
+              type: int
+              default: "1"
+            - name: clock
+              type: Callable[[], datetime]
+              default: utc_now
+          returns: AudioJob
+        - kind: method
+          name: to_dict
+          of: AudioJob
+          args:
+            - name: self
+          returns: Dict
+        - kind: method
+          name: from_dict
+          of: AudioJob
+          args:
+            - name: data
+              type: Dict
+          returns: AudioJob
+        - kind: function
+          name: utc_now
+          args: []
+          returns: datetime
+    - path: tests/acceptance/test_audio_job_timestamps.py
+      artifacts:
+        - kind: test_function
+          name: test_direct_jobs_receive_distinct_aware_utc_defaults
+          description: A06 observes independent created/updated datetime objects for each direct AudioJob construction and UTC awareness.
+        - kind: test_function
+          name: test_create_uses_one_injected_clock_instant
+          description: A06 injects a deterministic clock, observes one invocation, and receives matching aware created/updated timestamps.
+        - kind: test_function
+          name: test_legacy_naive_timestamps_are_interpreted_as_utc
+          description: Historical naive strings become aware UTC datetimes in memory without input mutation.
+        - kind: test_function
+          name: test_legacy_serialization_field_set_remains_unchanged
+          description: ScriptPart fields and AudioJob.to_dict preserve the established compatibility shape with ISO timestamps.
+  read:
+    - manifests/r01-runtime-path-injection.manifest.yaml
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md
+    - tests/characterization/test_legacy_database.py
+  scope:
+    - path: src/elevenlabs_mcp/server.py
+      reason: Replace the two legacy AudioJob constructor call sites with AudioJob.create without changing public server artifacts.
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_audio_job_timestamps.py]
+  - [uv, run, pytest, -q, tests/acceptance/test_audio_job_timestamps.py, tests/characterization/test_legacy_database.py]
+  - [uv, run, ruff, check, tests/acceptance/test_audio_job_timestamps.py]
+  - [uv, run, pyright, src/elevenlabs_mcp/models.py, tests/acceptance/test_audio_job_timestamps.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_audio_job_timestamps.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: AudioJob timestamps are fresh per instance, timezone-aware UTC, injectable through a one-call factory, and historical naive values are interpreted as UTC without changing legacy serialization fields.
+  rationale: The narrow model repair removes evaluated dataclass defaults while preserving the existing database/history shape and routing both server creation paths through the injected-clock factory.
+  review_notes:
+    - source: maid-implementation-reviewer:r02_timestamp_review
+      severity: ready
+      summary: No blockers; direct handler coverage and within-instance default-factory comparison remain P2 follow-ups.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 38 tests passed.
+    - command: [uv, run, maid, test, --manifest, manifests/r02-audio-job-timestamps.manifest.yaml]
+      status: passed
+      summary: All four child commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, d434125, --summary, --packet]
+      status: passed
+      summary: All 11 deep stages passed.
+  completed_at: "2026-09-20T13:15:56+08:00"
+created: "2026-09-20T05:12:55Z"
+metadata:
+  author: Codex
+  tags: [revival, r02, timestamps, legacy-models]
+  priority: high

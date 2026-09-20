@@ -349,7 +349,7 @@ class ElevenLabsServer:
                     
                     # Create job record
                     job_id = str(uuid.uuid4())
-                    job = AudioJob(
+                    job = AudioJob.create(
                         id=job_id,
                         status="pending",
                         script_parts=script_parts,
@@ -440,7 +440,7 @@ class ElevenLabsServer:
 
                     # Create job record
                     job_id = str(uuid.uuid4())
-                    job = AudioJob(
+                    job = AudioJob.create(
                         id=job_id,
                         status="pending",
                         script_parts=script_parts,

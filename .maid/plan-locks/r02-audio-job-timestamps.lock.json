@@ -1,0 +1,431 @@
+{
+  "manifest_path": "manifests/r02-audio-job-timestamps.manifest.yaml",
+  "manifest_hash": "sha256-contract:2996650f532ff54fce0b92631f19b7dc9c4a0bac1a4abf7442129099c5a5ecc5",
+  "test_hashes": {
+    "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+    "tests/acceptance/test_audio_job_timestamps.py": "sha256-pyast:v2:ba970e4a9b6b896786d331f250e3c81fc445e4f1884da3b361775a727fa4cc2f"
+  },
+  "created_at": "2026-09-20T05:12:52.915764+00:00",
+  "revision": 5,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:26cebd594ae1473695093b211e2fea2f919cbb5cd19d05a7cdbc325f676c7608",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/acceptance/test_audio_job_timestamps.py": "sha256-pyast:v2:ba970e4a9b6b896786d331f250e3c81fc445e4f1884da3b361775a727fa4cc2f"
+      },
+      "revised_at": "2026-09-20T05:12:55.263110+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r02-audio-job-timestamps.manifest.yaml -> manifests/r02-audio-job-timestamps.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:526bd3841c648baa2e4d8ab8775e15daaeda746d264cdaf1f07b19419772a0a8",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/acceptance/test_audio_job_timestamps.py": "sha256-pyast:v2:ba970e4a9b6b896786d331f250e3c81fc445e4f1884da3b361775a727fa4cc2f"
+      },
+      "revised_at": "2026-09-20T05:13:44.566845+00:00",
+      "reason": "Run the chain-discovered legacy database characterization explicitly",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [
+          "uv run pytest -q tests/acceptance/test_audio_job_timestamps.py tests/characterization/test_legacy_database.py"
+        ],
+        "validate_commands_removed": [
+          "uv run pytest -q"
+        ]
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:c9f91e50940752cbf572fc9dbc0c1d16feb54d2733a637bd6d28daa3ee56649b",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/acceptance/test_audio_job_timestamps.py": "sha256-pyast:v2:ba970e4a9b6b896786d331f250e3c81fc445e4f1884da3b361775a727fa4cc2f"
+      },
+      "revised_at": "2026-09-20T05:14:00.329045+00:00",
+      "reason": "Keep inherited models.py Ruff modernization debt out of the timestamp behavior child while retaining focused Pyright coverage",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [
+          "uv run ruff check tests/acceptance/test_audio_job_timestamps.py"
+        ],
+        "validate_commands_removed": [
+          "uv run ruff check src/elevenlabs_mcp/models.py tests/acceptance/test_audio_job_timestamps.py"
+        ]
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:2996650f532ff54fce0b92631f19b7dc9c4a0bac1a4abf7442129099c5a5ecc5",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/acceptance/test_audio_job_timestamps.py": "sha256-pyast:v2:ba970e4a9b6b896786d331f250e3c81fc445e4f1884da3b361775a727fa4cc2f"
+      },
+      "revised_at": "2026-09-20T05:16:21.322100+00:00",
+      "reason": "Capture reviewed timestamp Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T05:14:01.635605+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_audio_job_timestamps.py",
+        "exit_code": 1,
+        "output_tail": "            ],\n            clock=lambda: datetime(2026, 9, 20, tzinfo=UTC),\n        )\nE       AttributeError: type object 'AudioJob' has no attribute 'create'\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_audio_job_timestamps.py:68: AttributeError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_audio_job_timestamps.py::test_direct_jobs_receive_distinct_aware_utc_defaults\nFAILED tests/acceptance/test_audio_job_timestamps.py::test_create_uses_one_injected_clock_instant\nFAILED tests/acceptance/test_audio_job_timestamps.py::test_legacy_naive_timestamps_are_interpreted_as_utc\nFAILED tests/acceptance/test_audio_job_timestamps.py::test_legacy_serialization_field_set_remains_unchanged\n4 failed, 1 warning in 0.18s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run pytest -q tests/acceptance/test_audio_job_timestamps.py tests/characterization/test_legacy_database.py",
+        "exit_code": 1,
+        "output_tail": "            ],\n            clock=lambda: datetime(2026, 9, 20, tzinfo=UTC),\n        )\nE       AttributeError: type object 'AudioJob' has no attribute 'create'\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_audio_job_timestamps.py:68: AttributeError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_audio_job_timestamps.py::test_direct_jobs_receive_distinct_aware_utc_defaults\nFAILED tests/acceptance/test_audio_job_timestamps.py::test_create_uses_one_injected_clock_instant\nFAILED tests/acceptance/test_audio_job_timestamps.py::test_legacy_naive_timestamps_are_interpreted_as_utc\nFAILED tests/acceptance/test_audio_job_timestamps.py::test_legacy_serialization_field_set_remains_unchanged\n4 failed, 2 passed, 1 warning in 0.17s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/acceptance/test_audio_job_timestamps.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright src/elevenlabs_mcp/models.py tests/acceptance/test_audio_job_timestamps.py",
+        "exit_code": 1,
+        "output_tail": "/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_audio_job_timestamps.py\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_audio_job_timestamps.py:22:39 - error: \"utc_now\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_audio_job_timestamps.py:37:20 - error: Cannot access attribute \"create\" for class \"type[AudioJob]\"\n  \u00a0\u00a0Attribute \"create\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_audio_job_timestamps.py:68:20 - error: Cannot access attribute \"create\" for class \"type[AudioJob]\"\n  \u00a0\u00a0Attribute \"create\" is unknown (reportAttributeAccessIssue)\n3 errors, 0 warnings, 0 informations\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.completed_parts",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.completed_parts:kind=attribute",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.completed_parts:of=AudioJob",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.completed_parts:type=int",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.created_at",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.created_at:kind=attribute",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.created_at:of=AudioJob",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.created_at:type=datetime",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.error",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.error:kind=attribute",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.error:of=AudioJob",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.error:type=Optional[str]",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.id",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.id:kind=attribute",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.id:of=AudioJob",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.id:type=str",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.output_file",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.output_file:kind=attribute",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.output_file:of=AudioJob",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.output_file:type=Optional[str]",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.script_parts",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.script_parts:kind=attribute",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.script_parts:of=AudioJob",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.script_parts:type=List[Dict]",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.status",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.status:kind=attribute",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.status:of=AudioJob",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.status:type=str",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.total_parts",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.total_parts:kind=attribute",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.total_parts:of=AudioJob",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.total_parts:type=int",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.updated_at",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.updated_at:kind=attribute",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.updated_at:of=AudioJob",
+      "src/elevenlabs_mcp/models.py:attribute:AudioJob.updated_at:type=datetime",
+      "src/elevenlabs_mcp/models.py:attribute:ScriptPart.actor",
+      "src/elevenlabs_mcp/models.py:attribute:ScriptPart.actor:kind=attribute",
+      "src/elevenlabs_mcp/models.py:attribute:ScriptPart.actor:of=ScriptPart",
+      "src/elevenlabs_mcp/models.py:attribute:ScriptPart.actor:type=Optional[str]",
+      "src/elevenlabs_mcp/models.py:attribute:ScriptPart.text",
+      "src/elevenlabs_mcp/models.py:attribute:ScriptPart.text:kind=attribute",
+      "src/elevenlabs_mcp/models.py:attribute:ScriptPart.text:of=ScriptPart",
+      "src/elevenlabs_mcp/models.py:attribute:ScriptPart.text:type=str",
+      "src/elevenlabs_mcp/models.py:attribute:ScriptPart.voice_id",
+      "src/elevenlabs_mcp/models.py:attribute:ScriptPart.voice_id:kind=attribute",
+      "src/elevenlabs_mcp/models.py:attribute:ScriptPart.voice_id:of=ScriptPart",
+      "src/elevenlabs_mcp/models.py:attribute:ScriptPart.voice_id:type=Optional[str]",
+      "src/elevenlabs_mcp/models.py:class:AudioJob",
+      "src/elevenlabs_mcp/models.py:class:AudioJob:kind=class",
+      "src/elevenlabs_mcp/models.py:class:ScriptPart",
+      "src/elevenlabs_mcp/models.py:class:ScriptPart:kind=class",
+      "src/elevenlabs_mcp/models.py:function:utc_now",
+      "src/elevenlabs_mcp/models.py:function:utc_now:kind=function",
+      "src/elevenlabs_mcp/models.py:function:utc_now:returns=datetime",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.create",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.create:arg=clock:type=Callable[[], datetime]:default=utc_now",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.create:arg=cls:type=None:default=None",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.create:arg=id:type=str:default=None",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.create:arg=script_parts:type=List[Dict]:default=None",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.create:arg=status:type=str:default=None",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.create:arg=total_parts:type=int:default=1",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.create:kind=method",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.create:of=AudioJob",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.create:returns=AudioJob",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.from_dict",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.from_dict:arg=data:type=Dict:default=None",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.from_dict:kind=method",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.from_dict:of=AudioJob",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.from_dict:returns=AudioJob",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.to_dict",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.to_dict:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.to_dict:kind=method",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.to_dict:of=AudioJob",
+      "src/elevenlabs_mcp/models.py:method:AudioJob.to_dict:returns=Dict",
+      "tests/acceptance/test_audio_job_timestamps.py:test_create_uses_one_injected_clock_instant",
+      "tests/acceptance/test_audio_job_timestamps.py:test_create_uses_one_injected_clock_instant:kind=test_function",
+      "tests/acceptance/test_audio_job_timestamps.py:test_direct_jobs_receive_distinct_aware_utc_defaults",
+      "tests/acceptance/test_audio_job_timestamps.py:test_direct_jobs_receive_distinct_aware_utc_defaults:kind=test_function",
+      "tests/acceptance/test_audio_job_timestamps.py:test_legacy_naive_timestamps_are_interpreted_as_utc",
+      "tests/acceptance/test_audio_job_timestamps.py:test_legacy_naive_timestamps_are_interpreted_as_utc:kind=test_function",
+      "tests/acceptance/test_audio_job_timestamps.py:test_legacy_serialization_field_set_remains_unchanged",
+      "tests/acceptance/test_audio_job_timestamps.py:test_legacy_serialization_field_set_remains_unchanged:kind=test_function"
+    ],
+    "files": {
+      "create": [],
+      "edit": [
+        "src/elevenlabs_mcp/models.py",
+        "tests/acceptance/test_audio_job_timestamps.py"
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md",
+        "manifests/r01-runtime-path-injection.manifest.yaml",
+        "tests/characterization/test_legacy_database.py"
+      ],
+      "scope": [
+        "src/elevenlabs_mcp/server.py"
+      ],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "edit": [
+        {
+          "path": "src/elevenlabs_mcp/models.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "ScriptPart"
+            },
+            {
+              "kind": "attribute",
+              "name": "text",
+              "of": "ScriptPart",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "voice_id",
+              "of": "ScriptPart",
+              "type": "Optional[str]"
+            },
+            {
+              "kind": "attribute",
+              "name": "actor",
+              "of": "ScriptPart",
+              "type": "Optional[str]"
+            },
+            {
+              "kind": "class",
+              "name": "AudioJob"
+            },
+            {
+              "kind": "attribute",
+              "name": "id",
+              "of": "AudioJob",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "status",
+              "of": "AudioJob",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "script_parts",
+              "of": "AudioJob",
+              "type": "List[Dict]"
+            },
+            {
+              "kind": "attribute",
+              "name": "output_file",
+              "of": "AudioJob",
+              "type": "Optional[str]"
+            },
+            {
+              "kind": "attribute",
+              "name": "error",
+              "of": "AudioJob",
+              "type": "Optional[str]"
+            },
+            {
+              "kind": "attribute",
+              "name": "created_at",
+              "of": "AudioJob",
+              "type": "datetime"
+            },
+            {
+              "kind": "attribute",
+              "name": "updated_at",
+              "of": "AudioJob",
+              "type": "datetime"
+            },
+            {
+              "kind": "attribute",
+              "name": "total_parts",
+              "of": "AudioJob",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "completed_parts",
+              "of": "AudioJob",
+              "type": "int"
+            },
+            {
+              "kind": "method",
+              "name": "create",
+              "of": "AudioJob",
+              "args": [
+                {
+                  "name": "cls"
+                },
+                {
+                  "name": "id",
+                  "type": "str"
+                },
+                {
+                  "name": "status",
+                  "type": "str"
+                },
+                {
+                  "name": "script_parts",
+                  "type": "List[Dict]"
+                },
+                {
+                  "name": "total_parts",
+                  "type": "int",
+                  "default": "1"
+                },
+                {
+                  "name": "clock",
+                  "type": "Callable[[], datetime]",
+                  "default": "utc_now"
+                }
+              ],
+              "returns": "AudioJob"
+            },
+            {
+              "kind": "method",
+              "name": "to_dict",
+              "of": "AudioJob",
+              "args": [
+                {
+                  "name": "self"
+                }
+              ],
+              "returns": "Dict"
+            },
+            {
+              "kind": "method",
+              "name": "from_dict",
+              "of": "AudioJob",
+              "args": [
+                {
+                  "name": "data",
+                  "type": "Dict"
+                }
+              ],
+              "returns": "AudioJob"
+            },
+            {
+              "kind": "function",
+              "name": "utc_now",
+              "returns": "datetime"
+            }
+          ]
+        },
+        {
+          "path": "tests/acceptance/test_audio_job_timestamps.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_direct_jobs_receive_distinct_aware_utc_defaults",
+              "description": "A06 observes independent created/updated datetime objects for each direct AudioJob construction and UTC awareness."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_create_uses_one_injected_clock_instant",
+              "description": "A06 injects a deterministic clock, observes one invocation, and receives matching aware created/updated timestamps."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_legacy_naive_timestamps_are_interpreted_as_utc",
+              "description": "Historical naive strings become aware UTC datetimes in memory without input mutation."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_legacy_serialization_field_set_remains_unchanged",
+              "description": "ScriptPart fields and AudioJob.to_dict preserve the established compatibility shape with ISO timestamps."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "manifests/r01-runtime-path-injection.manifest.yaml",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md",
+        "tests/characterization/test_legacy_database.py"
+      ],
+      "scope": [
+        {
+          "path": "src/elevenlabs_mcp/server.py",
+          "reason": "Replace the two legacy AudioJob constructor call sites with AudioJob.create without changing public server artifacts."
+        }
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_audio_job_timestamps.py",
+      "tests/characterization/test_legacy_database.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_audio_job_timestamps.py",
+      "uv run pytest -q tests/acceptance/test_audio_job_timestamps.py tests/characterization/test_legacy_database.py",
+      "uv run ruff check tests/acceptance/test_audio_job_timestamps.py",
+      "uv run pyright src/elevenlabs_mcp/models.py tests/acceptance/test_audio_job_timestamps.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_audio_job_timestamps.py"
+    ]
+  }
+}
