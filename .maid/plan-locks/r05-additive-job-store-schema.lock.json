@@ -1,11 +1,11 @@
 {
   "manifest_path": "manifests/r05-additive-job-store-schema.manifest.yaml",
-  "manifest_hash": "sha256-contract:88b35ec9ab426b8c07d2a0fdfa419f12acc4ff59832edf4851a0631bff53b19c",
+  "manifest_hash": "sha256-contract:15712330f5626a2655af23fa2a1111c0bc104db0a83265a448971af430a4ef0f",
   "test_hashes": {
-    "tests/integration/test_job_store_schema.py": "sha256-pyast:v2:c293d471b49acdb05d0d870a7f5a37d7fe7f60aab6b257fb6197cad5edafe552"
+    "tests/integration/test_job_store_schema.py": "sha256-pyast:v2:77aa2dcd7c004c93c4d8cbbc725bb07a202f5df955ee66ac1bdd8592d88f663c"
   },
   "created_at": "2026-09-20T14:14:13.650210+00:00",
-  "revision": 4,
+  "revision": 6,
   "revisions": [
     {
       "prior_manifest_hash": "sha256-contract:5944c73cab832ee4d6fa5dee645f38297001087c6a0be243b71666832cc2f70f",
@@ -57,16 +57,50 @@
         "validate_commands_added": [],
         "validate_commands_removed": []
       }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:88b35ec9ab426b8c07d2a0fdfa419f12acc4ff59832edf4851a0631bff53b19c",
+      "prior_test_hashes": {
+        "tests/integration/test_job_store_schema.py": "sha256-pyast:v2:c293d471b49acdb05d0d870a7f5a37d7fe7f60aab6b257fb6197cad5edafe552"
+      },
+      "revised_at": "2026-09-20T14:42:51.599096+00:00",
+      "reason": "Evolve the still-unaccepted storage foundation to schema v2 with recorded v1 history and job-scoped chunk identity.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:75b375c81189ac608aae6ea9cc214d4c81184a5de08b2b351587663a8ef4e86b",
+      "prior_test_hashes": {
+        "tests/integration/test_job_store_schema.py": "sha256-pyast:v2:77aa2dcd7c004c93c4d8cbbc725bb07a202f5df955ee66ac1bdd8592d88f663c"
+      },
+      "revised_at": "2026-09-20T14:49:34.156428+00:00",
+      "reason": "Refresh the evolved schema-v2 Outcome with transactional migration and current review evidence.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
     }
   ],
   "red_evidence": {
     "red": true,
-    "captured_at": "2026-09-20T14:22:44.189683+00:00",
+    "captured_at": "2026-09-20T14:42:53.001117+00:00",
     "commands": [
       {
         "command": "uv run pytest -q tests/integration/test_job_store_schema.py",
         "exit_code": 1,
-        "output_tail": "\n    @pytest.mark.asyncio\n    async def test_foreign_keys_reject_orphan_production_records(tmp_path: Path) -> None:\n>       from elevenlabs_mcp.database import JobStore\nE       ImportError: cannot import name 'JobStore' from 'elevenlabs_mcp.database' (/mnt/storage/development/elevenlabs-mcp-server/src/elevenlabs_mcp/database.py)\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_schema.py:310: ImportError\n=============================== warnings summary ===============================\ntests/integration/test_job_store_schema.py::test_initialize_creates_complete_versioned_additive_schema\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/integration/test_job_store_schema.py::test_initialize_creates_complete_versioned_additive_schema\nFAILED tests/integration/test_job_store_schema.py::test_initialize_preserves_real_shaped_legacy_tables_and_rows\nFAILED tests/integration/test_job_store_schema.py::test_initialize_is_idempotent_and_concurrency_safe\nFAILED tests/integration/test_job_store_schema.py::test_newer_schema_version_is_rejected_without_mutation\nFAILED tests/integration/test_job_store_schema.py::test_foreign_keys_reject_orphan_production_records\n5 failed, 1 warning in 0.16s",
+        "output_tail": "        with pytest.raises(SchemaVersionError) as caught:\n            await JobStore(path).initialize()\n>       assert (caught.value.supported_version, caught.value.discovered_version) == (2, 99)\nE       assert (1, 99) == (2, 99)\nE         \nE         At index 0 diff: 1 != 2\nE         Use -v to get more diff\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_schema.py:302: AssertionError\n=============================== warnings summary ===============================\ntests/integration/test_job_store_schema.py::test_initialize_creates_complete_versioned_additive_schema\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/integration/test_job_store_schema.py::test_initialize_creates_complete_versioned_additive_schema\nFAILED tests/integration/test_job_store_schema.py::test_initialize_is_idempotent_and_concurrency_safe\nFAILED tests/integration/test_job_store_schema.py::test_newer_schema_version_is_rejected_without_mutation\n3 failed, 2 passed, 1 warning in 0.44s",
         "classification": "red"
       },
       {
@@ -83,10 +117,16 @@
       },
       {
         "command": "uv run pyright tests/integration/test_job_store_schema.py",
-        "exit_code": 1,
-        "output_tail": "/mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_schema.py\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_schema.py:79:41 - error: \"JobStore\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_schema.py:215:81 - error: \"JobStore\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_schema.py:257:41 - error: \"JobStore\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_schema.py:292:41 - error: \"JobStore\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_schema.py:292:51 - error: \"SchemaVersionError\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_schema.py:310:41 - error: \"JobStore\" is unknown import symbol (reportAttributeAccessIssue)\n6 errors, 0 warnings, 0 informations",
-        "classification": "red"
+        "exit_code": 0,
+        "output_tail": "0 errors, 0 warnings, 0 informations",
+        "classification": "not_red"
       }
+    ],
+    "sibling_dirty_paths": [
+      ".maid/plan-locks/r05-atomic-idempotent-job-creation.lock.json",
+      "manifests/r05-atomic-idempotent-job-creation.manifest.yaml",
+      "src/elevenlabs_mcp/contracts.py",
+      "tests/integration/test_job_store_creation.py"
     ]
   },
   "legacy_baseline": null,

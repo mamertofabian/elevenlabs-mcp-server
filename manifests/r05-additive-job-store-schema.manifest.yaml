@@ -16,8 +16,8 @@ description: |
   successful artifact reference, latest error, and generation metadata.
   Composite foreign keys prevent attempts and artifacts from crossing job and
   chunk ownership boundaries.
-  Enable foreign keys and WAL, record schema version 1, remain idempotent under
-  concurrent initialization, and reject a database advertising a newer schema
+  Enable foreign keys and WAL, record schema versions 1 and 2, remain
+  idempotent under concurrent initialization, and reject a database advertising a newer schema
   without mutation. Preserve every legacy table, column, row, ID, timestamp,
   path, and JSON value. This child defines durable structure only: it does not
   import legacy rows, create jobs, reserve budgets, mutate revisions, write
@@ -96,7 +96,7 @@ acceptance:
   immutable: true
 outcome:
   status: completed
-  summary: JobStore now initializes a transactional schema-v1 SQLite foundation with complete production job/chunk/attempt/artifact/receipt/import records, composite ownership constraints, WAL and foreign-key configuration, future-version refusal, and exact legacy preservation.
+  summary: JobStore initializes transactional SQLite schema v2 with complete production job/chunk/attempt/artifact/receipt/import records, job-scoped chunk identity, composite ownership constraints, WAL and foreign-key configuration, versioned v1 migration, future-version refusal, and exact legacy preservation.
   rationale: R05 begins with additive durable structure so later idempotency, budgets, migration, artifacts, and deletion children can transact against one reviewed ownership model without rewriting historical tables.
   lessons:
     - lesson_type: persistence-contract
@@ -107,17 +107,20 @@ outcome:
     - source: maid-implementation-reviewer:r05_schema_review_2
       severity: ready
       summary: No blockers; transactional versioning, complete durable fields, composite ownership, separate-process concurrency, future-version refusal, legacy preservation, and scope are valid. Exhaustive circular-FK introspection remains advisory only.
+    - source: maid-implementation-reviewer:r05_creation_review_5
+      severity: ready
+      summary: No blockers; schema-v1 to v2 migration validates ownership before commit, rolls back corrupt inputs completely, preserves valid data, and supports job-scoped deterministic chunk IDs.
   validation:
     - command: [uv, run, pytest, -q]
       status: passed
-      summary: All 112 credential-free tests passed.
+      summary: All 122 credential-free tests passed after schema-v2 evolution.
     - command: [uv, run, maid, test, --manifest, manifests/r05-additive-job-store-schema.manifest.yaml]
       status: passed
       summary: All 4 manifest-local commands passed.
     - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, c6e160a, --summary, --packet]
       status: passed
       summary: All 11 deep stages passed with zero blockers or warnings.
-  completed_at: "2026-09-20T22:25:52+08:00"
+  completed_at: "2026-09-20T22:49:01+08:00"
 created: "2026-09-20T14:14:14Z"
 metadata:
   author: Codex

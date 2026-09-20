@@ -1,0 +1,511 @@
+{
+  "manifest_path": "manifests/r05-atomic-idempotent-job-creation.manifest.yaml",
+  "manifest_hash": "sha256-contract:539772ff9f5681c19196eab7b764002302a0f7079b864fbd040822238e8f5059",
+  "test_hashes": {
+    "tests/integration/test_job_store_creation.py": "sha256-pyast:v2:8c359cb5aaf977aeefa5ef4614c95e6b640413e3a50b957a4422994b3ae467cc"
+  },
+  "created_at": "2026-09-20T14:28:12.035678+00:00",
+  "revision": 9,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:a9309e312501078a13196f1610a8df93d3ab52a7492f97f20e4dce1c9f5ea000",
+      "prior_test_hashes": {
+        "tests/integration/test_job_store_creation.py": "sha256-pyast:v2:a23985e90154c591447147c452a20cab851ea2b8133f394f2259ad5716dc522b"
+      },
+      "revised_at": "2026-09-20T14:28:13.701764+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r05-atomic-idempotent-job-creation.manifest.yaml -> manifests/r05-atomic-idempotent-job-creation.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:7563590f6a04467e9a1c67a5c80245dffcaf10145c9a19039b6930f1ef7c7f0f",
+      "prior_test_hashes": {
+        "tests/integration/test_job_store_creation.py": "sha256-pyast:v2:a23985e90154c591447147c452a20cab851ea2b8133f394f2259ad5716dc522b"
+      },
+      "revised_at": "2026-09-20T14:32:17.771289+00:00",
+      "reason": "Review-driven receipt-first hardening returns the committed submit revision before timestamp/current-state validation and proves complete request JSON plus exact UTC persistence.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:5b3a6af5c2aab4bf9ecd518c2e52e9699db7a2c56889e004a78eaf3158b22d95",
+      "prior_test_hashes": {
+        "tests/integration/test_job_store_creation.py": "sha256-pyast:v2:846bda9c9aae9f38798e88a1fcd2e6902430c7c45db82e0df486a8b9def7a61e"
+      },
+      "revised_at": "2026-09-20T14:33:08.461372+00:00",
+      "reason": "Express the intentional invalid naive replay timestamp without violating test lint while preserving receipt-first coverage.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:5b3a6af5c2aab4bf9ecd518c2e52e9699db7a2c56889e004a78eaf3158b22d95",
+      "prior_test_hashes": {
+        "tests/integration/test_job_store_creation.py": "sha256-pyast:v2:639f6b9e64c9afaab458cd05a04d38fe967d5c387c28e8a0e65e439eef7e9c47"
+      },
+      "revised_at": "2026-09-20T14:35:41.189636+00:00",
+      "reason": "Review-driven identity fix scopes deterministic plan chunk IDs by owning job and proves independent same-plan submissions under distinct keys.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "tests/integration/test_job_store_creation.py:test_same_plan_can_create_independent_jobs_with_distinct_keys",
+          "tests/integration/test_job_store_creation.py:test_same_plan_can_create_independent_jobs_with_distinct_keys:kind=test_function"
+        ],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:818c00a4236fdb4bd3c034d77f9779ef145bc6d7195e2ff842630031120773c1",
+      "prior_test_hashes": {
+        "tests/integration/test_job_store_creation.py": "sha256-pyast:v2:20b8115170773697d76f3979f70e0b41a394c101e562e54ea8d062f42e43520f"
+      },
+      "revised_at": "2026-09-20T14:42:49.709412+00:00",
+      "reason": "Review-driven durability hardening adds transactional schema-v1 to v2 migration for job-scoped chunk identity and validates new job IDs before any write while preserving receipt-first replay.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "tests/integration/test_job_store_creation.py:test_invalid_new_job_id_persists_nothing_but_replay_ignores_it",
+          "tests/integration/test_job_store_creation.py:test_invalid_new_job_id_persists_nothing_but_replay_ignores_it:kind=test_function",
+          "tests/integration/test_job_store_creation.py:test_schema_v1_migrates_to_job_scoped_chunks_without_data_loss",
+          "tests/integration/test_job_store_creation.py:test_schema_v1_migrates_to_job_scoped_chunks_without_data_loss:kind=test_function"
+        ],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:20f9f8b0e3f2020d76351ba05cffbef042719c918bc3283d84f546a649900017",
+      "prior_test_hashes": {
+        "tests/integration/test_job_store_creation.py": "sha256-pyast:v2:21fd65b4cc410d4d1e84bd1aff65a7e6f41bf5fd20b3da9a870b89944b2966ac"
+      },
+      "revised_at": "2026-09-20T14:45:59.342797+00:00",
+      "reason": "Review-driven migration safety moves foreign-key validation inside the v1-to-v2 transaction and proves complete rollback on corrupt v1 ownership.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "tests/integration/test_job_store_creation.py:test_schema_v1_integrity_failure_rolls_back_entire_migration",
+          "tests/integration/test_job_store_creation.py:test_schema_v1_integrity_failure_rolls_back_entire_migration:kind=test_function"
+        ],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:539772ff9f5681c19196eab7b764002302a0f7079b864fbd040822238e8f5059",
+      "prior_test_hashes": {
+        "tests/integration/test_job_store_creation.py": "sha256-pyast:v2:80c0279612fc3b06a55739fc5b2f71344bef3db5e53c061264fec19290900977"
+      },
+      "revised_at": "2026-09-20T14:46:42.957295+00:00",
+      "reason": "Apply lint-clean context management to the migration rollback contract without changing behavior.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:539772ff9f5681c19196eab7b764002302a0f7079b864fbd040822238e8f5059",
+      "prior_test_hashes": {
+        "tests/integration/test_job_store_creation.py": "sha256-pyast:v2:8c359cb5aaf977aeefa5ef4614c95e6b640413e3a50b957a4422994b3ae467cc"
+      },
+      "revised_at": "2026-09-20T14:49:34.372369+00:00",
+      "reason": "Capture the evidence-backed Outcome after independent Ready to merge review.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T14:46:44.497076+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/integration/test_job_store_creation.py",
+        "exit_code": 1,
+        "output_tail": "\n/mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_creation.py:464: AttributeError\n=============================== warnings summary ===============================\ntests/integration/test_job_store_creation.py::test_create_job_atomically_persists_complete_plan_chunks_and_receipt\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/integration/test_job_store_creation.py::test_create_job_atomically_persists_complete_plan_chunks_and_receipt\nFAILED tests/integration/test_job_store_creation.py::test_identical_replay_returns_original_result_and_conflicting_input_fails\nFAILED tests/integration/test_job_store_creation.py::test_concurrent_identical_submit_creates_exactly_one_job\nFAILED tests/integration/test_job_store_creation.py::test_same_plan_can_create_independent_jobs_with_distinct_keys\nFAILED tests/integration/test_job_store_creation.py::test_schema_v1_migrates_to_job_scoped_chunks_without_data_loss\nFAILED tests/integration/test_job_store_creation.py::test_schema_v1_integrity_failure_rolls_back_entire_migration\nFAILED tests/integration/test_job_store_creation.py::test_invalid_new_job_id_persists_nothing_but_replay_ignores_it\nFAILED tests/integration/test_job_store_creation.py::test_insufficient_initial_ceiling_leaves_database_empty[4-10]\nFAILED tests/integration/test_job_store_creation.py::test_insufficient_initial_ceiling_leaves_database_empty[100-1]\nFAILED tests/integration/test_job_store_creation.py::test_chunk_insert_failure_rolls_back_job_chunks_and_receipt\n10 failed, 1 warning in 0.31s",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/integration/test_job_store_creation.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run ruff format --check tests/integration/test_job_store_creation.py",
+        "exit_code": 0,
+        "output_tail": "1 file already formatted",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/integration/test_job_store_creation.py",
+        "exit_code": 1,
+        "output_tail": "  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_creation.py:299:25 - error: Cannot access attribute \"create_job\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"create_job\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_creation.py:300:26 - error: Cannot access attribute \"create_job\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"create_job\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_creation.py:351:17 - error: Cannot access attribute \"create_job\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"create_job\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_creation.py:352:17 - error: Cannot access attribute \"create_job\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"create_job\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_creation.py:413:25 - error: Cannot access attribute \"create_job\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"create_job\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_creation.py:420:17 - error: Cannot access attribute \"create_job\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"create_job\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_creation.py:421:26 - error: Cannot access attribute \"create_job\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"create_job\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_creation.py:434:41 - error: \"BudgetExceededError\" is unknown import symbol (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_creation.py:440:21 - error: Cannot access attribute \"create_job\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"create_job\" is unknown (reportAttributeAccessIssue)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/integration/test_job_store_creation.py:464:21 - error: Cannot access attribute \"create_job\" for class \"JobStore\"\n  \u00a0\u00a0Attribute \"create_job\" is unknown (reportAttributeAccessIssue)\n17 errors, 0 warnings, 0 informations",
+        "classification": "red"
+      }
+    ],
+    "sibling_dirty_paths": [
+      ".maid/plan-locks/r05-additive-job-store-schema.lock.json",
+      "tests/integration/test_job_store_schema.py"
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.created",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.created:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.created:of=JobCreateResult",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.created:type=bool",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.idempotent_replay",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.idempotent_replay:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.idempotent_replay:of=JobCreateResult",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.idempotent_replay:type=bool",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.job_id",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.job_id:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.job_id:of=JobCreateResult",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.job_id:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.revision",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.revision:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.revision:of=JobCreateResult",
+      "src/elevenlabs_mcp/contracts.py:attribute:JobCreateResult.revision:type=int",
+      "src/elevenlabs_mcp/contracts.py:class:JobCreateResult",
+      "src/elevenlabs_mcp/contracts.py:class:JobCreateResult:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:JobCreateResult:kind=class",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.max_total_characters",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.max_total_characters:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.max_total_characters:of=BudgetExceededError",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.max_total_characters:type=int",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.max_total_requests",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.max_total_requests:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.max_total_requests:of=BudgetExceededError",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.max_total_requests:type=int",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.required_characters",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.required_characters:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.required_characters:of=BudgetExceededError",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.required_characters:type=int",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.required_requests",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.required_requests:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.required_requests:of=BudgetExceededError",
+      "src/elevenlabs_mcp/database.py:attribute:BudgetExceededError.required_requests:type=int",
+      "src/elevenlabs_mcp/database.py:attribute:IdempotencyConflictError.idempotency_key",
+      "src/elevenlabs_mcp/database.py:attribute:IdempotencyConflictError.idempotency_key:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:IdempotencyConflictError.idempotency_key:of=IdempotencyConflictError",
+      "src/elevenlabs_mcp/database.py:attribute:IdempotencyConflictError.idempotency_key:type=str",
+      "src/elevenlabs_mcp/database.py:attribute:IdempotencyConflictError.operation",
+      "src/elevenlabs_mcp/database.py:attribute:IdempotencyConflictError.operation:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:IdempotencyConflictError.operation:of=IdempotencyConflictError",
+      "src/elevenlabs_mcp/database.py:attribute:IdempotencyConflictError.operation:type=str",
+      "src/elevenlabs_mcp/database.py:attribute:IdempotencyConflictError.workspace_id",
+      "src/elevenlabs_mcp/database.py:attribute:IdempotencyConflictError.workspace_id:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:IdempotencyConflictError.workspace_id:of=IdempotencyConflictError",
+      "src/elevenlabs_mcp/database.py:attribute:IdempotencyConflictError.workspace_id:type=str",
+      "src/elevenlabs_mcp/database.py:class:BudgetExceededError",
+      "src/elevenlabs_mcp/database.py:class:BudgetExceededError:base=RuntimeError",
+      "src/elevenlabs_mcp/database.py:class:BudgetExceededError:kind=class",
+      "src/elevenlabs_mcp/database.py:class:IdempotencyConflictError",
+      "src/elevenlabs_mcp/database.py:class:IdempotencyConflictError:base=RuntimeError",
+      "src/elevenlabs_mcp/database.py:class:IdempotencyConflictError:kind=class",
+      "src/elevenlabs_mcp/database.py:method:JobStore.create_job",
+      "src/elevenlabs_mcp/database.py:method:JobStore.create_job:arg=created_at:type=datetime:default=None",
+      "src/elevenlabs_mcp/database.py:method:JobStore.create_job:arg=idempotency_key:type=str:default=None",
+      "src/elevenlabs_mcp/database.py:method:JobStore.create_job:arg=job_id:type=str:default=None",
+      "src/elevenlabs_mcp/database.py:method:JobStore.create_job:arg=max_total_characters:type=int:default=None",
+      "src/elevenlabs_mcp/database.py:method:JobStore.create_job:arg=max_total_requests:type=int:default=None",
+      "src/elevenlabs_mcp/database.py:method:JobStore.create_job:arg=plan:type=VoiceoverPlan:default=None",
+      "src/elevenlabs_mcp/database.py:method:JobStore.create_job:arg=self:type=JobStore:default=None",
+      "src/elevenlabs_mcp/database.py:method:JobStore.create_job:arg=workspace_id:type=str:default=None",
+      "src/elevenlabs_mcp/database.py:method:JobStore.create_job:async=true",
+      "src/elevenlabs_mcp/database.py:method:JobStore.create_job:kind=method",
+      "src/elevenlabs_mcp/database.py:method:JobStore.create_job:of=JobStore",
+      "src/elevenlabs_mcp/database.py:method:JobStore.create_job:returns=JobCreateResult",
+      "tests/integration/test_job_store_creation.py:test_chunk_insert_failure_rolls_back_job_chunks_and_receipt",
+      "tests/integration/test_job_store_creation.py:test_chunk_insert_failure_rolls_back_job_chunks_and_receipt:kind=test_function",
+      "tests/integration/test_job_store_creation.py:test_concurrent_identical_submit_creates_exactly_one_job",
+      "tests/integration/test_job_store_creation.py:test_concurrent_identical_submit_creates_exactly_one_job:kind=test_function",
+      "tests/integration/test_job_store_creation.py:test_create_job_atomically_persists_complete_plan_chunks_and_receipt",
+      "tests/integration/test_job_store_creation.py:test_create_job_atomically_persists_complete_plan_chunks_and_receipt:kind=test_function",
+      "tests/integration/test_job_store_creation.py:test_identical_replay_returns_original_result_and_conflicting_input_fails",
+      "tests/integration/test_job_store_creation.py:test_identical_replay_returns_original_result_and_conflicting_input_fails:kind=test_function",
+      "tests/integration/test_job_store_creation.py:test_insufficient_initial_ceiling_leaves_database_empty",
+      "tests/integration/test_job_store_creation.py:test_insufficient_initial_ceiling_leaves_database_empty:kind=test_function",
+      "tests/integration/test_job_store_creation.py:test_invalid_new_job_id_persists_nothing_but_replay_ignores_it",
+      "tests/integration/test_job_store_creation.py:test_invalid_new_job_id_persists_nothing_but_replay_ignores_it:kind=test_function",
+      "tests/integration/test_job_store_creation.py:test_same_plan_can_create_independent_jobs_with_distinct_keys",
+      "tests/integration/test_job_store_creation.py:test_same_plan_can_create_independent_jobs_with_distinct_keys:kind=test_function",
+      "tests/integration/test_job_store_creation.py:test_schema_v1_integrity_failure_rolls_back_entire_migration",
+      "tests/integration/test_job_store_creation.py:test_schema_v1_integrity_failure_rolls_back_entire_migration:kind=test_function",
+      "tests/integration/test_job_store_creation.py:test_schema_v1_migrates_to_job_scoped_chunks_without_data_loss",
+      "tests/integration/test_job_store_creation.py:test_schema_v1_migrates_to_job_scoped_chunks_without_data_loss:kind=test_function"
+    ],
+    "files": {
+      "create": [],
+      "edit": [
+        "src/elevenlabs_mcp/contracts.py",
+        "src/elevenlabs_mcp/database.py",
+        "tests/integration/test_job_store_creation.py"
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r04-canonical-voiceover-plan.manifest.yaml",
+        "manifests/r05-additive-job-store-schema.manifest.yaml"
+      ],
+      "scope": [],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "edit": [
+        {
+          "path": "src/elevenlabs_mcp/contracts.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "JobCreateResult",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "job_id",
+              "of": "JobCreateResult",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "revision",
+              "of": "JobCreateResult",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "created",
+              "of": "JobCreateResult",
+              "type": "bool"
+            },
+            {
+              "kind": "attribute",
+              "name": "idempotent_replay",
+              "of": "JobCreateResult",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "path": "src/elevenlabs_mcp/database.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "IdempotencyConflictError",
+              "bases": [
+                "RuntimeError"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "workspace_id",
+              "of": "IdempotencyConflictError",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "operation",
+              "of": "IdempotencyConflictError",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "idempotency_key",
+              "of": "IdempotencyConflictError",
+              "type": "str"
+            },
+            {
+              "kind": "class",
+              "name": "BudgetExceededError",
+              "bases": [
+                "RuntimeError"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "max_total_characters",
+              "of": "BudgetExceededError",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "required_characters",
+              "of": "BudgetExceededError",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "max_total_requests",
+              "of": "BudgetExceededError",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "required_requests",
+              "of": "BudgetExceededError",
+              "type": "int"
+            },
+            {
+              "kind": "method",
+              "name": "create_job",
+              "of": "JobStore",
+              "args": [
+                {
+                  "name": "self",
+                  "type": "JobStore"
+                },
+                {
+                  "name": "workspace_id",
+                  "type": "str"
+                },
+                {
+                  "name": "job_id",
+                  "type": "str"
+                },
+                {
+                  "name": "plan",
+                  "type": "VoiceoverPlan"
+                },
+                {
+                  "name": "idempotency_key",
+                  "type": "str"
+                },
+                {
+                  "name": "max_total_characters",
+                  "type": "int"
+                },
+                {
+                  "name": "max_total_requests",
+                  "type": "int"
+                },
+                {
+                  "name": "created_at",
+                  "type": "datetime"
+                }
+              ],
+              "returns": "JobCreateResult",
+              "async": true
+            }
+          ]
+        },
+        {
+          "path": "tests/integration/test_job_store_creation.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_create_job_atomically_persists_complete_plan_chunks_and_receipt",
+              "description": "Sufficient submit stores exact plan/job summaries, every ordered request payload/fingerprint/span, zero reservations, and one receipt before returning created result."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_identical_replay_returns_original_result_and_conflicting_input_fails",
+              "description": "Same key/canonical input returns original job and committed revision before proposed ID/timestamp/current-state validation; changed plan or ceilings raises IdempotencyConflictError without additional rows."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_concurrent_identical_submit_creates_exactly_one_job",
+              "description": "Concurrent separate JobStore instances using one key return one created and remaining replay results with one durable job/receipt/chunk set."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_same_plan_can_create_independent_jobs_with_distinct_keys",
+              "description": "The same deterministic plan submitted under distinct idempotency keys and job IDs creates independent job-owned chunk rows without global chunk-ID collisions."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_schema_v1_migrates_to_job_scoped_chunks_without_data_loss",
+              "description": "Exact schema-v1 job/chunk/attempt/artifact rows survive transactional v2 rebuild and same-plan independent jobs no longer collide."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_schema_v1_integrity_failure_rolls_back_entire_migration",
+              "description": "Invalid v1 ownership detected by in-transaction foreign-key check preserves version 1, migration history, original table keys/data, and usable FK-configured connections."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_invalid_new_job_id_persists_nothing_but_replay_ignores_it",
+              "description": "Empty/oversized IDs fail before writes for new submissions while an identical committed receipt replay ignores an invalid proposed ID."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_insufficient_initial_ceiling_leaves_database_empty",
+              "description": "Character or request ceiling below planned initial exposure raises exact BudgetExceededError and persists no job/chunk/receipt."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_chunk_insert_failure_rolls_back_job_chunks_and_receipt",
+              "description": "SQLite trigger fault during chunk insertion leaves no production job, chunk, or submit receipt."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r04-canonical-voiceover-plan.manifest.yaml",
+        "manifests/r05-additive-job-store-schema.manifest.yaml"
+      ]
+    },
+    "test_files": [
+      "tests/integration/test_job_store_creation.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/integration/test_job_store_creation.py",
+      "uv run ruff check tests/integration/test_job_store_creation.py",
+      "uv run ruff format --check tests/integration/test_job_store_creation.py",
+      "uv run pyright tests/integration/test_job_store_creation.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/integration/test_job_store_creation.py"
+    ]
+  }
+}

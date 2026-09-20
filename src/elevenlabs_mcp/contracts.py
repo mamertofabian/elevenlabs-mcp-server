@@ -195,6 +195,13 @@ class VoiceoverPlan(_StrictModel):
     cost_estimate: None = None
 
 
+class JobCreateResult(_StrictModel):
+    job_id: str = Field(min_length=1, max_length=128)
+    revision: int = Field(ge=0)
+    created: bool
+    idempotent_replay: bool
+
+
 class PlanVoiceoverInput(_StrictModel):
     script: Script
     options: VoiceoverOptions

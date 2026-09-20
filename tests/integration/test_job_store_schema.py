@@ -81,7 +81,7 @@ async def test_initialize_creates_complete_versioned_additive_schema(
     path = tmp_path / "voiceover_history.db"
     store = JobStore(path)
     await store.initialize()
-    assert await store.get_schema_version() == 1
+    assert await store.get_schema_version() == 2
     expected = {
         "voiceover_jobs": (
             "job_id",
@@ -173,7 +173,10 @@ async def test_initialize_creates_complete_versioned_additive_schema(
             for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")
         }
         assert db.execute("PRAGMA journal_mode").fetchone()[0] == "wal"
-        assert db.execute("SELECT version FROM schema_migrations").fetchall() == [(1,)]
+        assert db.execute("SELECT version FROM schema_migrations").fetchall() == [
+            (1,),
+            (2,),
+        ]
         indexes = {
             (r[0], r[1])
             for r in db.execute(
@@ -281,8 +284,8 @@ async def test_initialize_is_idempotent_and_concurrency_safe(tmp_path: Path) -> 
     with sqlite3.connect(path) as db:
         assert db.execute(
             "SELECT version,COUNT(*) FROM schema_migrations GROUP BY version"
-        ).fetchall() == [(1, 1)]
-        assert db.execute("PRAGMA user_version").fetchone() == (1,)
+        ).fetchall() == [(1, 1), (2, 1)]
+        assert db.execute("PRAGMA user_version").fetchone() == (2,)
 
 
 @pytest.mark.asyncio
@@ -296,7 +299,7 @@ async def test_newer_schema_version_is_rejected_without_mutation(
         db.execute("PRAGMA user_version=99")
     with pytest.raises(SchemaVersionError) as caught:
         await JobStore(path).initialize()
-    assert (caught.value.supported_version, caught.value.discovered_version) == (1, 99)
+    assert (caught.value.supported_version, caught.value.discovered_version) == (2, 99)
     with sqlite3.connect(path) as db:
         assert (
             db.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()

@@ -1,0 +1,150 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Atomically persist a complete voiceover plan and idempotent submit receipt under sufficient cumulative attempt ceilings.
+description: |
+  Second R05 child covering initial A24/A26 persistence. Add immutable
+  JobCreateResult plus IdempotencyConflictError and BudgetExceededError.
+  JobStore.create_job accepts an injected aware timestamp, workspace/key,
+  caller-proposed job ID, complete VoiceoverPlan, and cumulative character/
+  request ceilings. In one BEGIN IMMEDIATE transaction it checks an existing
+  receipt first, returns an exact replay for identical canonical input, rejects
+  key reuse for different input, verifies ceilings cover the initial plan,
+  inserts the job, every immutable request chunk, and the committed receipt,
+  then acknowledges. Concurrent identical calls create exactly one job.
+  Any insert failure rolls back job/chunks/receipt together. Rebuild schema-v1
+  chunk/attempt/artifact tables transactionally as schema v2
+  so deterministic plan chunk IDs are scoped by owning job and existing v1
+  records remain intact. This child does not
+  reserve attempts, mutate revisions, import legacy data, delete/tombstone,
+  dispatch providers, or write files. Expected red: result/errors/method absent.
+temptations:
+  - risk: Check expected job state or create a new job before looking up an existing receipt.
+    instead: Under BEGIN IMMEDIATE, resolve receipt digest first and return its original job ID before any other validation or writes.
+  - risk: Treat idempotency as an in-memory map or SELECT-then-INSERT outside one transaction.
+    instead: Rely on the durable composite receipt primary key and one SQLite write transaction.
+  - risk: Accept a budget that covers unique script text but not every initial generation request.
+    instead: Sum planned request character_count and request count as cumulative initial dispatch exposure before inserting anything.
+  - risk: Acknowledge after inserting only the job row and add chunks later.
+    instead: Commit job, all chunks, and receipt atomically; fault-injection must leave all three empty.
+type: feature
+files:
+  edit:
+    - path: src/elevenlabs_mcp/contracts.py
+      artifacts:
+        - kind: class
+          name: JobCreateResult
+          bases: [_StrictModel]
+        - {kind: attribute, name: job_id, of: JobCreateResult, type: str}
+        - {kind: attribute, name: revision, of: JobCreateResult, type: int}
+        - {kind: attribute, name: created, of: JobCreateResult, type: bool}
+        - {kind: attribute, name: idempotent_replay, of: JobCreateResult, type: bool}
+    - path: src/elevenlabs_mcp/database.py
+      artifacts:
+        - kind: class
+          name: IdempotencyConflictError
+          bases: [RuntimeError]
+        - {kind: attribute, name: workspace_id, of: IdempotencyConflictError, type: str}
+        - {kind: attribute, name: operation, of: IdempotencyConflictError, type: str}
+        - {kind: attribute, name: idempotency_key, of: IdempotencyConflictError, type: str}
+        - kind: class
+          name: BudgetExceededError
+          bases: [RuntimeError]
+        - {kind: attribute, name: max_total_characters, of: BudgetExceededError, type: int}
+        - {kind: attribute, name: required_characters, of: BudgetExceededError, type: int}
+        - {kind: attribute, name: max_total_requests, of: BudgetExceededError, type: int}
+        - {kind: attribute, name: required_requests, of: BudgetExceededError, type: int}
+        - kind: method
+          name: create_job
+          of: JobStore
+          async: true
+          args:
+            - {name: self, type: JobStore}
+            - {name: workspace_id, type: str}
+            - {name: job_id, type: str}
+            - {name: plan, type: VoiceoverPlan}
+            - {name: idempotency_key, type: str}
+            - {name: max_total_characters, type: int}
+            - {name: max_total_requests, type: int}
+            - {name: created_at, type: datetime}
+          returns: JobCreateResult
+    - path: tests/integration/test_job_store_creation.py
+      artifacts:
+        - kind: test_function
+          name: test_create_job_atomically_persists_complete_plan_chunks_and_receipt
+          description: Sufficient submit stores exact plan/job summaries, every ordered request payload/fingerprint/span, zero reservations, and one receipt before returning created result.
+        - kind: test_function
+          name: test_identical_replay_returns_original_result_and_conflicting_input_fails
+          description: Same key/canonical input returns original job and committed revision before proposed ID/timestamp/current-state validation; changed plan or ceilings raises IdempotencyConflictError without additional rows.
+        - kind: test_function
+          name: test_concurrent_identical_submit_creates_exactly_one_job
+          description: Concurrent separate JobStore instances using one key return one created and remaining replay results with one durable job/receipt/chunk set.
+        - kind: test_function
+          name: test_same_plan_can_create_independent_jobs_with_distinct_keys
+          description: The same deterministic plan submitted under distinct idempotency keys and job IDs creates independent job-owned chunk rows without global chunk-ID collisions.
+        - kind: test_function
+          name: test_schema_v1_migrates_to_job_scoped_chunks_without_data_loss
+          description: Exact schema-v1 job/chunk/attempt/artifact rows survive transactional v2 rebuild and same-plan independent jobs no longer collide.
+        - kind: test_function
+          name: test_schema_v1_integrity_failure_rolls_back_entire_migration
+          description: Invalid v1 ownership detected by in-transaction foreign-key check preserves version 1, migration history, original table keys/data, and usable FK-configured connections.
+        - kind: test_function
+          name: test_invalid_new_job_id_persists_nothing_but_replay_ignores_it
+          description: Empty/oversized IDs fail before writes for new submissions while an identical committed receipt replay ignores an invalid proposed ID.
+        - kind: test_function
+          name: test_insufficient_initial_ceiling_leaves_database_empty
+          description: Character or request ceiling below planned initial exposure raises exact BudgetExceededError and persists no job/chunk/receipt.
+        - kind: test_function
+          name: test_chunk_insert_failure_rolls_back_job_chunks_and_receipt
+          description: SQLite trigger fault during chunk insertion leaves no production job, chunk, or submit receipt.
+  read:
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/03_TOOL_CONTRACTS.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - manifests/r04-canonical-voiceover-plan.manifest.yaml
+    - manifests/r05-additive-job-store-schema.manifest.yaml
+validate:
+  - [uv, run, pytest, -q, tests/integration/test_job_store_creation.py]
+  - [uv, run, ruff, check, tests/integration/test_job_store_creation.py]
+  - [uv, run, ruff, format, --check, tests/integration/test_job_store_creation.py]
+  - [uv, run, pyright, tests/integration/test_job_store_creation.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/integration/test_job_store_creation.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: JobStore atomically persists complete plans, job-owned chunks, and durable submit receipts; exact receipt replays precede retry validation, conflicts and insufficient ceilings write nothing, same-plan independent jobs coexist, and schema-v1 data migrates transactionally to v2.
+  rationale: Submit acknowledgment now has one durable transaction boundary and one canonical receipt identity before R05 adds attempt reservation, legacy import, revision mutations, and deletion tombstones.
+  lessons:
+    - lesson_type: persistence-contract
+      summary: Deterministic plan chunk IDs are not globally unique storage IDs; ownership keys must include job identity and existing schema versions require an explicit data-preserving migration.
+      tags: [sqlite, idempotency, migration, ownership, transactions]
+      paths: [src/elevenlabs_mcp/database.py, tests/integration/test_job_store_creation.py]
+    - lesson_type: idempotency
+      summary: Durable receipt lookup must precede retry-variant validation and replay the originally committed result rather than mutable current job state.
+      tags: [receipts, replay, concurrency, budget]
+      paths: [src/elevenlabs_mcp/database.py, tests/integration/test_job_store_creation.py]
+  review_notes:
+    - source: maid-implementation-reviewer:r05_creation_review_5
+      severity: ready
+      summary: No blockers; in-transaction migration integrity checks, rollback, job-scoped chunk identity, receipt-first replay, budget enforcement, invalid-ID atomicity, and scope are valid.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 122 credential-free tests passed.
+    - command: [uv, run, maid, test, --manifest, manifests/r05-atomic-idempotent-job-creation.manifest.yaml]
+      status: passed
+      summary: All 4 manifest-local commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, 653cdc3, --summary, --packet]
+      status: passed
+      summary: All 11 deep stages passed with zero blockers or warnings.
+  completed_at: "2026-09-20T22:49:01+08:00"
+created: "2026-09-20T14:28:13Z"
+metadata:
+  author: Codex
+  tags: [revival, r05, sqlite, idempotency, budget, transaction]
+  priority: high
