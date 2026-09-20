@@ -1,0 +1,826 @@
+{
+  "manifest_path": "manifests/r01-runtime-path-injection.manifest.yaml",
+  "manifest_hash": "sha256-contract:4e52ea7793a64d5adc022ad731570021e17d18bb7633175acf526529d87995a6",
+  "test_hashes": {
+    "tests/characterization/test_legacy_contract_fixtures.py": "sha256-pyast:v2:54235b7118c80bb2dda815332ea26b5ab24c7d7d40fdf5ad1935d5eb5eca2fe2",
+    "tests/test_server.py": "sha256-pyast:v2:bd62ad082c438b681839f55abc87dafe77eb68958faf2925056b877dde3b72fe",
+    "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:c96efbdb30917d662d254b2d8b9809b67feadeabda3aaa9c1a03b2bd71463a68",
+    "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+    "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9"
+  },
+  "created_at": "2026-09-20T03:49:46.959679+00:00",
+  "revision": 9,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:4fc7767eda2c2db935c5b7444dad933e90859224ba80ab82b37ce357ed3f3e12",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_contract_fixtures.py": "sha256-pyast:v2:54235b7118c80bb2dda815332ea26b5ab24c7d7d40fdf5ad1935d5eb5eca2fe2",
+        "tests/test_server.py": "sha256-pyast:v2:bd62ad082c438b681839f55abc87dafe77eb68958faf2925056b877dde3b72fe",
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:2ef04ab018f8fbe1bdf7ad4564cde9324a54551c69fa600378b2646d7d8fa951",
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:4f53e7b694ed234f81e9d2bf28f3a8dc4a7a5f96dab33150b14739ed6d54f1b5"
+      },
+      "revised_at": "2026-09-20T03:49:53.945790+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r01-runtime-path-injection.manifest.yaml -> manifests/r01-runtime-path-injection.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:f2e4ceafb74227819dcac14e835bdea0f26142c22a466fd39983f80d5dca3d07",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_contract_fixtures.py": "sha256-pyast:v2:54235b7118c80bb2dda815332ea26b5ab24c7d7d40fdf5ad1935d5eb5eca2fe2",
+        "tests/test_server.py": "sha256-pyast:v2:bd62ad082c438b681839f55abc87dafe77eb68958faf2925056b877dde3b72fe",
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:2ef04ab018f8fbe1bdf7ad4564cde9324a54551c69fa600378b2646d7d8fa951",
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:4f53e7b694ed234f81e9d2bf28f3a8dc4a7a5f96dab33150b14739ed6d54f1b5"
+      },
+      "revised_at": "2026-09-20T03:52:04.882089+00:00",
+      "reason": "Normalize the validator-rendered union spelling without changing behavior or tests",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script:returns=tuple[list[dict[str, Union[str, None]]], list[str]]"
+        ],
+        "artifacts_removed": [
+          "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script:returns=tuple[list[dict[str, str | None]], list[str]]"
+        ],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:7be26dbbba267fd784779542c91077e0c0ebdc8bf0abcdf6e51f23737f10ff14",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_contract_fixtures.py": "sha256-pyast:v2:54235b7118c80bb2dda815332ea26b5ab24c7d7d40fdf5ad1935d5eb5eca2fe2",
+        "tests/test_server.py": "sha256-pyast:v2:bd62ad082c438b681839f55abc87dafe77eb68958faf2925056b877dde3b72fe",
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:201dd53ba1ee2b9d60b7bd1fb73a08606852079e88a5f64f996e50ec60094798",
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:4f53e7b694ed234f81e9d2bf28f3a8dc4a7a5f96dab33150b14739ed6d54f1b5"
+      },
+      "revised_at": "2026-09-20T03:53:54.662816+00:00",
+      "reason": "Execute run and main bodies in-process so deep artifact coverage observes the declared entrypoint artifacts; register existing R00 test dependencies as read context",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [
+          "read:tests/conftest.py",
+          "read:tests/fixtures/legacy/tool_contracts.json"
+        ],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:56434e73d25c764939e82eef9f118c0fd5070df9b55d901e96745557dded4fd9",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_contract_fixtures.py": "sha256-pyast:v2:54235b7118c80bb2dda815332ea26b5ab24c7d7d40fdf5ad1935d5eb5eca2fe2",
+        "tests/test_server.py": "sha256-pyast:v2:bd62ad082c438b681839f55abc87dafe77eb68958faf2925056b877dde3b72fe",
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:201dd53ba1ee2b9d60b7bd1fb73a08606852079e88a5f64f996e50ec60094798",
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:f9b3eb8140eb71674f677fda938a7ba98b66598d64578e833658d252e0151f4d"
+      },
+      "revised_at": "2026-09-20T03:56:38.446023+00:00",
+      "reason": "Bound stdio discovery waits so dependency-knockout subprocess failures terminate deterministically",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:56434e73d25c764939e82eef9f118c0fd5070df9b55d901e96745557dded4fd9",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_contract_fixtures.py": "sha256-pyast:v2:54235b7118c80bb2dda815332ea26b5ab24c7d7d40fdf5ad1935d5eb5eca2fe2",
+        "tests/test_server.py": "sha256-pyast:v2:bd62ad082c438b681839f55abc87dafe77eb68958faf2925056b877dde3b72fe",
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:201dd53ba1ee2b9d60b7bd1fb73a08606852079e88a5f64f996e50ec60094798",
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:35973470ad54c29e3db70671b62ff76de355c6bdc92e91d93f298b3461f29826"
+      },
+      "revised_at": "2026-09-20T04:02:30.927167+00:00",
+      "reason": "Keep the synthetic voice cache deterministically fresh so future credential-free stdio tests cannot trigger provider refresh",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:56434e73d25c764939e82eef9f118c0fd5070df9b55d901e96745557dded4fd9",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_contract_fixtures.py": "sha256-pyast:v2:54235b7118c80bb2dda815332ea26b5ab24c7d7d40fdf5ad1935d5eb5eca2fe2",
+        "tests/test_server.py": "sha256-pyast:v2:bd62ad082c438b681839f55abc87dafe77eb68958faf2925056b877dde3b72fe",
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:201dd53ba1ee2b9d60b7bd1fb73a08606852079e88a5f64f996e50ec60094798",
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9"
+      },
+      "revised_at": "2026-09-20T04:06:36.283498+00:00",
+      "reason": "Strengthen A01 after implementation review with filesystem snapshotting, a child-process network tripwire, and a bounded subprocess while preserving the approved dotenv deferral",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:01b57f57439a7f9240df31d8e6c2dabc0ff838d6722a38435a8237b321104001",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_contract_fixtures.py": "sha256-pyast:v2:54235b7118c80bb2dda815332ea26b5ab24c7d7d40fdf5ad1935d5eb5eca2fe2",
+        "tests/test_server.py": "sha256-pyast:v2:bd62ad082c438b681839f55abc87dafe77eb68958faf2925056b877dde3b72fe",
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:b54b522635c0aa9dea67b9d4b17f00ec85d1703ee7b852cb49a01ed070251cc4",
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9"
+      },
+      "revised_at": "2026-09-20T04:11:21.158513+00:00",
+      "reason": "Harden A01 after review by redirecting all standard writable roots, probing fail-closed socket operations, snapshotting the full sandbox, and bounding subprocess execution",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:4e52ea7793a64d5adc022ad731570021e17d18bb7633175acf526529d87995a6",
+      "prior_test_hashes": {
+        "tests/characterization/test_legacy_contract_fixtures.py": "sha256-pyast:v2:54235b7118c80bb2dda815332ea26b5ab24c7d7d40fdf5ad1935d5eb5eca2fe2",
+        "tests/test_server.py": "sha256-pyast:v2:bd62ad082c438b681839f55abc87dafe77eb68958faf2925056b877dde3b72fe",
+        "tests/acceptance/test_runtime_configuration.py": "sha256-pyast:v2:c96efbdb30917d662d254b2d8b9809b67feadeabda3aaa9c1a03b2bd71463a68",
+        "tests/characterization/test_legacy_database.py": "sha256-pyast:v2:4f5eb04087afbb1e7d42f619d2eba0f9083a03ce0fc70267392e5ad6a5b15515",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9"
+      },
+      "revised_at": "2026-09-20T04:16:19.889192+00:00",
+      "reason": "Capture the reviewed implementation Outcome and validation evidence",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T04:11:23.637903+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_runtime_configuration.py",
+        "exit_code": 1,
+        "output_tail": "        tmp_path: Path,\n    ) -> None:\n>       from elevenlabs_mcp.config import Settings\nE       ModuleNotFoundError: No module named 'elevenlabs_mcp.config'\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_runtime_configuration.py:207: ModuleNotFoundError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_runtime_configuration.py::test_importing_config_and_database_has_no_resource_side_effects\nFAILED tests/acceptance/test_runtime_configuration.py::test_output_environment_resolves_default_database_under_launch_directory\nFAILED tests/acceptance/test_runtime_configuration.py::test_explicit_database_path_is_injected_after_database_module_import\nFAILED tests/acceptance/test_runtime_configuration.py::test_initialize_creates_only_resolved_output_and_database_parents\n4 failed, 1 warning in 0.25s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run pytest -q tests/characterization/test_legacy_contract_fixtures.py tests/characterization/test_legacy_database.py tests/characterization/test_legacy_server_surface.py tests/test_server.py",
+        "exit_code": 1,
+        "output_tail": "        \"\"\"\n        if \"b\" not in mode:\n            encoding = io.text_encoding(encoding)\n>       return io.open(self, mode, buffering, encoding, errors, newline)\nE       FileNotFoundError: [Errno 2] No such file or directory: '/mnt/storage/development/elevenlabs-mcp-server/tests/fixtures/legacy/tool_contracts.json'\n\n/home/atomrem/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/pathlib.py:1044: FileNotFoundError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/characterization/test_legacy_contract_fixtures.py::test_fixture_preserves_all_six_legacy_tool_names\nFAILED tests/characterization/test_legacy_contract_fixtures.py::test_generation_fixtures_preserve_old_client_success_signal\nFAILED tests/characterization/test_legacy_contract_fixtures.py::test_history_fixture_preserves_old_client_shape\n3 failed, 15 passed, 1 warning in 0.66s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/conftest.py tests/acceptance/test_runtime_configuration.py tests/characterization/test_legacy_contract_fixtures.py tests/characterization/test_legacy_database.py tests/characterization/test_legacy_server_surface.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/conftest.py tests/acceptance/test_runtime_configuration.py tests/characterization/test_legacy_contract_fixtures.py tests/characterization/test_legacy_database.py tests/characterization/test_legacy_server_surface.py",
+        "exit_code": 1,
+        "output_tail": "/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_runtime_configuration.py\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_runtime_configuration.py:135:10 - error: Import \"elevenlabs_mcp.config\" could not be resolved (reportMissingImports)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_runtime_configuration.py:189:10 - error: Import \"elevenlabs_mcp.config\" could not be resolved (reportMissingImports)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_runtime_configuration.py:207:10 - error: Import \"elevenlabs_mcp.config\" could not be resolved (reportMissingImports)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_runtime_configuration.py:215:31 - error: Expected 0 positional arguments (reportCallIssue)\n/mnt/storage/development/elevenlabs-mcp-server/tests/characterization/test_legacy_database.py\n  /mnt/storage/development/elevenlabs-mcp-server/tests/characterization/test_legacy_database.py:12:25 - error: Argument of type \"Path\" cannot be assigned to parameter \"db_path\" of type \"str\" in function \"__init__\"\n  \u00a0\u00a0\"Path\" is not assignable to \"str\" (reportArgumentType)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/characterization/test_legacy_database.py:51:25 - error: Argument of type \"Path\" cannot be assigned to parameter \"db_path\" of type \"str\" in function \"__init__\"\n  \u00a0\u00a0\"Path\" is not assignable to \"str\" (reportArgumentType)\n6 errors, 0 warnings, 0 informations\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/config.py:attribute:Settings.database_path",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.database_path:kind=attribute",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.database_path:of=Settings",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.database_path:type=Path",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.launch_cwd",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.launch_cwd:kind=attribute",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.launch_cwd:of=Settings",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.launch_cwd:type=Path",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.output_dir",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.output_dir:kind=attribute",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.output_dir:of=Settings",
+      "src/elevenlabs_mcp/config.py:attribute:Settings.output_dir:type=Path",
+      "src/elevenlabs_mcp/config.py:class:Settings",
+      "src/elevenlabs_mcp/config.py:class:Settings:kind=class",
+      "src/elevenlabs_mcp/config.py:function:settings_from_environment",
+      "src/elevenlabs_mcp/config.py:function:settings_from_environment:arg=environ:type=Mapping[str, str]:default=None",
+      "src/elevenlabs_mcp/config.py:function:settings_from_environment:arg=launch_cwd:type=Path:default=None",
+      "src/elevenlabs_mcp/config.py:function:settings_from_environment:kind=function",
+      "src/elevenlabs_mcp/config.py:function:settings_from_environment:returns=Settings",
+      "src/elevenlabs_mcp/database.py:attribute:Database.CACHE_DURATION_SECONDS",
+      "src/elevenlabs_mcp/database.py:attribute:Database.CACHE_DURATION_SECONDS:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:Database.CACHE_DURATION_SECONDS:of=Database",
+      "src/elevenlabs_mcp/database.py:attribute:Database.CACHE_DURATION_SECONDS:type=int",
+      "src/elevenlabs_mcp/database.py:attribute:Database.db_path",
+      "src/elevenlabs_mcp/database.py:attribute:Database.db_path:kind=attribute",
+      "src/elevenlabs_mcp/database.py:attribute:Database.db_path:of=Database",
+      "src/elevenlabs_mcp/database.py:attribute:Database.db_path:type=str",
+      "src/elevenlabs_mcp/database.py:class:Database",
+      "src/elevenlabs_mcp/database.py:class:Database:kind=class",
+      "src/elevenlabs_mcp/database.py:method:Database.cleanup",
+      "src/elevenlabs_mcp/database.py:method:Database.cleanup:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.cleanup:async=true",
+      "src/elevenlabs_mcp/database.py:method:Database.cleanup:kind=method",
+      "src/elevenlabs_mcp/database.py:method:Database.cleanup:of=Database",
+      "src/elevenlabs_mcp/database.py:method:Database.cleanup:returns=None",
+      "src/elevenlabs_mcp/database.py:method:Database.delete_job",
+      "src/elevenlabs_mcp/database.py:method:Database.delete_job:arg=job_id:type=str:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.delete_job:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.delete_job:async=true",
+      "src/elevenlabs_mcp/database.py:method:Database.delete_job:kind=method",
+      "src/elevenlabs_mcp/database.py:method:Database.delete_job:of=Database",
+      "src/elevenlabs_mcp/database.py:method:Database.delete_job:returns=bool",
+      "src/elevenlabs_mcp/database.py:method:Database.get_all_jobs",
+      "src/elevenlabs_mcp/database.py:method:Database.get_all_jobs:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.get_all_jobs:async=true",
+      "src/elevenlabs_mcp/database.py:method:Database.get_all_jobs:kind=method",
+      "src/elevenlabs_mcp/database.py:method:Database.get_all_jobs:of=Database",
+      "src/elevenlabs_mcp/database.py:method:Database.get_all_jobs:returns=list[AudioJob]",
+      "src/elevenlabs_mcp/database.py:method:Database.get_job",
+      "src/elevenlabs_mcp/database.py:method:Database.get_job:arg=job_id:type=str:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.get_job:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.get_job:async=true",
+      "src/elevenlabs_mcp/database.py:method:Database.get_job:kind=method",
+      "src/elevenlabs_mcp/database.py:method:Database.get_job:of=Database",
+      "src/elevenlabs_mcp/database.py:method:Database.get_job:returns=AudioJob | None",
+      "src/elevenlabs_mcp/database.py:method:Database.get_voices",
+      "src/elevenlabs_mcp/database.py:method:Database.get_voices:arg=max_age_seconds:type=int | None:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.get_voices:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.get_voices:async=true",
+      "src/elevenlabs_mcp/database.py:method:Database.get_voices:kind=method",
+      "src/elevenlabs_mcp/database.py:method:Database.get_voices:of=Database",
+      "src/elevenlabs_mcp/database.py:method:Database.get_voices:returns=tuple[list[dict[str, object]], bool]",
+      "src/elevenlabs_mcp/database.py:method:Database.initialize",
+      "src/elevenlabs_mcp/database.py:method:Database.initialize:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.initialize:async=true",
+      "src/elevenlabs_mcp/database.py:method:Database.initialize:kind=method",
+      "src/elevenlabs_mcp/database.py:method:Database.initialize:of=Database",
+      "src/elevenlabs_mcp/database.py:method:Database.initialize:returns=None",
+      "src/elevenlabs_mcp/database.py:method:Database.insert_job",
+      "src/elevenlabs_mcp/database.py:method:Database.insert_job:arg=job:type=AudioJob:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.insert_job:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.insert_job:async=true",
+      "src/elevenlabs_mcp/database.py:method:Database.insert_job:kind=method",
+      "src/elevenlabs_mcp/database.py:method:Database.insert_job:of=Database",
+      "src/elevenlabs_mcp/database.py:method:Database.insert_job:returns=None",
+      "src/elevenlabs_mcp/database.py:method:Database.update_job",
+      "src/elevenlabs_mcp/database.py:method:Database.update_job:arg=job:type=AudioJob:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.update_job:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.update_job:async=true",
+      "src/elevenlabs_mcp/database.py:method:Database.update_job:kind=method",
+      "src/elevenlabs_mcp/database.py:method:Database.update_job:of=Database",
+      "src/elevenlabs_mcp/database.py:method:Database.update_job:returns=None",
+      "src/elevenlabs_mcp/database.py:method:Database.upsert_voices",
+      "src/elevenlabs_mcp/database.py:method:Database.upsert_voices:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.upsert_voices:arg=voices:type=list[dict[str, object]]:default=None",
+      "src/elevenlabs_mcp/database.py:method:Database.upsert_voices:async=true",
+      "src/elevenlabs_mcp/database.py:method:Database.upsert_voices:kind=method",
+      "src/elevenlabs_mcp/database.py:method:Database.upsert_voices:of=Database",
+      "src/elevenlabs_mcp/database.py:method:Database.upsert_voices:returns=None",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.api",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.api:kind=attribute",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.api:of=ElevenLabsServer",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.api:type=ElevenLabsAPI",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.db",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.db:kind=attribute",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.db:of=ElevenLabsServer",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.db:type=Database",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.output_dir",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.output_dir:kind=attribute",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.output_dir:of=ElevenLabsServer",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.output_dir:type=Path",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.server",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.server:kind=attribute",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.server:of=ElevenLabsServer",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.server:type=Server",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.settings",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.settings:kind=attribute",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.settings:of=ElevenLabsServer",
+      "src/elevenlabs_mcp/server.py:attribute:ElevenLabsServer.settings:type=Settings",
+      "src/elevenlabs_mcp/server.py:class:ElevenLabsServer",
+      "src/elevenlabs_mcp/server.py:class:ElevenLabsServer:kind=class",
+      "src/elevenlabs_mcp/server.py:function:main",
+      "src/elevenlabs_mcp/server.py:function:main:kind=function",
+      "src/elevenlabs_mcp/server.py:function:main:returns=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.initialize",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.initialize:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.initialize:async=true",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.initialize:kind=method",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.initialize:of=ElevenLabsServer",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.initialize:returns=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script:arg=script_json:type=str:default=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script:kind=method",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script:of=ElevenLabsServer",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.parse_script:returns=tuple[list[dict[str, Union[str, None]]], list[str]]",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.run",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.run:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.run:async=true",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.run:kind=method",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.run:of=ElevenLabsServer",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.run:returns=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_notifications",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_notifications:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_notifications:kind=method",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_notifications:of=ElevenLabsServer",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_notifications:returns=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_resources",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_resources:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_resources:kind=method",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_resources:of=ElevenLabsServer",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_resources:returns=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_tools",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_tools:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_tools:kind=method",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_tools:of=ElevenLabsServer",
+      "src/elevenlabs_mcp/server.py:method:ElevenLabsServer.setup_tools:returns=None",
+      "tests/acceptance/test_runtime_configuration.py:test_explicit_database_path_is_injected_after_database_module_import",
+      "tests/acceptance/test_runtime_configuration.py:test_explicit_database_path_is_injected_after_database_module_import:kind=test_function",
+      "tests/acceptance/test_runtime_configuration.py:test_importing_config_and_database_has_no_resource_side_effects",
+      "tests/acceptance/test_runtime_configuration.py:test_importing_config_and_database_has_no_resource_side_effects:kind=test_function",
+      "tests/acceptance/test_runtime_configuration.py:test_initialize_creates_only_resolved_output_and_database_parents",
+      "tests/acceptance/test_runtime_configuration.py:test_initialize_creates_only_resolved_output_and_database_parents:kind=test_function",
+      "tests/acceptance/test_runtime_configuration.py:test_output_environment_resolves_default_database_under_launch_directory",
+      "tests/acceptance/test_runtime_configuration.py:test_output_environment_resolves_default_database_under_launch_directory:kind=test_function",
+      "tests/characterization/test_legacy_database.py:test_legacy_job_crud_round_trip",
+      "tests/characterization/test_legacy_database.py:test_legacy_job_crud_round_trip:kind=test_function",
+      "tests/characterization/test_legacy_database.py:test_legacy_voice_cache_round_trip",
+      "tests/characterization/test_legacy_database.py:test_legacy_voice_cache_round_trip:kind=test_function",
+      "tests/characterization/test_legacy_server_surface.py:test_legacy_server_parses_supported_script_forms",
+      "tests/characterization/test_legacy_server_surface.py:test_legacy_server_parses_supported_script_forms:kind=test_function",
+      "tests/characterization/test_legacy_server_surface.py:test_legacy_server_registers_six_tools_and_three_resource_uris",
+      "tests/characterization/test_legacy_server_surface.py:test_legacy_server_registers_six_tools_and_three_resource_uris:kind=test_function",
+      "tests/characterization/test_legacy_server_surface.py:test_legacy_stdio_entrypoint_discovers_tools_without_provider_network",
+      "tests/characterization/test_legacy_server_surface.py:test_legacy_stdio_entrypoint_discovers_tools_without_provider_network:kind=test_function"
+    ],
+    "files": {
+      "create": [
+        "src/elevenlabs_mcp/config.py",
+        "tests/acceptance/test_runtime_configuration.py",
+        "tests/characterization/test_legacy_database.py",
+        "tests/characterization/test_legacy_server_surface.py"
+      ],
+      "edit": [
+        "src/elevenlabs_mcp/database.py",
+        "src/elevenlabs_mcp/server.py"
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md",
+        "docs/revival/evidence/baseline.md",
+        "tests/characterization/test_legacy_contract_fixtures.py",
+        "tests/conftest.py",
+        "tests/fixtures/legacy/tool_contracts.json",
+        "tests/test_server.py"
+      ],
+      "scope": [],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "create": [
+        {
+          "path": "src/elevenlabs_mcp/config.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "Settings",
+              "description": "Frozen dataclass containing launch_cwd, output_dir, and database_path as fully resolved absolute Paths."
+            },
+            {
+              "kind": "attribute",
+              "name": "launch_cwd",
+              "of": "Settings",
+              "type": "Path"
+            },
+            {
+              "kind": "attribute",
+              "name": "output_dir",
+              "of": "Settings",
+              "type": "Path"
+            },
+            {
+              "kind": "attribute",
+              "name": "database_path",
+              "of": "Settings",
+              "type": "Path"
+            },
+            {
+              "kind": "function",
+              "name": "settings_from_environment",
+              "description": "Purely resolve explicit database and output environment settings relative to launch_cwd without reading dotenv or touching the filesystem.",
+              "args": [
+                {
+                  "name": "environ",
+                  "type": "Mapping[str, str]"
+                },
+                {
+                  "name": "launch_cwd",
+                  "type": "Path"
+                }
+              ],
+              "returns": "Settings"
+            }
+          ]
+        },
+        {
+          "path": "tests/acceptance/test_runtime_configuration.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_importing_config_and_database_has_no_resource_side_effects",
+              "description": "A01 imports config and database in a bounded subprocess whose writable environment roots are redirected and snapshotted, and whose socket-construction tripwire is proved fail-closed; package-level dotenv cleanup remains explicitly deferred."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_output_environment_resolves_default_database_under_launch_directory",
+              "description": "A02 verifies nested relative and absolute output roots resolve once and produce the expected default database path."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_explicit_database_path_is_injected_after_database_module_import",
+              "description": "A03 imports first, resolves a later environment mapping, constructs Database with Settings.database_path, and observes no frozen legacy default."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_initialize_creates_only_resolved_output_and_database_parents",
+              "description": "A02 verifies explicit startup creates nested parents under the resolved root without creating the old package-relative output location."
+            }
+          ]
+        },
+        {
+          "path": "tests/characterization/test_legacy_database.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_legacy_job_crud_round_trip",
+              "description": "Characterize Database initialize, insert_job, update_job, get_job, get_all_jobs, delete_job, and cleanup against an isolated SQLite file."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_legacy_voice_cache_round_trip",
+              "description": "Characterize CACHE_DURATION_SECONDS, upsert_voices, and get_voices without provider access."
+            }
+          ]
+        },
+        {
+          "path": "tests/characterization/test_legacy_server_surface.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_legacy_server_registers_six_tools_and_three_resource_uris",
+              "description": "Characterize setup_tools and setup_resources through observable SDK registration results."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_legacy_server_parses_supported_script_forms",
+              "description": "Characterize parse_script for plain text, direct arrays, and wrapped script objects."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_legacy_stdio_entrypoint_discovers_tools_without_provider_network",
+              "description": "Characterize main and run through a real temporary stdio MCP client with fake/local dependencies."
+            }
+          ]
+        }
+      ],
+      "edit": [
+        {
+          "path": "src/elevenlabs_mcp/database.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "Database",
+              "description": "Legacy database adapter whose constructor requires an explicit str or PathLike database path and performs no filesystem work."
+            },
+            {
+              "kind": "attribute",
+              "name": "CACHE_DURATION_SECONDS",
+              "of": "Database",
+              "type": "int"
+            },
+            {
+              "kind": "attribute",
+              "name": "db_path",
+              "of": "Database",
+              "type": "str"
+            },
+            {
+              "kind": "method",
+              "name": "initialize",
+              "description": "Create only the explicitly selected database parent and initialize the unchanged legacy schema.",
+              "of": "Database",
+              "args": [
+                {
+                  "name": "self"
+                }
+              ],
+              "returns": "None",
+              "async": true
+            },
+            {
+              "kind": "method",
+              "name": "insert_job",
+              "of": "Database",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "job",
+                  "type": "AudioJob"
+                }
+              ],
+              "returns": "None",
+              "async": true
+            },
+            {
+              "kind": "method",
+              "name": "update_job",
+              "of": "Database",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "job",
+                  "type": "AudioJob"
+                }
+              ],
+              "returns": "None",
+              "async": true
+            },
+            {
+              "kind": "method",
+              "name": "get_job",
+              "of": "Database",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "job_id",
+                  "type": "str"
+                }
+              ],
+              "returns": "AudioJob | None",
+              "async": true
+            },
+            {
+              "kind": "method",
+              "name": "get_all_jobs",
+              "of": "Database",
+              "args": [
+                {
+                  "name": "self"
+                }
+              ],
+              "returns": "list[AudioJob]",
+              "async": true
+            },
+            {
+              "kind": "method",
+              "name": "delete_job",
+              "of": "Database",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "job_id",
+                  "type": "str"
+                }
+              ],
+              "returns": "bool",
+              "async": true
+            },
+            {
+              "kind": "method",
+              "name": "cleanup",
+              "of": "Database",
+              "args": [
+                {
+                  "name": "self"
+                }
+              ],
+              "returns": "None",
+              "async": true
+            },
+            {
+              "kind": "method",
+              "name": "upsert_voices",
+              "of": "Database",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "voices",
+                  "type": "list[dict[str, object]]"
+                }
+              ],
+              "returns": "None",
+              "async": true
+            },
+            {
+              "kind": "method",
+              "name": "get_voices",
+              "of": "Database",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "max_age_seconds",
+                  "type": "int | None",
+                  "default": "None"
+                }
+              ],
+              "returns": "tuple[list[dict[str, object]], bool]",
+              "async": true
+            }
+          ]
+        },
+        {
+          "path": "src/elevenlabs_mcp/server.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "ElevenLabsServer",
+              "description": "Legacy MCP server accepting optional resolved Settings and performing no directory creation in its constructor."
+            },
+            {
+              "kind": "attribute",
+              "name": "server",
+              "of": "ElevenLabsServer",
+              "type": "Server"
+            },
+            {
+              "kind": "attribute",
+              "name": "api",
+              "of": "ElevenLabsServer",
+              "type": "ElevenLabsAPI"
+            },
+            {
+              "kind": "attribute",
+              "name": "settings",
+              "of": "ElevenLabsServer",
+              "type": "Settings"
+            },
+            {
+              "kind": "attribute",
+              "name": "output_dir",
+              "of": "ElevenLabsServer",
+              "type": "Path"
+            },
+            {
+              "kind": "attribute",
+              "name": "db",
+              "of": "ElevenLabsServer",
+              "type": "Database"
+            },
+            {
+              "kind": "method",
+              "name": "initialize",
+              "description": "Explicit startup boundary that initializes directories and the injected legacy database before existing cache handling.",
+              "of": "ElevenLabsServer",
+              "args": [
+                {
+                  "name": "self"
+                }
+              ],
+              "returns": "None",
+              "async": true
+            },
+            {
+              "kind": "method",
+              "name": "parse_script",
+              "of": "ElevenLabsServer",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "script_json",
+                  "type": "str"
+                }
+              ],
+              "returns": "tuple[list[dict[str, Union[str, None]]], list[str]]"
+            },
+            {
+              "kind": "method",
+              "name": "setup_resources",
+              "of": "ElevenLabsServer",
+              "args": [
+                {
+                  "name": "self"
+                }
+              ],
+              "returns": "None"
+            },
+            {
+              "kind": "method",
+              "name": "setup_tools",
+              "of": "ElevenLabsServer",
+              "args": [
+                {
+                  "name": "self"
+                }
+              ],
+              "returns": "None"
+            },
+            {
+              "kind": "method",
+              "name": "setup_notifications",
+              "of": "ElevenLabsServer",
+              "args": [
+                {
+                  "name": "self"
+                }
+              ],
+              "returns": "None"
+            },
+            {
+              "kind": "method",
+              "name": "run",
+              "of": "ElevenLabsServer",
+              "args": [
+                {
+                  "name": "self"
+                }
+              ],
+              "returns": "None",
+              "async": true
+            },
+            {
+              "kind": "function",
+              "name": "main",
+              "returns": "None"
+            }
+          ]
+        }
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md",
+        "docs/revival/evidence/baseline.md",
+        "tests/conftest.py",
+        "tests/characterization/test_legacy_contract_fixtures.py",
+        "tests/fixtures/legacy/tool_contracts.json",
+        "tests/test_server.py"
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_runtime_configuration.py",
+      "tests/characterization/test_legacy_contract_fixtures.py",
+      "tests/characterization/test_legacy_database.py",
+      "tests/characterization/test_legacy_server_surface.py",
+      "tests/test_server.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_runtime_configuration.py",
+      "uv run pytest -q tests/characterization/test_legacy_contract_fixtures.py tests/characterization/test_legacy_database.py tests/characterization/test_legacy_server_surface.py tests/test_server.py",
+      "uv run ruff check tests/conftest.py tests/acceptance/test_runtime_configuration.py tests/characterization/test_legacy_contract_fixtures.py tests/characterization/test_legacy_database.py tests/characterization/test_legacy_server_surface.py",
+      "uv run pyright tests/conftest.py tests/acceptance/test_runtime_configuration.py tests/characterization/test_legacy_contract_fixtures.py tests/characterization/test_legacy_database.py tests/characterization/test_legacy_server_surface.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_runtime_configuration.py"
+    ]
+  }
+}

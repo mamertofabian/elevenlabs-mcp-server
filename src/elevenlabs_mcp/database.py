@@ -1,25 +1,12 @@
-import aiosqlite
 import json
 import os
 from datetime import datetime
+from pathlib import Path
 from typing import List, Optional
 
+import aiosqlite
+
 from .models import AudioJob
-
-def get_database_path() -> str:
-    """Get the database path, ensuring it's in the output directory."""
-    # First try to get the output directory from the server instance
-    output_dir = os.getenv("ELEVENLABS_OUTPUT_DIR")
-    if not output_dir:
-        # Fall back to default output directory in project root
-        output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "output")
-    
-    # Ensure output directory exists
-    os.makedirs(output_dir, exist_ok=True)
-    
-    return os.path.join(output_dir, "voiceover_history.db")
-
-DATABASE_PATH = get_database_path()
 
 CREATE_VOICES_TABLE = """
 CREATE TABLE IF NOT EXISTS voices (
@@ -50,13 +37,13 @@ CREATE TABLE IF NOT EXISTS audio_jobs (
 
 class Database:
     CACHE_DURATION_SECONDS = 24 * 60 * 60  # 24 hours
-    def __init__(self, db_path: str = DATABASE_PATH):
-        self.db_path = db_path
-        # Ensure output directory exists
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-        
-    async def initialize(self):
+
+    def __init__(self, db_path: str | os.PathLike[str]):
+        self.db_path: str = os.fspath(db_path)
+
+    async def initialize(self) -> None:
         """Initialize database and create tables if they don't exist."""
+        Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
         async with aiosqlite.connect(self.db_path) as db:
             # Create tables one at a time
             await db.execute(CREATE_VOICES_TABLE)
@@ -163,7 +150,7 @@ class Database:
         if os.path.exists(self.db_path):
             os.remove(self.db_path)
 
-    async def upsert_voices(self, voices: List[dict]) -> None:
+    async def upsert_voices(self, voices: list[dict[str, object]]) -> None:
         """Insert or update voice data in the database."""
         async with aiosqlite.connect(self.db_path) as db:
             now = datetime.utcnow().isoformat()
@@ -196,7 +183,9 @@ class Database:
                 )
             await db.commit()
 
-    async def get_voices(self, max_age_seconds: Optional[int] = None) -> tuple[List[dict], bool]:
+    async def get_voices(
+        self, max_age_seconds: Optional[int] = None
+    ) -> tuple[list[dict[str, object]], bool]:
         """
         Get all voices from the database.
         Returns tuple of (voices, needs_refresh) where needs_refresh indicates if cache is stale.

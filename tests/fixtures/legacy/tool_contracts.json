@@ -1,0 +1,72 @@
+{
+  "fixture_version": "legacy-v0.1.1",
+  "tools": [
+    {
+      "name": "generate_audio_simple",
+      "input": {"text": "Fixture narration", "voice_id": null},
+      "result": {
+        "text_first_line": "Audio generation successful.",
+        "embedded_resource_mime_type": "audio/mpeg"
+      }
+    },
+    {
+      "name": "generate_audio_script",
+      "input": {
+        "script": "{\"script\":[{\"text\":\"Fixture line\",\"voice_id\":\"voice-a\",\"actor\":\"Narrator\"}]}"
+      },
+      "result": {
+        "text_first_line": "Audio generation successful.",
+        "embedded_resource_mime_type": "audio/mpeg"
+      }
+    },
+    {
+      "name": "delete_job",
+      "input": {"job_id": "fixture-job-id"},
+      "result": {"text_contains": "deleted successfully"}
+    },
+    {
+      "name": "get_audio_file",
+      "input": {"job_id": "fixture-job-id"},
+      "result": {"embedded_resource_mime_type": "audio/mpeg"}
+    },
+    {
+      "name": "list_voices",
+      "input": {},
+      "result": {
+        "json_type": "array",
+        "voice_fields": [
+          "voice_id",
+          "name",
+          "category",
+          "labels",
+          "description",
+          "preview_url",
+          "high_quality_base_model_ids"
+        ]
+      }
+    },
+    {
+      "name": "get_voiceover_history",
+      "input": {"job_id": "fixture-job-id"},
+      "result": {
+        "json_type": "array",
+        "history_fields": [
+          "id",
+          "status",
+          "script_parts",
+          "output_file",
+          "error",
+          "created_at",
+          "updated_at",
+          "total_parts",
+          "completed_parts"
+        ]
+      }
+    }
+  ],
+  "resources": {
+    "history_uri": "voiceover://history",
+    "history_mime_type_consumed_by_client": "text/plain",
+    "voices_uri": "voiceover://voices"
+  }
+}

@@ -14,6 +14,7 @@ import logging
 from urllib.parse import unquote
 
 from .elevenlabs_api import ElevenLabsAPI
+from .config import Settings, settings_from_environment
 from .database import Database
 from .models import AudioJob
 
@@ -31,22 +32,21 @@ logging.basicConfig(
 )
 
 class ElevenLabsServer:
-    def __init__(self):
+    def __init__(self, settings: Settings | None = None):
+        self.settings = settings or settings_from_environment(os.environ, Path.cwd())
         self.server = Server("elevenlabs-server")
         self.api = ElevenLabsAPI()
-        self.output_dir = Path("output")
-        self.output_dir.mkdir(exist_ok=True)
-        # Set output directory for database
-        os.environ["ELEVENLABS_OUTPUT_DIR"] = str(self.output_dir.absolute())
-        self.db = Database()
+        self.output_dir = self.settings.output_dir
+        self.db = Database(self.settings.database_path)
         
         # Set up handlers
         self.setup_tools()
         self.setup_resources()
         # self.setup_notifications()
     
-    async def initialize(self):
+    async def initialize(self) -> None:
         """Initialize server components."""
+        self.output_dir.mkdir(parents=True, exist_ok=True)
         await self.db.initialize()
         
         # Initialize voices cache
@@ -60,7 +60,9 @@ class ElevenLabsServer:
         except Exception as e:
             logging.error(f"Error initializing voices cache: {e}")
 
-    def parse_script(self, script_json: str) -> tuple[list[dict], list[str]]:
+    def parse_script(
+        self, script_json: str
+    ) -> tuple[list[dict[str, str | None]], list[str]]:
         """
         Parse the input into a list of script parts and collect debug information.
         Accepts:
@@ -131,7 +133,7 @@ class ElevenLabsServer:
         debug_info.append(f"Final script_parts: {script_parts}")
         return script_parts, debug_info
 
-    def setup_resources(self):
+    def setup_resources(self) -> None:
         """Set up MCP resources."""
         @self.server.list_resource_templates()
         async def handle_list_resource_templates() -> list[types.ResourceTemplate]:
@@ -202,7 +204,7 @@ class ElevenLabsServer:
             except Exception as e:
                 return json.dumps({"error": str(e)}, indent=2)
 
-    def setup_tools(self):
+    def setup_tools(self) -> None:
         @self.server.list_tools()
         async def handle_list_tools() -> list[types.Tool]:
             return [
@@ -628,7 +630,7 @@ class ElevenLabsServer:
                     text=error_msg
                 )]
 
-    def setup_notifications(self):
+    def setup_notifications(self) -> None:
         """Set up notification handlers"""
         @self.server.progress_notification()
         async def handle_cancelled(params: dict):
@@ -649,7 +651,7 @@ class ElevenLabsServer:
                     }
                 })
 
-    async def run(self):
+    async def run(self) -> None:
         """Run the server"""
         try:
             await self.initialize()
@@ -670,7 +672,7 @@ class ElevenLabsServer:
                 )
             )
 
-def main():
+def main() -> None:
     """Entry point for the server"""
     server = ElevenLabsServer()
     asyncio.run(server.run())

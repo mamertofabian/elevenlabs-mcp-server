@@ -1,0 +1,316 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Resolve legacy output and database paths at runtime and inject the database path explicitly without import-time filesystem effects.
+description: |
+  First implementation-sized R01 child covering the database/output subset of
+  A01-A03. Introduce an immutable Settings value and pure environment resolver,
+  require Database to
+  receive the selected path, and wire ElevenLabsServer startup to create the
+  resolved directories. This removes the evaluated DATABASE_PATH trap while
+  preserving the default launch-working-directory output layout. Legacy
+  database ambiguity/discovery (A04), credential-free MCP discovery (A05),
+  import-time dotenv removal, migration, HTTP behavior, and UI work are
+  intentionally deferred. Because database.py and server.py are uncovered
+  brownfield files, this child also adds characterization coverage for their
+  complete existing public surfaces without changing unrelated behavior.
+  Expected red: the A01 subprocess observes directory creation while importing
+  database.py, and A02/A03 cannot import settings_from_environment because
+  config.py does not exist; the current DATABASE_PATH/default argument also
+  remains bound to the first environment value after that value changes.
+temptations:
+  - risk: Patch only ElevenLabsServer.output_dir while leaving Database's evaluated default in place.
+    instead: Resolve Settings once from the launch environment and pass settings.database_path explicitly to Database.
+  - risk: Mutate ELEVENLABS_OUTPUT_DIR so separately constructed classes happen to agree.
+    instead: Pass the immutable Settings value or its resolved Path directly through constructors.
+  - risk: Create directories while importing config.py or database.py to make path tests pass.
+    instead: Keep environment resolution pure and create required parents only during explicit server/database initialization.
+  - risk: Silently select or move a different existing legacy database while repairing defaults.
+    instead: Leave ambiguity detection and owner-controlled migration to the separately reviewed A04 child.
+type: fix
+files:
+  create:
+    - path: src/elevenlabs_mcp/config.py
+      artifacts:
+        - kind: class
+          name: Settings
+          description: Frozen dataclass containing launch_cwd, output_dir, and database_path as fully resolved absolute Paths.
+        - kind: attribute
+          name: launch_cwd
+          of: Settings
+          type: Path
+        - kind: attribute
+          name: output_dir
+          of: Settings
+          type: Path
+        - kind: attribute
+          name: database_path
+          of: Settings
+          type: Path
+        - kind: function
+          name: settings_from_environment
+          description: Purely resolve explicit database and output environment settings relative to launch_cwd without reading dotenv or touching the filesystem.
+          args:
+            - name: environ
+              type: Mapping[str, str]
+            - name: launch_cwd
+              type: Path
+          returns: Settings
+    - path: tests/acceptance/test_runtime_configuration.py
+      artifacts:
+        - kind: test_function
+          name: test_importing_config_and_database_has_no_resource_side_effects
+          description: A01 imports config and database in a bounded subprocess whose writable environment roots are redirected and snapshotted, and whose socket-construction tripwire is proved fail-closed; package-level dotenv cleanup remains explicitly deferred.
+        - kind: test_function
+          name: test_output_environment_resolves_default_database_under_launch_directory
+          description: A02 verifies nested relative and absolute output roots resolve once and produce the expected default database path.
+        - kind: test_function
+          name: test_explicit_database_path_is_injected_after_database_module_import
+          description: A03 imports first, resolves a later environment mapping, constructs Database with Settings.database_path, and observes no frozen legacy default.
+        - kind: test_function
+          name: test_initialize_creates_only_resolved_output_and_database_parents
+          description: A02 verifies explicit startup creates nested parents under the resolved root without creating the old package-relative output location.
+    - path: tests/characterization/test_legacy_database.py
+      artifacts:
+        - kind: test_function
+          name: test_legacy_job_crud_round_trip
+          description: Characterize Database initialize, insert_job, update_job, get_job, get_all_jobs, delete_job, and cleanup against an isolated SQLite file.
+        - kind: test_function
+          name: test_legacy_voice_cache_round_trip
+          description: Characterize CACHE_DURATION_SECONDS, upsert_voices, and get_voices without provider access.
+    - path: tests/characterization/test_legacy_server_surface.py
+      artifacts:
+        - kind: test_function
+          name: test_legacy_server_registers_six_tools_and_three_resource_uris
+          description: Characterize setup_tools and setup_resources through observable SDK registration results.
+        - kind: test_function
+          name: test_legacy_server_parses_supported_script_forms
+          description: Characterize parse_script for plain text, direct arrays, and wrapped script objects.
+        - kind: test_function
+          name: test_legacy_stdio_entrypoint_discovers_tools_without_provider_network
+          description: Characterize main and run through a real temporary stdio MCP client with fake/local dependencies.
+  edit:
+    - path: src/elevenlabs_mcp/database.py
+      artifacts:
+        - kind: class
+          name: Database
+          description: Legacy database adapter whose constructor requires an explicit str or PathLike database path and performs no filesystem work.
+        - kind: attribute
+          name: CACHE_DURATION_SECONDS
+          of: Database
+          type: int
+        - kind: attribute
+          name: db_path
+          of: Database
+          type: str
+        - kind: method
+          name: initialize
+          of: Database
+          description: Create only the explicitly selected database parent and initialize the unchanged legacy schema.
+          args:
+            - name: self
+          returns: None
+          async: true
+        - kind: method
+          name: insert_job
+          of: Database
+          args:
+            - name: self
+            - name: job
+              type: AudioJob
+          returns: None
+          async: true
+        - kind: method
+          name: update_job
+          of: Database
+          args:
+            - name: self
+            - name: job
+              type: AudioJob
+          returns: None
+          async: true
+        - kind: method
+          name: get_job
+          of: Database
+          args:
+            - name: self
+            - name: job_id
+              type: str
+          returns: AudioJob | None
+          async: true
+        - kind: method
+          name: get_all_jobs
+          of: Database
+          args:
+            - name: self
+          returns: list[AudioJob]
+          async: true
+        - kind: method
+          name: delete_job
+          of: Database
+          args:
+            - name: self
+            - name: job_id
+              type: str
+          returns: bool
+          async: true
+        - kind: method
+          name: cleanup
+          of: Database
+          args:
+            - name: self
+          returns: None
+          async: true
+        - kind: method
+          name: upsert_voices
+          of: Database
+          args:
+            - name: self
+            - name: voices
+              type: list[dict[str, object]]
+          returns: None
+          async: true
+        - kind: method
+          name: get_voices
+          of: Database
+          args:
+            - name: self
+            - name: max_age_seconds
+              type: int | None
+              default: None
+          returns: tuple[list[dict[str, object]], bool]
+          async: true
+    - path: src/elevenlabs_mcp/server.py
+      artifacts:
+        - kind: class
+          name: ElevenLabsServer
+          description: Legacy MCP server accepting optional resolved Settings and performing no directory creation in its constructor.
+        - kind: attribute
+          name: server
+          of: ElevenLabsServer
+          type: Server
+        - kind: attribute
+          name: api
+          of: ElevenLabsServer
+          type: ElevenLabsAPI
+        - kind: attribute
+          name: settings
+          of: ElevenLabsServer
+          type: Settings
+        - kind: attribute
+          name: output_dir
+          of: ElevenLabsServer
+          type: Path
+        - kind: attribute
+          name: db
+          of: ElevenLabsServer
+          type: Database
+        - kind: method
+          name: initialize
+          of: ElevenLabsServer
+          description: Explicit startup boundary that initializes directories and the injected legacy database before existing cache handling.
+          args:
+            - name: self
+          returns: None
+          async: true
+        - kind: method
+          name: parse_script
+          of: ElevenLabsServer
+          args:
+            - name: self
+            - name: script_json
+              type: str
+          returns: tuple[list[dict[str, Union[str, None]]], list[str]]
+        - kind: method
+          name: setup_resources
+          of: ElevenLabsServer
+          args:
+            - name: self
+          returns: None
+        - kind: method
+          name: setup_tools
+          of: ElevenLabsServer
+          args:
+            - name: self
+          returns: None
+        - kind: method
+          name: setup_notifications
+          of: ElevenLabsServer
+          args:
+            - name: self
+          returns: None
+        - kind: method
+          name: run
+          of: ElevenLabsServer
+          args:
+            - name: self
+          returns: None
+          async: true
+        - kind: function
+          name: main
+          args: []
+          returns: None
+  read:
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - docs/revival/05_MAID_IMPLEMENTATION_BACKLOG.md
+    - docs/revival/evidence/baseline.md
+    - tests/conftest.py
+    - tests/characterization/test_legacy_contract_fixtures.py
+    - tests/fixtures/legacy/tool_contracts.json
+    - tests/test_server.py
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_runtime_configuration.py]
+  - [uv, run, pytest, -q, tests/characterization/test_legacy_contract_fixtures.py, tests/characterization/test_legacy_database.py, tests/characterization/test_legacy_server_surface.py, tests/test_server.py]
+  - [uv, run, ruff, check, tests/conftest.py, tests/acceptance/test_runtime_configuration.py, tests/characterization/test_legacy_contract_fixtures.py, tests/characterization/test_legacy_database.py, tests/characterization/test_legacy_server_surface.py]
+  - [uv, run, pyright, tests/conftest.py, tests/acceptance/test_runtime_configuration.py, tests/characterization/test_legacy_contract_fixtures.py, tests/characterization/test_legacy_database.py, tests/characterization/test_legacy_server_surface.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_runtime_configuration.py]
+  immutable: true
+removed_artifacts:
+  - kind: function
+    name: get_database_path
+    file: src/elevenlabs_mcp/database.py
+    reason: Runtime resolution moves to the pure settings_from_environment factory.
+  - kind: attribute
+    name: DATABASE_PATH
+    file: src/elevenlabs_mcp/database.py
+    reason: An import-time evaluated database default conflicts with explicit runtime injection.
+outcome:
+  status: completed
+  summary: Runtime output and database paths now resolve once into immutable Settings, Database requires explicit path injection, and filesystem creation occurs only during explicit initialization while legacy tool and stdio behavior remains characterized.
+  rationale: The implementation fixes the import-time DATABASE_PATH trap without selecting or migrating legacy data, changing package identity, or expanding into deferred provider, HTTP, or UI work.
+  lessons:
+    - lesson_type: test-safety
+      summary: Subprocess import tests need redirected writable roots, bounded execution, and a proved fail-closed socket tripwire; parent-process pytest isolation does not automatically protect child processes.
+      tags: [subprocess, network-isolation, filesystem-safety, maid-runner-feedback]
+      paths:
+        - tests/acceptance/test_runtime_configuration.py
+        - tests/characterization/test_legacy_server_surface.py
+  review_notes:
+    - source: maid-implementation-reviewer:r01_review_4
+      severity: ready
+      summary: Fresh read-only review found no blocking or advisory findings after A01 filesystem, socket, and timeout hardening.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 22 credential-free acceptance, characterization, and legacy tests passed.
+    - command: [uv, run, maid, validate, manifests/r01-runtime-path-injection.manifest.yaml, --mode, implementation]
+      status: passed
+      summary: All declared artifacts and signatures matched the implementation.
+    - command: [uv, run, maid, test, --manifest, manifests/r01-runtime-path-injection.manifest.yaml]
+      status: passed
+      summary: All four manifest validation commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, HEAD, --summary, --packet]
+      status: passed
+      summary: All 11 deep gates passed, including artifact coverage, knockout, plan-lock/red-evidence integrity, file tracking, and changed scope.
+  completed_at: "2026-09-20T12:15:44+08:00"
+created: "2026-09-20T03:49:53Z"
+metadata:
+  author: Codex
+  tags: [revival, r01, configuration, database, brownfield]
+  priority: high
