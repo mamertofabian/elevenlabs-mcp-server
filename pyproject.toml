@@ -17,6 +17,7 @@ dependencies = [
     "mcp>=1.1.2,<2",
     "requests",
     "pydub",
+    "pydantic>=2.10,<3",
     "python-dotenv",
     "tenacity>=9.0.0",
     "aiosqlite>=0.19.0",

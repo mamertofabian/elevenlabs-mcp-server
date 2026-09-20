@@ -137,6 +137,7 @@ source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },
     { name = "mcp" },
+    { name = "pydantic" },
     { name = "pydub" },
     { name = "python-dotenv" },
     { name = "requests" },
@@ -162,6 +163,7 @@ dev = [
 requires-dist = [
     { name = "aiosqlite", specifier = ">=0.19.0" },
     { name = "mcp", specifier = ">=1.1.2,<2" },
+    { name = "pydantic", specifier = ">=2.10,<3" },
     { name = "pydub" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-asyncio", marker = "extra == 'dev'" },

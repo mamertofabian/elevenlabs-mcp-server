@@ -1,11 +1,11 @@
 {
   "manifest_path": "manifests/r03-runtime-dependency-containment.manifest.yaml",
-  "manifest_hash": "sha256-contract:e52ab7a41123c8564724c3bf52d7eda84210ac6dbdb57bc9f1de4c0a6f9d95b7",
+  "manifest_hash": "sha256-contract:ed0171fc76965402323c2de78fd7fe6e318f9ed4b6644bf56861cc4009da2b13",
   "test_hashes": {
-    "tests/acceptance/test_runtime_dependency_metadata.py": "sha256-pyast:v2:c762ffbe6abc9daf05ea8d1cf58fb6418e9e971b15dc186442c9c7949aad7f74"
+    "tests/acceptance/test_runtime_dependency_metadata.py": "sha256-pyast:v2:e07045b398d54bda9c44a9043815ccd37d348c61984b9cc5a191ed1235bce735"
   },
   "created_at": "2026-09-20T07:07:22.941138+00:00",
-  "revision": 3,
+  "revision": 5,
   "revisions": [
     {
       "prior_manifest_hash": "sha256-contract:dd791f035e92b6504deaa2a0098de898c2ced0c2a3b050129a63fe26fdbf0620",
@@ -40,40 +40,74 @@
         "validate_commands_added": [],
         "validate_commands_removed": []
       }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:e52ab7a41123c8564724c3bf52d7eda84210ac6dbdb57bc9f1de4c0a6f9d95b7",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_dependency_metadata.py": "sha256-pyast:v2:c762ffbe6abc9daf05ea8d1cf58fb6418e9e971b15dc186442c9c7949aad7f74"
+      },
+      "revised_at": "2026-09-20T08:38:15.683799+00:00",
+      "reason": "Declare tested Pydantic v2 directly before adding R04 public contracts, with fresh wheel/lock red evidence",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:ed0171fc76965402323c2de78fd7fe6e318f9ed4b6644bf56861cc4009da2b13",
+      "prior_test_hashes": {
+        "tests/acceptance/test_runtime_dependency_metadata.py": "sha256-pyast:v2:e07045b398d54bda9c44a9043815ccd37d348c61984b9cc5a191ed1235bce735"
+      },
+      "revised_at": "2026-09-20T08:40:48.690923+00:00",
+      "reason": "Capture reviewed direct Pydantic dependency Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
     }
   ],
   "red_evidence": {
     "red": true,
-    "captured_at": "2026-09-20T07:07:27.427737+00:00",
+    "captured_at": "2026-09-20T08:38:22.364982+00:00",
     "commands": [
       {
         "command": "uv run pytest -q tests/acceptance/test_runtime_dependency_metadata.py",
         "exit_code": 1,
-        "output_tail": "            entry_name = next(\n                name for name in names if name.endswith(\".dist-info/entry_points.txt\")\n            )\n            metadata = email.message_from_bytes(wheel.read(metadata_name))\n            entries = wheel.read(entry_name).decode(\"utf-8\")\n    \n        requirements = metadata.get_all(\"Requires-Dist\") or []\n        mcp_requirement = next(item for item in requirements if item.startswith(\"mcp\"))\n        assert metadata[\"Name\"] == \"elevenlabs-mcp-server\"\n>       assert \">=1.1.2\" in mcp_requirement\nE       AssertionError: assert '>=1.1.2' in 'mcp>=1.0.0'\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_runtime_dependency_metadata.py:97: AssertionError\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_project_runtime_dependencies_bound_mcp_and_exclude_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_lock_resolves_tested_mcp_v1_without_runtime_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_built_wheel_preserves_identity_license_and_safe_requirements\n3 failed in 0.21s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "output_tail": "    yield from self._runtest_for(item, \"call\")\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/_pytest/logging.py:829: in _runtest_for\n    yield\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <CaptureManager _method='fd' _global_capturing=<MultiCapture out=<FDCapture 1 oldfd=6 _state='suspended' tmpfile=<_io....xtIOWrapper name='/dev/null' mode='r' encoding='utf-8'>> _state='suspended' _in_suspended=False> _capture_fixture=None>\nitem = <Function test_built_wheel_preserves_identity_license_and_safe_requirements>\n\n    @hookimpl(wrapper=True)\n    def pytest_runtest_call(self, item: Item) -> Generator[None]:\n        with self.item_capture(\"call\", item):\n>           return (yield)\nE           RuntimeError: generator raised StopIteration\n\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/_pytest/capture.py:880: RuntimeError\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_project_runtime_dependencies_bound_mcp_and_exclude_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_lock_resolves_tested_mcp_v1_without_runtime_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_built_wheel_preserves_identity_license_and_safe_requirements\n3 failed in 0.24s",
         "classification": "red"
       },
       {
         "command": "uv run pytest -q",
         "exit_code": 1,
-        "output_tail": "        requirements = metadata.get_all(\"Requires-Dist\") or []\n        mcp_requirement = next(item for item in requirements if item.startswith(\"mcp\"))\n        assert metadata[\"Name\"] == \"elevenlabs-mcp-server\"\n>       assert \">=1.1.2\" in mcp_requirement\nE       AssertionError: assert '>=1.1.2' in 'mcp>=1.0.0'\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_runtime_dependency_metadata.py:97: AssertionError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_project_runtime_dependencies_bound_mcp_and_exclude_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_lock_resolves_tested_mcp_v1_without_runtime_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_built_wheel_preserves_identity_license_and_safe_requirements\n3 failed, 67 passed, 1 warning in 3.32s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "output_tail": "item = <Function test_built_wheel_preserves_identity_license_and_safe_requirements>\n\n    @hookimpl(wrapper=True)\n    def pytest_runtest_call(self, item: Item) -> Generator[None]:\n        with self.item_capture(\"call\", item):\n>           return (yield)\nE           RuntimeError: generator raised StopIteration\n\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/_pytest/capture.py:880: RuntimeError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_project_runtime_dependencies_bound_mcp_and_exclude_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_lock_resolves_tested_mcp_v1_without_runtime_pytest\nFAILED tests/acceptance/test_runtime_dependency_metadata.py::test_built_wheel_preserves_identity_license_and_safe_requirements\n3 failed, 76 passed, 1 warning in 5.43s",
         "classification": "red"
       },
       {
         "command": "uv run ruff check tests/acceptance/test_runtime_dependency_metadata.py",
         "exit_code": 0,
-        "output_tail": "All checks passed!\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "output_tail": "All checks passed!",
         "classification": "not_red"
       },
       {
         "command": "uv run pyright tests/acceptance/test_runtime_dependency_metadata.py",
         "exit_code": 0,
-        "output_tail": "0 errors, 0 warnings, 0 informations\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "output_tail": "0 errors, 0 warnings, 0 informations",
         "classification": "not_red"
       },
       {
         "command": "uv lock --check",
         "exit_code": 0,
-        "output_tail": "warning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead\nResolved 42 packages in 5ms",
+        "output_tail": "Resolved 42 packages in 5ms",
         "classification": "not_red"
       }
     ]
