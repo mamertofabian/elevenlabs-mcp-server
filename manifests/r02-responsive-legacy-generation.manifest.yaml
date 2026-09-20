@@ -1,0 +1,92 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Keep MCP discovery and local history responsive during synchronous legacy synthesis while serializing generation to one worker at a time.
+description: |
+  R02/A10 child. Add a private SDK-v1 concurrent request dispatcher plus a server generation seam guarded by one
+  asyncio.Lock and execute ElevenLabsAPI.generate_full_audio through
+  asyncio.to_thread. The dispatcher keeps independent MCP requests moving while a tool handler awaits its worker. Both legacy generation tools await that seam, preserving
+  their synchronous response contracts and existing job transitions while the
+  MCP event loop remains free for discovery/history. The lock bounds this
+  recovery implementation to one active generation per server; it is not the
+  durable R08 worker. Real in-memory MCP tests use a 600 ms fake blocking
+  renderer and require list-tools plus history to complete within 300 ms, then
+  prove concurrent legacy renders never overlap. Cancellation/unknown outcome,
+  executor shutdown, and durable worker ownership remain later contracts.
+  Expected red: current handlers call generate_full_audio directly, blocking
+  the event loop so the metadata observation exceeds the threshold.
+temptations:
+  - risk: Mock the decorated handler directly and call that responsive.
+    instead: Send concurrent requests through ClientSession and the real MCP Server memory streams.
+  - risk: Offload synthesis but leave the SDK-v1 receive loop awaiting one handler at a time.
+    instead: Use a private task-group dispatcher for registered requests while retaining request context and response/error semantics.
+  - risk: Use to_thread without limiting simultaneous synthesis.
+    instead: Guard the private offload seam with one asyncio.Lock and measure maximum fake-render overlap.
+  - risk: Return a job ID immediately and break legacy synchronous response compatibility.
+    instead: Await the offloaded render for the generation call while allowing unrelated MCP requests to progress.
+  - risk: Use a timing threshold close to the fake block duration.
+    instead: Block for 600 ms and require metadata under 300 ms, leaving a clear deterministic separation.
+type: fix
+files:
+  create:
+    - path: tests/acceptance/test_responsive_legacy_generation.py
+      artifacts:
+        - kind: test_function
+          name: test_discovery_and_history_remain_responsive_during_blocked_render
+          description: A10 sends a real legacy tool call while a 600 ms fake renderer blocks and observes list-tools/history within 300 ms for both simple and script tools.
+        - kind: test_function
+          name: test_concurrent_legacy_renders_are_serialized
+          description: Concurrent real MCP generation calls complete with maximum fake-render overlap of exactly one.
+        - kind: test_function
+          name: test_notification_failure_does_not_stop_following_requests
+          description: A raising notification handler is contained and a subsequent real MCP list-tools request succeeds, preserving SDK-v1 failure semantics.
+  read:
+    - manifests/r01-runtime-path-injection.manifest.yaml
+    - manifests/r02-honest-partial-generation.manifest.yaml
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - tests/acceptance/test_collision_proof_output.py
+  scope:
+    - path: src/elevenlabs_mcp/server.py
+      reason: Add a private concurrent SDK-v1 dispatcher and one asyncio.Lock/offload seam, then route both existing generate_full_audio calls through it without changing public server artifacts.
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_responsive_legacy_generation.py]
+  - [uv, run, pytest, -q, tests/acceptance/test_responsive_legacy_generation.py, tests/acceptance/test_collision_proof_output.py, tests/characterization/test_legacy_server_surface.py]
+  - [uv, run, ruff, check, tests/acceptance/test_responsive_legacy_generation.py]
+  - [uv, run, pyright, tests/acceptance/test_responsive_legacy_generation.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_responsive_legacy_generation.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Both synchronous legacy render tools now offload through one serialized worker seam, while a private SDK-v1 concurrent dispatcher keeps real MCP discovery and history responsive during blocked synthesis.
+  rationale: Thread offload alone cannot help a serial SDK receive loop; the private dispatcher preserves request context and error/notification semantics while the generation lock bounds active synthesis to one per server.
+  lessons:
+    - lesson_type: async-dispatch
+      summary: Freeing the event loop is insufficient when the protocol receive loop serially awaits handlers; responsiveness requires concurrency at both dispatch and blocking-I/O boundaries.
+      tags: [asyncio, mcp, responsiveness, legacy]
+      paths: [src/elevenlabs_mcp/server.py, tests/acceptance/test_responsive_legacy_generation.py]
+  review_notes:
+    - source: maid-implementation-reviewer:r02_responsive_review_2
+      severity: ready
+      summary: No blockers; timer placement is a P2 false-failure risk and cancellation/thread ownership remains explicitly deferred.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 56 tests passed.
+    - command: [uv, run, pyright]
+      status: inherited-debt
+      summary: Exactly 13 pre-existing errors remain; the dispatcher and test added none.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, 7a82b85, --summary, --packet]
+      status: passed
+      summary: All 11 deep stages passed.
+  completed_at: "2026-09-20T13:55:40+08:00"
+created: "2026-09-20T05:43:58Z"
+metadata:
+  author: Codex
+  tags: [revival, r02, asyncio, responsiveness, legacy-tools]
+  priority: high

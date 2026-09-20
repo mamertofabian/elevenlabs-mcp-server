@@ -1,0 +1,203 @@
+{
+  "manifest_path": "manifests/r02-responsive-legacy-generation.manifest.yaml",
+  "manifest_hash": "sha256-contract:6ceee4079b18c04cd9a74cf2fc43f0fa8d7fb7f57ddea8d47b54b032e223ad2a",
+  "test_hashes": {
+    "tests/acceptance/test_collision_proof_output.py": "sha256-pyast:v2:911c3e4f0bc521fc47ab666e265138660aad16a6d2b862daa8ce794d6cd47ee4",
+    "tests/acceptance/test_responsive_legacy_generation.py": "sha256-pyast:v2:a08aaac19b8d8cb8e06fa4d7310a587349e39680d7dbf42bb5988e421b0fc677",
+    "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9"
+  },
+  "created_at": "2026-09-20T05:43:53.326989+00:00",
+  "revision": 5,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:1d2cac9776ff1e2e4671d464981a9f657b5c03363077e6b136032b13601d4790",
+      "prior_test_hashes": {
+        "tests/acceptance/test_collision_proof_output.py": "sha256-pyast:v2:911c3e4f0bc521fc47ab666e265138660aad16a6d2b862daa8ce794d6cd47ee4",
+        "tests/acceptance/test_responsive_legacy_generation.py": "sha256-pyast:v2:aa80407f71e7f4389493313ce04d16d512472e8f5d19737468a2685a3b298782",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9"
+      },
+      "revised_at": "2026-09-20T05:43:58.823491+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r02-responsive-legacy-generation.manifest.yaml -> manifests/r02-responsive-legacy-generation.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:37f9af3eaf31cb874379faf9edd31a5b899c721a631088289ee5b93739e13418",
+      "prior_test_hashes": {
+        "tests/acceptance/test_collision_proof_output.py": "sha256-pyast:v2:911c3e4f0bc521fc47ab666e265138660aad16a6d2b862daa8ce794d6cd47ee4",
+        "tests/acceptance/test_responsive_legacy_generation.py": "sha256-pyast:v2:aa80407f71e7f4389493313ce04d16d512472e8f5d19737468a2685a3b298782",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9"
+      },
+      "revised_at": "2026-09-20T05:46:20.296125+00:00",
+      "reason": "Include the private SDK-v1 concurrent dispatcher required for real MCP responsiveness while handlers await offloaded synthesis",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:37a09a80c844e977c807a31f9be3aecd252cf1b8345854c54af8dc9900f6c2ee",
+      "prior_test_hashes": {
+        "tests/acceptance/test_collision_proof_output.py": "sha256-pyast:v2:911c3e4f0bc521fc47ab666e265138660aad16a6d2b862daa8ce794d6cd47ee4",
+        "tests/acceptance/test_responsive_legacy_generation.py": "sha256-pyast:v2:aa80407f71e7f4389493313ce04d16d512472e8f5d19737468a2685a3b298782",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9"
+      },
+      "revised_at": "2026-09-20T05:52:24.550876+00:00",
+      "reason": "Restore SDK notification exception containment, use public direct import paths and exact stream types, and synchronize responsiveness on renderer entry",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "tests/acceptance/test_responsive_legacy_generation.py:test_notification_failure_does_not_stop_following_requests",
+          "tests/acceptance/test_responsive_legacy_generation.py:test_notification_failure_does_not_stop_following_requests:kind=test_function"
+        ],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:6ceee4079b18c04cd9a74cf2fc43f0fa8d7fb7f57ddea8d47b54b032e223ad2a",
+      "prior_test_hashes": {
+        "tests/acceptance/test_collision_proof_output.py": "sha256-pyast:v2:911c3e4f0bc521fc47ab666e265138660aad16a6d2b862daa8ce794d6cd47ee4",
+        "tests/acceptance/test_responsive_legacy_generation.py": "sha256-pyast:v2:a08aaac19b8d8cb8e06fa4d7310a587349e39680d7dbf42bb5988e421b0fc677",
+        "tests/characterization/test_legacy_server_surface.py": "sha256-pyast:v2:87c451b035f46624f592d26bc6df959bb6af9c6c6602ba532acc2f3bd2f34cd9"
+      },
+      "revised_at": "2026-09-20T05:56:13.720427+00:00",
+      "reason": "Capture reviewed responsive legacy generation Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T05:52:30.147137+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_responsive_legacy_generation.py",
+        "exit_code": 1,
+        "output_tail": "      |     raise BaseExceptionGroup(\n      | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)\n      +-+---------------- 1 ----------------\n        | Traceback (most recent call last):\n        |   File \"/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_responsive_legacy_generation.py\", line 94, in scenario\n        |     assert elapsed < 0.3\n        | AssertionError: assert 0.6195270029966196 < 0.3\n        +------------------------------------\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_responsive_legacy_generation.py::test_discovery_and_history_remain_responsive_during_blocked_render[generate_audio_simple-arguments0]\nFAILED tests/acceptance/test_responsive_legacy_generation.py::test_discovery_and_history_remain_responsive_during_blocked_render[generate_audio_script-arguments1]\n2 failed, 2 passed, 1 warning in 1.83s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run pytest -q tests/acceptance/test_responsive_legacy_generation.py tests/acceptance/test_collision_proof_output.py tests/characterization/test_legacy_server_surface.py",
+        "exit_code": 1,
+        "output_tail": "      |     raise BaseExceptionGroup(\n      | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)\n      +-+---------------- 1 ----------------\n        | Traceback (most recent call last):\n        |   File \"/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_responsive_legacy_generation.py\", line 94, in scenario\n        |     assert elapsed < 0.3\n        | AssertionError: assert 0.608543495000049 < 0.3\n        +------------------------------------\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_responsive_legacy_generation.py::test_discovery_and_history_remain_responsive_during_blocked_render[generate_audio_simple-arguments0]\nFAILED tests/acceptance/test_responsive_legacy_generation.py::test_discovery_and_history_remain_responsive_during_blocked_render[generate_audio_script-arguments1]\n2 failed, 11 passed, 1 warning in 2.24s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/acceptance/test_responsive_legacy_generation.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/acceptance/test_responsive_legacy_generation.py",
+        "exit_code": 0,
+        "output_tail": "0 errors, 0 warnings, 0 informations\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "tests/acceptance/test_responsive_legacy_generation.py:test_concurrent_legacy_renders_are_serialized",
+      "tests/acceptance/test_responsive_legacy_generation.py:test_concurrent_legacy_renders_are_serialized:kind=test_function",
+      "tests/acceptance/test_responsive_legacy_generation.py:test_discovery_and_history_remain_responsive_during_blocked_render",
+      "tests/acceptance/test_responsive_legacy_generation.py:test_discovery_and_history_remain_responsive_during_blocked_render:kind=test_function",
+      "tests/acceptance/test_responsive_legacy_generation.py:test_notification_failure_does_not_stop_following_requests",
+      "tests/acceptance/test_responsive_legacy_generation.py:test_notification_failure_does_not_stop_following_requests:kind=test_function"
+    ],
+    "files": {
+      "create": [
+        "tests/acceptance/test_responsive_legacy_generation.py"
+      ],
+      "edit": [],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r01-runtime-path-injection.manifest.yaml",
+        "manifests/r02-honest-partial-generation.manifest.yaml",
+        "tests/acceptance/test_collision_proof_output.py"
+      ],
+      "scope": [
+        "src/elevenlabs_mcp/server.py"
+      ],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "create": [
+        {
+          "path": "tests/acceptance/test_responsive_legacy_generation.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_discovery_and_history_remain_responsive_during_blocked_render",
+              "description": "A10 sends a real legacy tool call while a 600 ms fake renderer blocks and observes list-tools/history within 300 ms for both simple and script tools."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_concurrent_legacy_renders_are_serialized",
+              "description": "Concurrent real MCP generation calls complete with maximum fake-render overlap of exactly one."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_notification_failure_does_not_stop_following_requests",
+              "description": "A raising notification handler is contained and a subsequent real MCP list-tools request succeeds, preserving SDK-v1 failure semantics."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "manifests/r01-runtime-path-injection.manifest.yaml",
+        "manifests/r02-honest-partial-generation.manifest.yaml",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "tests/acceptance/test_collision_proof_output.py"
+      ],
+      "scope": [
+        {
+          "path": "src/elevenlabs_mcp/server.py",
+          "reason": "Add a private concurrent SDK-v1 dispatcher and one asyncio.Lock/offload seam, then route both existing generate_full_audio calls through it without changing public server artifacts."
+        }
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_collision_proof_output.py",
+      "tests/acceptance/test_responsive_legacy_generation.py",
+      "tests/characterization/test_legacy_server_surface.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_responsive_legacy_generation.py",
+      "uv run pytest -q tests/acceptance/test_responsive_legacy_generation.py tests/acceptance/test_collision_proof_output.py tests/characterization/test_legacy_server_surface.py",
+      "uv run ruff check tests/acceptance/test_responsive_legacy_generation.py",
+      "uv run pyright tests/acceptance/test_responsive_legacy_generation.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_responsive_legacy_generation.py"
+    ]
+  }
+}

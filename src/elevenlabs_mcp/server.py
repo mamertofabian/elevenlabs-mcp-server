@@ -3,10 +3,17 @@ import base64
 import os
 from collections.abc import Mapping
 from pathlib import Path
+from typing import Any, cast
 import uuid
+import mcp.server as mcp_server
 import mcp.types as types
-from mcp.server import Server, NotificationOptions
+from anyio.streams.memory import MemoryObjectReceiveStream, MemoryObjectSendStream
+from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
+from mcp.server.session import ServerSession
+from mcp.shared.context import RequestContext
+from mcp.shared.exceptions import McpError
+from mcp.shared.session import RequestResponder
 import mcp.server.stdio
 import json
 from datetime import datetime
@@ -25,6 +32,7 @@ from .models import AudioJob
 
 log_level = os.getenv("ELEVENLABS_LOG_LEVEL", "ERROR").upper()
 valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
+_request_ctx = cast(Any, mcp_server).request_ctx
 if log_level not in valid_levels:
     log_level = "ERROR"
     print(f"Invalid log level {log_level}. Using ERROR. Valid levels are: {', '.join(valid_levels)}")
@@ -33,6 +41,72 @@ logging.basicConfig(
     level=getattr(logging, log_level),
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+
+
+class _ConcurrentServer(Server):
+    """SDK-v1 server loop that keeps independent requests in flight."""
+
+    async def run(
+        self,
+        read_stream: MemoryObjectReceiveStream[types.JSONRPCMessage | Exception],
+        write_stream: MemoryObjectSendStream[types.JSONRPCMessage],
+        initialization_options: InitializationOptions,
+        raise_exceptions: bool = False,
+    ) -> None:
+        async with ServerSession(
+            read_stream, write_stream, initialization_options
+        ) as session:
+            async with asyncio.TaskGroup() as tasks:
+                async for message in session.incoming_messages:
+                    tasks.create_task(
+                        self._dispatch_message(
+                            message, session, raise_exceptions=raise_exceptions
+                        )
+                    )
+
+    async def _dispatch_message(
+        self, message: object, session: ServerSession, raise_exceptions: bool
+    ) -> None:
+        if isinstance(message, RequestResponder):
+            request = message.request.root
+            handler = self.request_handlers.get(type(request))
+            if handler is None:
+                await message.respond(
+                    types.ErrorData(
+                        code=types.METHOD_NOT_FOUND,
+                        message="Method not found",
+                    )
+                )
+                return
+            token = _request_ctx.set(
+                RequestContext(
+                    message.request_id,
+                    message.request_meta,
+                    session,
+                )
+            )
+            try:
+                response = await handler(request)
+            except McpError as error:
+                response = error.error
+            except Exception as error:
+                if raise_exceptions:
+                    raise
+                response = types.ErrorData(code=0, message=str(error), data=None)
+            finally:
+                _request_ctx.reset(token)
+            await message.respond(response)
+            return
+
+        if not isinstance(message, types.ClientNotification):
+            return
+        notification = message.root
+        handler = self.notification_handlers.get(type(notification))
+        if handler is not None:
+            try:
+                await handler(notification)
+            except Exception as error:
+                logging.error("Notification handler failed: %s", error)
 
 class ElevenLabsServer:
     def __init__(
@@ -48,15 +122,27 @@ class ElevenLabsServer:
         self.settings = settings or settings_from_environment(
             runtime_environment, launch_cwd
         )
-        self.server = Server("elevenlabs-server")
+        self.server = _ConcurrentServer("elevenlabs-server")
         self.api = ElevenLabsAPI(runtime_environment)
         self.output_dir = self.settings.output_dir
         self.db = Database(self.settings.database_path)
+        self._generation_lock = asyncio.Lock()
         
         # Set up handlers
         self.setup_tools()
         self.setup_resources()
         # self.setup_notifications()
+
+    async def _generate_full_audio(
+        self, script_parts: list[dict], job_id: str
+    ) -> tuple[str, list[str], int]:
+        async with self._generation_lock:
+            return await asyncio.to_thread(
+                self.api.generate_full_audio,
+                script_parts,
+                self.output_dir,
+                output_id=job_id,
+            )
     
     async def initialize(self) -> None:
         """Initialize server components."""
@@ -375,10 +461,8 @@ class ElevenLabsServer:
                         #         }
                         #     })
 
-                        output_file, api_debug_info, completed_parts = self.api.generate_full_audio(
-                            script_parts,
-                            self.output_dir,
-                            output_id=job_id,
+                        output_file, api_debug_info, completed_parts = (
+                            await self._generate_full_audio(script_parts, job_id)
                         )
                         debug_info.extend(api_debug_info)
 
@@ -461,10 +545,8 @@ class ElevenLabsServer:
                         job.status = "processing"
                         await self.db.update_job(job)
 
-                        output_file, api_debug_info, completed_parts = self.api.generate_full_audio(
-                            script_parts,
-                            self.output_dir,
-                            output_id=job_id,
+                        output_file, api_debug_info, completed_parts = (
+                            await self._generate_full_audio(script_parts, job_id)
                         )
                         debug_info.extend(api_debug_info)
 
