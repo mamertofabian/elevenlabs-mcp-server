@@ -1,0 +1,533 @@
+{
+  "manifest_path": "manifests/r04-typed-script-contracts.manifest.yaml",
+  "manifest_hash": "sha256-contract:7cd37d61b8568e85a985edf8ff4df6426f2cca888e6f337639ac18b834a78c67",
+  "test_hashes": {
+    "tests/acceptance/test_typed_script_contracts.py": "sha256-pyast:v2:7fb7d67766dcaf3ed990edab04833319fe5c831d5593a69a1231dd844ede5d8b"
+  },
+  "created_at": "2026-09-20T08:43:01.486900+00:00",
+  "revision": 6,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:cce471f739cbb04239b5844bd858c6bb224bc4e83b1a20a19f021341d731ffe5",
+      "prior_test_hashes": {
+        "tests/acceptance/test_typed_script_contracts.py": "sha256-pyast:v2:0dc8cf0fedf043d36a7b11a649729d39726a689437c73eacc368de6d556ea08e"
+      },
+      "revised_at": "2026-09-20T08:43:02.742636+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r04-typed-script-contracts.manifest.yaml -> manifests/r04-typed-script-contracts.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:537cbb2480d7a2ba7e58887c504da3a75cd8e40fc36a134da485bc80259e38bc",
+      "prior_test_hashes": {
+        "tests/acceptance/test_typed_script_contracts.py": "sha256-pyast:v2:0dc8cf0fedf043d36a7b11a649729d39726a689437c73eacc368de6d556ea08e"
+      },
+      "revised_at": "2026-09-20T08:45:10.544195+00:00",
+      "reason": "Keep Pydantic configuration and validator hooks private so strict-mode public artifacts match the approved DTO field contract",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "src/elevenlabs_mcp/contracts.py:class:CastVoice:base=_StrictModel",
+          "src/elevenlabs_mcp/contracts.py:class:PlanVoiceoverInput:base=_StrictModel",
+          "src/elevenlabs_mcp/contracts.py:class:Scene:base=_StrictModel",
+          "src/elevenlabs_mcp/contracts.py:class:Script:base=_StrictModel",
+          "src/elevenlabs_mcp/contracts.py:class:ScriptPart:base=_StrictModel",
+          "src/elevenlabs_mcp/contracts.py:class:TtsVoiceSettings:base=_StrictModel",
+          "src/elevenlabs_mcp/contracts.py:class:VoiceoverOptions:base=_StrictModel"
+        ],
+        "artifacts_removed": [
+          "src/elevenlabs_mcp/contracts.py:class:CastVoice:base=BaseModel",
+          "src/elevenlabs_mcp/contracts.py:class:PlanVoiceoverInput:base=BaseModel",
+          "src/elevenlabs_mcp/contracts.py:class:Scene:base=BaseModel",
+          "src/elevenlabs_mcp/contracts.py:class:Script:base=BaseModel",
+          "src/elevenlabs_mcp/contracts.py:class:ScriptPart:base=BaseModel",
+          "src/elevenlabs_mcp/contracts.py:class:TtsVoiceSettings:base=BaseModel",
+          "src/elevenlabs_mcp/contracts.py:class:VoiceoverOptions:base=BaseModel"
+        ],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:c1cef1379e968620c7ff3ad2c7cbc6e20ca1456ce93d81d5a05c5d86cf2b29f1",
+      "prior_test_hashes": {
+        "tests/acceptance/test_typed_script_contracts.py": "sha256-pyast:v2:0dc8cf0fedf043d36a7b11a649729d39726a689437c73eacc368de6d556ea08e"
+      },
+      "revised_at": "2026-09-20T08:50:13.184752+00:00",
+      "reason": "Independent implementation review required deep cast immutability plus explicit max/max-plus-one and isolated nested extra-field behavioral coverage.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [
+          "src/elevenlabs_mcp/contracts.py:attribute:Script.cast:type=Mapping[str, CastVoice]"
+        ],
+        "artifacts_removed": [
+          "src/elevenlabs_mcp/contracts.py:attribute:Script.cast:type=dict[str, CastVoice]"
+        ],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:7cd37d61b8568e85a985edf8ff4df6426f2cca888e6f337639ac18b834a78c67",
+      "prior_test_hashes": {
+        "tests/acceptance/test_typed_script_contracts.py": "sha256-pyast:v2:7fb7d67766dcaf3ed990edab04833319fe5c831d5593a69a1231dd844ede5d8b"
+      },
+      "revised_at": "2026-09-20T08:50:19.566605+00:00",
+      "reason": "Apply deterministic Ruff formatting to the review-hardened behavioral tests without changing their contract.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:7cd37d61b8568e85a985edf8ff4df6426f2cca888e6f337639ac18b834a78c67",
+      "prior_test_hashes": {
+        "tests/acceptance/test_typed_script_contracts.py": "sha256-pyast:v2:7fb7d67766dcaf3ed990edab04833319fe5c831d5593a69a1231dd844ede5d8b"
+      },
+      "revised_at": "2026-09-20T08:54:38.722179+00:00",
+      "reason": "Capture the evidence-backed Outcome after an independent Ready to merge implementation review.",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T08:50:20.617953+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_typed_script_contracts.py",
+        "exit_code": 1,
+        "output_tail": "    def test_voiceover_options_enforce_engine_profiles_and_bounds() -> None:\n>       from elevenlabs_mcp.contracts import TtsVoiceSettings, VoiceoverOptions\nE       ModuleNotFoundError: No module named 'elevenlabs_mcp.contracts'\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_typed_script_contracts.py:221: ModuleNotFoundError\n=============================== warnings summary ===============================\ntests/acceptance/test_typed_script_contracts.py::test_supplied_plan_fixture_validates_and_preserves_values\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_typed_script_contracts.py::test_supplied_plan_fixture_validates_and_preserves_values\nFAILED tests/acceptance/test_typed_script_contracts.py::test_script_semantic_relationships_fail_before_planning[unknown_actor]\nFAILED tests/acceptance/test_typed_script_contracts.py::test_script_semantic_relationships_fail_before_planning[duplicate_scene]\nFAILED tests/acceptance/test_typed_script_contracts.py::test_script_semantic_relationships_fail_before_planning[duplicate_part]\nFAILED tests/acceptance/test_typed_script_contracts.py::test_script_semantic_relationships_fail_before_planning[blank_text]\nFAILED tests/acceptance/test_typed_script_contracts.py::test_nested_extra_keys_and_resource_boundaries_are_rejected\nFAILED tests/acceptance/test_typed_script_contracts.py::test_voiceover_options_enforce_engine_profiles_and_bounds\n7 failed, 1 warning in 0.16s",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/acceptance/test_typed_script_contracts.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/acceptance/test_typed_script_contracts.py",
+        "exit_code": 1,
+        "output_tail": "/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_typed_script_contracts.py\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_typed_script_contracts.py:22:10 - error: Import \"elevenlabs_mcp.contracts\" could not be resolved (reportMissingImports)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_typed_script_contracts.py:90:10 - error: Import \"elevenlabs_mcp.contracts\" could not be resolved (reportMissingImports)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_typed_script_contracts.py:107:10 - error: Import \"elevenlabs_mcp.contracts\" could not be resolved (reportMissingImports)\n  /mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_typed_script_contracts.py:221:10 - error: Import \"elevenlabs_mcp.contracts\" could not be resolved (reportMissingImports)\n4 errors, 0 warnings, 0 informations",
+        "classification": "red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/contracts.py:attribute:CastVoice.voice_id",
+      "src/elevenlabs_mcp/contracts.py:attribute:CastVoice.voice_id:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:CastVoice.voice_id:of=CastVoice",
+      "src/elevenlabs_mcp/contracts.py:attribute:CastVoice.voice_id:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanVoiceoverInput.options",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanVoiceoverInput.options:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanVoiceoverInput.options:of=PlanVoiceoverInput",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanVoiceoverInput.options:type=VoiceoverOptions",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanVoiceoverInput.script",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanVoiceoverInput.script:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanVoiceoverInput.script:of=PlanVoiceoverInput",
+      "src/elevenlabs_mcp/contracts.py:attribute:PlanVoiceoverInput.script:type=Script",
+      "src/elevenlabs_mcp/contracts.py:attribute:Scene.id",
+      "src/elevenlabs_mcp/contracts.py:attribute:Scene.id:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:Scene.id:of=Scene",
+      "src/elevenlabs_mcp/contracts.py:attribute:Scene.id:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:Scene.parts",
+      "src/elevenlabs_mcp/contracts.py:attribute:Scene.parts:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:Scene.parts:of=Scene",
+      "src/elevenlabs_mcp/contracts.py:attribute:Scene.parts:type=tuple[ScriptPart, ...]",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.cast",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.cast:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.cast:of=Script",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.cast:type=Mapping[str, CastVoice]",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.scenes",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.scenes:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.scenes:of=Script",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.scenes:type=tuple[Scene, ...]",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.script_version",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.script_version:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.script_version:of=Script",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.script_version:type=Literal['1']",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.title",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.title:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.title:of=Script",
+      "src/elevenlabs_mcp/contracts.py:attribute:Script.title:type=str | None",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.actor",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.actor:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.actor:of=ScriptPart",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.actor:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.id",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.id:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.id:of=ScriptPart",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.id:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.pause_after_ms",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.pause_after_ms:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.pause_after_ms:of=ScriptPart",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.pause_after_ms:type=int",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.text",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.text:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.text:of=ScriptPart",
+      "src/elevenlabs_mcp/contracts.py:attribute:ScriptPart.text:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.similarity_boost",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.similarity_boost:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.similarity_boost:of=TtsVoiceSettings",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.similarity_boost:type=float | None",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.speed",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.speed:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.speed:of=TtsVoiceSettings",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.speed:type=float | None",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.stability",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.stability:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.stability:of=TtsVoiceSettings",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.stability:type=float | None",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.style",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.style:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.style:of=TtsVoiceSettings",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.style:type=float | None",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.use_speaker_boost",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.use_speaker_boost:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.use_speaker_boost:of=TtsVoiceSettings",
+      "src/elevenlabs_mcp/contracts.py:attribute:TtsVoiceSettings.use_speaker_boost:type=bool | None",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.engine",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.engine:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.engine:of=VoiceoverOptions",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.engine:type=Literal['dialogue', 'tts']",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.export_format",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.export_format:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.export_format:of=VoiceoverOptions",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.export_format:type=Literal['mp3', 'wav']",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.language_code",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.language_code:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.language_code:of=VoiceoverOptions",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.language_code:type=str | None",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.model_id",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.model_id:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.model_id:of=VoiceoverOptions",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.model_id:type=str",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.seed",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.seed:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.seed:of=VoiceoverOptions",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.seed:type=int | None",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.voice_settings",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.voice_settings:kind=attribute",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.voice_settings:of=VoiceoverOptions",
+      "src/elevenlabs_mcp/contracts.py:attribute:VoiceoverOptions.voice_settings:type=TtsVoiceSettings | None",
+      "src/elevenlabs_mcp/contracts.py:class:CastVoice",
+      "src/elevenlabs_mcp/contracts.py:class:CastVoice:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:CastVoice:kind=class",
+      "src/elevenlabs_mcp/contracts.py:class:PlanVoiceoverInput",
+      "src/elevenlabs_mcp/contracts.py:class:PlanVoiceoverInput:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:PlanVoiceoverInput:kind=class",
+      "src/elevenlabs_mcp/contracts.py:class:Scene",
+      "src/elevenlabs_mcp/contracts.py:class:Scene:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:Scene:kind=class",
+      "src/elevenlabs_mcp/contracts.py:class:Script",
+      "src/elevenlabs_mcp/contracts.py:class:Script:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:Script:kind=class",
+      "src/elevenlabs_mcp/contracts.py:class:ScriptPart",
+      "src/elevenlabs_mcp/contracts.py:class:ScriptPart:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:ScriptPart:kind=class",
+      "src/elevenlabs_mcp/contracts.py:class:TtsVoiceSettings",
+      "src/elevenlabs_mcp/contracts.py:class:TtsVoiceSettings:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:TtsVoiceSettings:kind=class",
+      "src/elevenlabs_mcp/contracts.py:class:VoiceoverOptions",
+      "src/elevenlabs_mcp/contracts.py:class:VoiceoverOptions:base=_StrictModel",
+      "src/elevenlabs_mcp/contracts.py:class:VoiceoverOptions:kind=class",
+      "tests/acceptance/test_typed_script_contracts.py:test_nested_extra_keys_and_resource_boundaries_are_rejected",
+      "tests/acceptance/test_typed_script_contracts.py:test_nested_extra_keys_and_resource_boundaries_are_rejected:kind=test_function",
+      "tests/acceptance/test_typed_script_contracts.py:test_script_semantic_relationships_fail_before_planning",
+      "tests/acceptance/test_typed_script_contracts.py:test_script_semantic_relationships_fail_before_planning:kind=test_function",
+      "tests/acceptance/test_typed_script_contracts.py:test_supplied_plan_fixture_validates_and_preserves_values",
+      "tests/acceptance/test_typed_script_contracts.py:test_supplied_plan_fixture_validates_and_preserves_values:kind=test_function",
+      "tests/acceptance/test_typed_script_contracts.py:test_voiceover_options_enforce_engine_profiles_and_bounds",
+      "tests/acceptance/test_typed_script_contracts.py:test_voiceover_options_enforce_engine_profiles_and_bounds:kind=test_function"
+    ],
+    "files": {
+      "create": [
+        "src/elevenlabs_mcp/contracts.py",
+        "tests/acceptance/test_typed_script_contracts.py"
+      ],
+      "edit": [],
+      "read": [
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/examples/plan_voiceover.input.json",
+        "docs/revival/schemas/contracts.schema.json",
+        "manifests/r03-runtime-dependency-containment.manifest.yaml"
+      ],
+      "scope": [],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "create": [
+        {
+          "path": "src/elevenlabs_mcp/contracts.py",
+          "artifacts": [
+            {
+              "kind": "class",
+              "name": "CastVoice",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "voice_id",
+              "of": "CastVoice",
+              "type": "str"
+            },
+            {
+              "kind": "class",
+              "name": "ScriptPart",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "id",
+              "of": "ScriptPart",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "actor",
+              "of": "ScriptPart",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "text",
+              "of": "ScriptPart",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "pause_after_ms",
+              "of": "ScriptPart",
+              "type": "int"
+            },
+            {
+              "kind": "class",
+              "name": "Scene",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "id",
+              "of": "Scene",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "parts",
+              "of": "Scene",
+              "type": "tuple[ScriptPart, ...]"
+            },
+            {
+              "kind": "class",
+              "name": "Script",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "script_version",
+              "of": "Script",
+              "type": "Literal['1']"
+            },
+            {
+              "kind": "attribute",
+              "name": "title",
+              "of": "Script",
+              "type": "str | None"
+            },
+            {
+              "kind": "attribute",
+              "name": "cast",
+              "of": "Script",
+              "type": "Mapping[str, CastVoice]"
+            },
+            {
+              "kind": "attribute",
+              "name": "scenes",
+              "of": "Script",
+              "type": "tuple[Scene, ...]"
+            },
+            {
+              "kind": "class",
+              "name": "TtsVoiceSettings",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "stability",
+              "of": "TtsVoiceSettings",
+              "type": "float | None"
+            },
+            {
+              "kind": "attribute",
+              "name": "similarity_boost",
+              "of": "TtsVoiceSettings",
+              "type": "float | None"
+            },
+            {
+              "kind": "attribute",
+              "name": "style",
+              "of": "TtsVoiceSettings",
+              "type": "float | None"
+            },
+            {
+              "kind": "attribute",
+              "name": "use_speaker_boost",
+              "of": "TtsVoiceSettings",
+              "type": "bool | None"
+            },
+            {
+              "kind": "attribute",
+              "name": "speed",
+              "of": "TtsVoiceSettings",
+              "type": "float | None"
+            },
+            {
+              "kind": "class",
+              "name": "VoiceoverOptions",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "engine",
+              "of": "VoiceoverOptions",
+              "type": "Literal['dialogue', 'tts']"
+            },
+            {
+              "kind": "attribute",
+              "name": "model_id",
+              "of": "VoiceoverOptions",
+              "type": "str"
+            },
+            {
+              "kind": "attribute",
+              "name": "export_format",
+              "of": "VoiceoverOptions",
+              "type": "Literal['mp3', 'wav']"
+            },
+            {
+              "kind": "attribute",
+              "name": "seed",
+              "of": "VoiceoverOptions",
+              "type": "int | None"
+            },
+            {
+              "kind": "attribute",
+              "name": "language_code",
+              "of": "VoiceoverOptions",
+              "type": "str | None"
+            },
+            {
+              "kind": "attribute",
+              "name": "voice_settings",
+              "of": "VoiceoverOptions",
+              "type": "TtsVoiceSettings | None"
+            },
+            {
+              "kind": "class",
+              "name": "PlanVoiceoverInput",
+              "bases": [
+                "_StrictModel"
+              ]
+            },
+            {
+              "kind": "attribute",
+              "name": "script",
+              "of": "PlanVoiceoverInput",
+              "type": "Script"
+            },
+            {
+              "kind": "attribute",
+              "name": "options",
+              "of": "PlanVoiceoverInput",
+              "type": "VoiceoverOptions"
+            }
+          ]
+        },
+        {
+          "path": "tests/acceptance/test_typed_script_contracts.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_supplied_plan_fixture_validates_and_preserves_values",
+              "description": "Supplied plan input validates into every declared model, resolves defaults, preserves exact text, and round-trips to JSON-compatible data."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_script_semantic_relationships_fail_before_planning",
+              "description": "Unknown actor, duplicate scene ID, duplicate global part ID, and whitespace-only text each raise ValidationError."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_nested_extra_keys_and_resource_boundaries_are_rejected",
+              "description": "Extra keys, invalid identifiers, empty/oversized collections, and pause/text/cast limits are rejected at their owning model."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_voiceover_options_enforce_engine_profiles_and_bounds",
+              "description": "Dialogue/TTS options apply explicit defaults and reject model/settings/profile/numeric/language/extra-key violations."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "docs/revival/03_TOOL_CONTRACTS.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "docs/revival/schemas/contracts.schema.json",
+        "docs/revival/examples/plan_voiceover.input.json",
+        "manifests/r03-runtime-dependency-containment.manifest.yaml"
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_typed_script_contracts.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_typed_script_contracts.py",
+      "uv run ruff check tests/acceptance/test_typed_script_contracts.py",
+      "uv run pyright tests/acceptance/test_typed_script_contracts.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_typed_script_contracts.py"
+    ]
+  }
+}

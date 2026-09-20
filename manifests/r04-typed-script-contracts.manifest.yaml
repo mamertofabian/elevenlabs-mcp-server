@@ -1,0 +1,208 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Add strict immutable typed script and voiceover-option contracts with semantic validation before planning or persistence.
+description: |
+  First R04 child covering the typed input foundation and A16. Create strict
+  frozen Pydantic v2 models for CastVoice, ScriptPart, Scene, Script,
+  TtsVoiceSettings, VoiceoverOptions, and PlanVoiceoverInput. Reject unknown
+  fields at every level; enforce identifier, length, count, numeric, language,
+  and pause limits; reject blank text; resolve every actor against cast; require
+  unique scene IDs and globally unique part IDs; require dialogue model
+  eleven_v3 with no TTS voice_settings. Preserve exact text content after
+  validating nonblank—line-ending normalization belongs to the pure planner.
+  Models perform no credential, network, filesystem, database, environment, or
+  LLM access. This child does not add MCP tools, planner chunks, canonical
+  hashing, persistence, or provider capabilities. Expected red: contracts.py
+  and every declared public model are absent.
+temptations:
+  - risk: Allow extra provider dictionaries or Pydantic's default ignored fields.
+    instead: Use extra='forbid' on the shared private base and assert rejection at every nested level.
+  - risk: Strip or rewrite spoken text while checking for blanks.
+    instead: Reject text whose strip() is empty but return the original exact string unchanged.
+  - risk: Validate only JSON-schema shapes and defer actor/ID relationships.
+    instead: Enforce actor resolution, unique scene IDs, and globally unique part IDs in Script model validation.
+  - risk: Let dialogue options silently accept another model or TTS settings.
+    instead: Require eleven_v3 and voice_settings=None whenever engine='dialogue'.
+type: feature
+files:
+  create:
+    - path: src/elevenlabs_mcp/contracts.py
+      artifacts:
+        - kind: class
+          name: CastVoice
+          bases: [_StrictModel]
+        - kind: attribute
+          name: voice_id
+          of: CastVoice
+          type: str
+        - kind: class
+          name: ScriptPart
+          bases: [_StrictModel]
+        - kind: attribute
+          name: id
+          of: ScriptPart
+          type: str
+        - kind: attribute
+          name: actor
+          of: ScriptPart
+          type: str
+        - kind: attribute
+          name: text
+          of: ScriptPart
+          type: str
+        - kind: attribute
+          name: pause_after_ms
+          of: ScriptPart
+          type: int
+        - kind: class
+          name: Scene
+          bases: [_StrictModel]
+        - kind: attribute
+          name: id
+          of: Scene
+          type: str
+        - kind: attribute
+          name: parts
+          of: Scene
+          type: tuple[ScriptPart, ...]
+        - kind: class
+          name: Script
+          bases: [_StrictModel]
+        - kind: attribute
+          name: script_version
+          of: Script
+          type: Literal['1']
+        - kind: attribute
+          name: title
+          of: Script
+          type: str | None
+        - kind: attribute
+          name: cast
+          of: Script
+          type: Mapping[str, CastVoice]
+        - kind: attribute
+          name: scenes
+          of: Script
+          type: tuple[Scene, ...]
+        - kind: class
+          name: TtsVoiceSettings
+          bases: [_StrictModel]
+        - kind: attribute
+          name: stability
+          of: TtsVoiceSettings
+          type: float | None
+        - kind: attribute
+          name: similarity_boost
+          of: TtsVoiceSettings
+          type: float | None
+        - kind: attribute
+          name: style
+          of: TtsVoiceSettings
+          type: float | None
+        - kind: attribute
+          name: use_speaker_boost
+          of: TtsVoiceSettings
+          type: bool | None
+        - kind: attribute
+          name: speed
+          of: TtsVoiceSettings
+          type: float | None
+        - kind: class
+          name: VoiceoverOptions
+          bases: [_StrictModel]
+        - kind: attribute
+          name: engine
+          of: VoiceoverOptions
+          type: Literal['dialogue', 'tts']
+        - kind: attribute
+          name: model_id
+          of: VoiceoverOptions
+          type: str
+        - kind: attribute
+          name: export_format
+          of: VoiceoverOptions
+          type: Literal['mp3', 'wav']
+        - kind: attribute
+          name: seed
+          of: VoiceoverOptions
+          type: int | None
+        - kind: attribute
+          name: language_code
+          of: VoiceoverOptions
+          type: str | None
+        - kind: attribute
+          name: voice_settings
+          of: VoiceoverOptions
+          type: TtsVoiceSettings | None
+        - kind: class
+          name: PlanVoiceoverInput
+          bases: [_StrictModel]
+        - kind: attribute
+          name: script
+          of: PlanVoiceoverInput
+          type: Script
+        - kind: attribute
+          name: options
+          of: PlanVoiceoverInput
+          type: VoiceoverOptions
+    - path: tests/acceptance/test_typed_script_contracts.py
+      artifacts:
+        - kind: test_function
+          name: test_supplied_plan_fixture_validates_and_preserves_values
+          description: Supplied plan input validates into every declared model, resolves defaults, preserves exact text, and round-trips to JSON-compatible data.
+        - kind: test_function
+          name: test_script_semantic_relationships_fail_before_planning
+          description: Unknown actor, duplicate scene ID, duplicate global part ID, and whitespace-only text each raise ValidationError.
+        - kind: test_function
+          name: test_nested_extra_keys_and_resource_boundaries_are_rejected
+          description: Extra keys, invalid identifiers, empty/oversized collections, and pause/text/cast limits are rejected at their owning model.
+        - kind: test_function
+          name: test_voiceover_options_enforce_engine_profiles_and_bounds
+          description: Dialogue/TTS options apply explicit defaults and reject model/settings/profile/numeric/language/extra-key violations.
+  read:
+    - docs/revival/03_TOOL_CONTRACTS.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - docs/revival/schemas/contracts.schema.json
+    - docs/revival/examples/plan_voiceover.input.json
+    - manifests/r03-runtime-dependency-containment.manifest.yaml
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_typed_script_contracts.py]
+  - [uv, run, ruff, check, tests/acceptance/test_typed_script_contracts.py]
+  - [uv, run, pyright, tests/acceptance/test_typed_script_contracts.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_typed_script_contracts.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Strict Pydantic v2 DTOs now validate the supplied plan fixture, reject malformed or oversized scripts and options, enforce semantic actor and ID relationships, preserve exact nonblank text, serialize to JSON-compatible data, and expose a deeply immutable cast graph without side effects.
+  rationale: The typed foundation makes invalid planning requests fail before credentials, persistence, filesystem work, or provider calls while keeping the first R04 child limited to contracts rather than planner or MCP-tool behavior.
+  lessons:
+    - lesson_type: contract-evolution
+      summary: Frozen DTOs containing mappings need explicit deep-immutability enforcement and direct boundary tests; shallow model freezing alone does not protect semantic invariants after validation.
+      tags: [contracts, pydantic, immutability, boundaries]
+      paths: [src/elevenlabs_mcp/contracts.py, tests/acceptance/test_typed_script_contracts.py]
+  review_notes:
+    - source: maid-implementation-reviewer:r04_contracts_review_2
+      severity: ready
+      summary: No blocking findings; declared types, semantics, strict nested extras, resource bounds, JSON serialization, side-effect freedom, and deep immutability match the manifest. Numeric-minimum and additional mutation probes were advisory only and independently behaved correctly.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 86 tests passed without live provider calls.
+    - command: [uv, run, maid, validate, manifests/r04-typed-script-contracts.manifest.yaml, --mode, implementation]
+      status: passed
+      summary: The active manifest and all declared artifacts validated in implementation mode.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, 1b195da, --summary, --packet]
+      status: passed
+      summary: All 11 deep verification stages passed with zero blocking findings or warnings.
+  completed_at: "2026-09-20T16:54:20+08:00"
+created: "2026-09-20T08:43:02Z"
+metadata:
+  author: Codex
+  tags: [revival, r04, contracts, pydantic, validation]
+  priority: high
