@@ -1,0 +1,88 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Report one distribution-derived version consistently from the Python package and MCP initialization without changing server identity.
+description: |
+  R03 version-reporting child. Add package_version(), which reads installed
+  importlib.metadata for elevenlabs-mcp-server and falls back to the current
+  source/package version 0.1.1 only when distribution metadata is unavailable.
+  Wire elevenlabs_mcp.__version__ and MCP InitializationOptions.server_version
+  to this function while preserving distribution name, import package, server
+  name, entry point, and release number. Tests compare installed metadata,
+  package export, direct fallback, and a real in-memory MCP initialize result.
+  No release bump, tag, publication, or broad __init__ re-export cleanup is in
+  scope. Expected red: package/MCP currently report 0.1.0 while metadata is
+  0.1.1.
+temptations:
+  - risk: Change pyproject version to match the stale runtime constant.
+    instead: Treat installed distribution metadata 0.1.1 as authoritative and update runtime consumers without authorizing a release bump.
+  - risk: Import __version__ from package __init__ inside server.py and create a circular import.
+    instead: Put package_version in a dependency-light version module imported independently by __init__ and server.
+  - risk: Read pyproject.toml at runtime as a fallback.
+    instead: Use a packaged fallback constant tested against metadata because installed wheels do not include project source metadata files.
+type: fix
+files:
+  create:
+    - path: src/elevenlabs_mcp/version.py
+      artifacts:
+        - kind: function
+          name: package_version
+          description: Return installed elevenlabs-mcp-server distribution version or the packaged 0.1.1 fallback when metadata is unavailable.
+          args: []
+          returns: str
+    - path: tests/acceptance/test_version_reporting.py
+      artifacts:
+        - kind: test_function
+          name: test_package_export_matches_distribution_metadata
+          description: elevenlabs_mcp.__version__ and package_version equal importlib metadata for the preserved distribution name.
+        - kind: test_function
+          name: test_source_fallback_matches_current_distribution_version
+          description: A forced PackageNotFoundError returns 0.1.1 and remains equal to project metadata.
+        - kind: test_function
+          name: test_real_mcp_initialization_reports_distribution_version
+          description: Real in-memory MCP initialization reports server name elevenlabs-server and the same installed distribution version.
+  read:
+    - pyproject.toml
+    - manifests/r03-runtime-dependency-containment.manifest.yaml
+    - tests/characterization/test_legacy_server_surface.py
+  scope:
+    - path: src/elevenlabs_mcp/__init__.py
+      reason: Replace the stale __version__ literal with package_version() while preserving the existing public re-exports and __all__.
+    - path: src/elevenlabs_mcp/server.py
+      reason: Replace the stale InitializationOptions server_version literal with package_version() without changing server name or public artifacts.
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_version_reporting.py]
+  - [uv, run, pytest, -q, tests/acceptance/test_version_reporting.py, tests/characterization/test_legacy_server_surface.py]
+  - [uv, run, ruff, check, tests/acceptance/test_version_reporting.py]
+  - [uv, run, pyright, tests/acceptance/test_version_reporting.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_version_reporting.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Python package export and production MCP initialization now report the installed elevenlabs-mcp-server distribution version 0.1.1 through one dependency-light metadata function with a tested source fallback.
+  rationale: Centralized metadata lookup removes stale duplicate literals and avoids circular imports while preserving distribution name, import package, MCP server name, entry point, and release number.
+  review_notes:
+    - source: maid-implementation-reviewer:r03_version_review
+      severity: ready
+      summary: No findings; metadata, fallback, package export, and real stdio initialization are consistent without a release bump.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 73 tests passed.
+    - command: [uv, run, maid, test, --manifest, manifests/r03-version-reporting.manifest.yaml]
+      status: passed
+      summary: All four child commands passed.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, fa4b1d1, --summary, --packet]
+      status: passed
+      summary: All 11 deep stages passed.
+  completed_at: "2026-09-20T15:15:28+08:00"
+created: "2026-09-20T07:13:33Z"
+metadata:
+  author: Codex
+  tags: [revival, r03, version, mcp, packaging]
+  priority: high

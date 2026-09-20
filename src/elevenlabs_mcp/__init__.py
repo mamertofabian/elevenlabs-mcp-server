@@ -1,6 +1,8 @@
 """ElevenLabs MCP Server package."""
 
-__version__ = "0.1.0"
+from .version import package_version
+
+__version__ = package_version()
 
 from .server import ElevenLabsServer, main
 from .models import AudioJob, ScriptPart

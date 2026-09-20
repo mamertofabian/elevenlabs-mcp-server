@@ -34,6 +34,7 @@ from .config import (
 )
 from .database import Database
 from .models import AudioJob
+from .version import package_version
 
 log_level = os.getenv("ELEVENLABS_LOG_LEVEL", "ERROR").upper()
 valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
@@ -813,7 +814,7 @@ class ElevenLabsServer:
                 write_stream,
                 InitializationOptions(
                     server_name="elevenlabs-server",
-                    server_version="0.1.0",
+                    server_version=package_version(),
                     capabilities=self.server.get_capabilities(
                         notification_options=NotificationOptions(),
                         experimental_capabilities={},
