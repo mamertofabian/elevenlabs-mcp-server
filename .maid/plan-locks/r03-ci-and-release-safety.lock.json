@@ -1,0 +1,198 @@
+{
+  "manifest_path": "manifests/r03-ci-and-release-safety.manifest.yaml",
+  "manifest_hash": "sha256-contract:28b513924637e2994559748343264a61ebbc543b3a11b8e276543e7f9a9f1cfa",
+  "test_hashes": {
+    "tests/acceptance/test_ci_and_release_safety.py": "sha256-pyast:v2:6e368364a43aab051301fb555901cd58758ee540fe28f4a21b03ab2b17485ea5"
+  },
+  "created_at": "2026-09-20T08:28:30.271395+00:00",
+  "revision": 4,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:799107ee6f3f30a6e781c5c6e482edf421893801ba586f0ab5ec234343862f4c",
+      "prior_test_hashes": {
+        "tests/acceptance/test_ci_and_release_safety.py": "sha256-pyast:v2:88eb2ee2ba57d8adad356cc4ae189cdc608c2de9e08d433395f38217d78a8518"
+      },
+      "revised_at": "2026-09-20T08:28:36.935841+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r03-ci-and-release-safety.manifest.yaml -> manifests/r03-ci-and-release-safety.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:28b513924637e2994559748343264a61ebbc543b3a11b8e276543e7f9a9f1cfa",
+      "prior_test_hashes": {
+        "tests/acceptance/test_ci_and_release_safety.py": "sha256-pyast:v2:88eb2ee2ba57d8adad356cc4ae189cdc608c2de9e08d433395f38217d78a8518"
+      },
+      "revised_at": "2026-09-20T08:33:51.800410+00:00",
+      "reason": "Require tag-bound PyPI publication, remove duplicate wheel smoke, add actionlint, and structurally verify workflow job conditions after review",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:28b513924637e2994559748343264a61ebbc543b3a11b8e276543e7f9a9f1cfa",
+      "prior_test_hashes": {
+        "tests/acceptance/test_ci_and_release_safety.py": "sha256-pyast:v2:6e368364a43aab051301fb555901cd58758ee540fe28f4a21b03ab2b17485ea5"
+      },
+      "revised_at": "2026-09-20T08:36:25.243569+00:00",
+      "reason": "Capture reviewed CI and release safety Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T08:33:58.414832+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_ci_and_release_safety.py",
+        "exit_code": 1,
+        "output_tail": "\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_ci_and_release_safety.py:81: AssertionError\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_ci_and_release_safety.py::test_ci_runs_credential_free_python_and_maid_gates\nFAILED tests/acceptance/test_ci_and_release_safety.py::test_publication_workflow_is_manual_and_confirmed\nFAILED tests/acceptance/test_ci_and_release_safety.py::test_pytest_asyncio_scope_is_explicit\nFAILED tests/acceptance/test_ci_and_release_safety.py::test_readme_states_recovery_commands_and_limits\n4 failed in 0.03s\n\n   Building elevenlabs-mcp-server @ file:///mnt/storage/development/elevenlabs-mcp-server\n      Built elevenlabs-mcp-server @ file:///mnt/storage/development/elevenlabs-mcp-server\nUninstalled 1 package in 0.41ms\nwarning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.\n         If the cache and target directories are on different filesystems, hardlinking may not be supported.\n         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.\nInstalled 1 package in 0.90ms\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
+        "classification": "red"
+      },
+      {
+        "command": "uv run pytest -q",
+        "exit_code": 1,
+        "output_tail": "E       AssertionError: assert '## Recovery candidate status' in '# ElevenLabs MCP Server\\n[![smithery badge](https://smithery.ai/badge/elevenlabs-mcp-server)](https://smithery.ai/ser...oices\\n\\n## License\\n\\nThis project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.\\n'\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_ci_and_release_safety.py:81: AssertionError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_ci_and_release_safety.py::test_ci_runs_credential_free_python_and_maid_gates\nFAILED tests/acceptance/test_ci_and_release_safety.py::test_publication_workflow_is_manual_and_confirmed\nFAILED tests/acceptance/test_ci_and_release_safety.py::test_pytest_asyncio_scope_is_explicit\nFAILED tests/acceptance/test_ci_and_release_safety.py::test_readme_states_recovery_commands_and_limits\n4 failed, 75 passed, 1 warning in 5.43s\n\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/acceptance/test_ci_and_release_safety.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/acceptance/test_ci_and_release_safety.py",
+        "exit_code": 0,
+        "output_tail": "0 errors, 0 warnings, 0 informations",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv lock --check",
+        "exit_code": 0,
+        "output_tail": "Resolved 42 packages in 5ms",
+        "classification": "not_red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "tests/acceptance/test_ci_and_release_safety.py:test_ci_runs_credential_free_python_and_maid_gates",
+      "tests/acceptance/test_ci_and_release_safety.py:test_ci_runs_credential_free_python_and_maid_gates:kind=test_function",
+      "tests/acceptance/test_ci_and_release_safety.py:test_publication_workflow_is_manual_and_confirmed",
+      "tests/acceptance/test_ci_and_release_safety.py:test_publication_workflow_is_manual_and_confirmed:kind=test_function",
+      "tests/acceptance/test_ci_and_release_safety.py:test_pytest_asyncio_scope_is_explicit",
+      "tests/acceptance/test_ci_and_release_safety.py:test_pytest_asyncio_scope_is_explicit:kind=test_function",
+      "tests/acceptance/test_ci_and_release_safety.py:test_readme_states_recovery_commands_and_limits",
+      "tests/acceptance/test_ci_and_release_safety.py:test_readme_states_recovery_commands_and_limits:kind=test_function"
+    ],
+    "files": {
+      "create": [
+        "tests/acceptance/test_ci_and_release_safety.py"
+      ],
+      "edit": [],
+      "read": [
+        "docs/revival/01_PRODUCT_AND_SCOPE.md",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r03-installed-wheel-smoke.manifest.yaml"
+      ],
+      "scope": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/publish-to-test-pypi.yml",
+        "README.md",
+        "pyproject.toml"
+      ],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "create": [
+        {
+          "path": "tests/acceptance/test_ci_and_release_safety.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_ci_runs_credential_free_python_and_maid_gates",
+              "description": "CI triggers on pull requests and non-release branches, uses frozen uv, and runs pytest/MAID/build/installed-wheel smoke without provider secrets."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_publication_workflow_is_manual_and_confirmed",
+              "description": "Publish workflow has workflow_dispatch inputs and no push/tag/branch trigger, with all external-write jobs gated by explicit confirmation."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_pytest_asyncio_scope_is_explicit",
+              "description": "Project pytest configuration pins function loop scope to eliminate version-dependent warning/default behavior."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_readme_states_recovery_commands_and_limits",
+              "description": "README documents tested commands, local/provider boundary, synchronous/process-lifetime limitations, uncertainty, and no durable-resume claim."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "docs/revival/01_PRODUCT_AND_SCOPE.md",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r03-installed-wheel-smoke.manifest.yaml"
+      ],
+      "scope": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "reason": "New non-publishing credential-free CI workflow; YAML has no discovered MAID artifact validator."
+        },
+        {
+          "path": ".github/workflows/publish-to-test-pypi.yml",
+          "reason": "Replace automatic branch/tag release triggers with manually confirmed target-gated publication."
+        },
+        {
+          "path": "pyproject.toml",
+          "reason": "Add deterministic pytest-asyncio loop-scope configuration only."
+        },
+        {
+          "path": "README.md",
+          "reason": "Add recovery validation, data-boundary, and limitation documentation without changing install identity or legacy tool docs."
+        }
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_ci_and_release_safety.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_ci_and_release_safety.py",
+      "uv run pytest -q",
+      "uv run ruff check tests/acceptance/test_ci_and_release_safety.py",
+      "uv run pyright tests/acceptance/test_ci_and_release_safety.py",
+      "uv lock --check"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_ci_and_release_safety.py"
+    ]
+  }
+}

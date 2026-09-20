@@ -1,0 +1,101 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Add credential-free CI gates and require an explicit manual confirmation before any package publication workflow can run.
+description: |
+  R03 recovery automation/documentation child. Add ci.yml for Python 3.11 and
+  3.12 pull-request/dev/main checks using uv sync --frozen, full credential-free
+  pytest, MAID validation/tests, wheel build, and installed-wheel smoke. Convert
+  the existing publish workflow from automatic branch/tag triggers to manual
+  workflow_dispatch with required target and confirmation inputs; publishing
+  jobs are conditionally gated and no branch push can publish TestPyPI/PyPI or
+  create a release. Configure pytest-asyncio function loop scope to remove its
+  environment warning. Add a concise README recovery-status section with tested
+  commands, local/provider data boundary, current synchronous/process-lifetime
+  limits, uncertainty warning, and explicit no-resume/no-production claim.
+  Do not publish, bump a version, add secrets, claim live evidence, or repair
+  inherited whole-repo Ruff/Pyright debt here. Expected red: ci.yml and pytest
+  configuration are absent, README lacks limitations, and publish workflow has
+  dev/tag automatic triggers.
+temptations:
+  - risk: Keep automatic TestPyPI publication on dev and call it a deployment test.
+    instead: Remove every push/tag trigger from the publish workflow and require workflow_dispatch target plus literal confirmation.
+  - risk: Add a CI Ruff/Pyright command known to fail inherited debt and hide it with continue-on-error.
+    instead: Run the currently authoritative pytest, MAID, wheel, and installed-artifact gates; document inherited static-analysis debt visibly.
+  - risk: Put a real API key in Actions secrets or run live synthesis from CI.
+    instead: Use credential-free tests only; no workflow references ELEVENLABS_API_KEY secrets or generation credits.
+  - risk: Describe durable resume or production readiness before R08-R10.
+    instead: State current synchronous/process-lifetime limits and unknown-outcome risk explicitly.
+type: fix
+files:
+  create:
+    - path: tests/acceptance/test_ci_and_release_safety.py
+      artifacts:
+        - kind: test_function
+          name: test_ci_runs_credential_free_python_and_maid_gates
+          description: CI triggers on pull requests and non-release branches, uses frozen uv, and runs pytest/MAID/build/installed-wheel smoke without provider secrets.
+        - kind: test_function
+          name: test_publication_workflow_is_manual_and_confirmed
+          description: Publish workflow has workflow_dispatch inputs and no push/tag/branch trigger, with all external-write jobs gated by explicit confirmation.
+        - kind: test_function
+          name: test_pytest_asyncio_scope_is_explicit
+          description: Project pytest configuration pins function loop scope to eliminate version-dependent warning/default behavior.
+        - kind: test_function
+          name: test_readme_states_recovery_commands_and_limits
+          description: README documents tested commands, local/provider boundary, synchronous/process-lifetime limitations, uncertainty, and no durable-resume claim.
+  read:
+    - docs/revival/01_PRODUCT_AND_SCOPE.md
+    - docs/revival/02_ENGINEERING_SPEC.md
+    - docs/revival/04_ACCEPTANCE_AND_RELEASE.md
+    - manifests/r03-installed-wheel-smoke.manifest.yaml
+  scope:
+    - path: .github/workflows/ci.yml
+      reason: New non-publishing credential-free CI workflow; YAML has no discovered MAID artifact validator.
+    - path: .github/workflows/publish-to-test-pypi.yml
+      reason: Replace automatic branch/tag release triggers with manually confirmed target-gated publication.
+    - path: pyproject.toml
+      reason: Add deterministic pytest-asyncio loop-scope configuration only.
+    - path: README.md
+      reason: Add recovery validation, data-boundary, and limitation documentation without changing install identity or legacy tool docs.
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_ci_and_release_safety.py]
+  - [uv, run, pytest, -q]
+  - [uv, run, ruff, check, tests/acceptance/test_ci_and_release_safety.py]
+  - [uv, run, pyright, tests/acceptance/test_ci_and_release_safety.py]
+  - [uv, lock, --check]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_ci_and_release_safety.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: Credential-free CI now gates Python 3.11/3.12 with frozen installs, full tests, MAID validation/tests, actionlint, and wheel build; all TestPyPI/PyPI/GitHub release writes require manual target plus confirmation, with production additionally tag-bound.
+  rationale: Recovery validation is separated from publication authority, preventing dev pushes or ordinary tags from publishing while documenting only behavior and limitations already supported by evidence.
+  lessons:
+    - lesson_type: release-safety
+      summary: Manual dispatch alone is not sufficient release provenance; production publication must also require a tag and tests must inspect parsed workflow job conditions rather than substrings.
+      tags: [ci, release, pypi, github-actions]
+      paths: [.github/workflows/ci.yml, .github/workflows/publish-to-test-pypi.yml]
+  review_notes:
+    - source: maid-implementation-reviewer:r03_ci_review_2
+      severity: ready
+      summary: No findings; actionlint, triggers, tag/confirmation gates, permissions, matrix, structural tests, config, and README limits align.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 79 tests passed.
+    - command: [uv, lock, --check]
+      status: passed
+      summary: Lock remains current.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, c0f8f5a, --summary, --packet]
+      status: passed
+      summary: All 11 deep stages passed; actionlint 1.7.7 also passed independently.
+  completed_at: "2026-09-20T16:36:00+08:00"
+created: "2026-09-20T08:28:36Z"
+metadata:
+  author: Codex
+  tags: [revival, r03, ci, release-safety, documentation]
+  priority: critical

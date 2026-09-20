@@ -117,6 +117,35 @@ Add the following configuration to your MCP settings file (e.g., `cline_mcp_sett
 - `voiceover://history/{job_id}`: Get the audio file by its ID
 - `voiceover://voices`: List all available voices
 
+## Recovery candidate status
+
+The current recovery work preserves the `elevenlabs-mcp-server` package, the
+six legacy MCP tools, and the existing small-response client contract. The
+credential-free local verification commands are:
+
+```bash
+uv sync --frozen --dev
+uv run pytest -q
+uv run maid validate
+uv run maid test
+uv build
+```
+
+Scripts and job history stay local, while speech text is sent to ElevenLabs
+only when a generation tool is explicitly called with provider credentials.
+The legacy generation tools remain synchronous from the client's perspective;
+their work is limited to the owning server process lifetime.
+
+Provider timeouts or connection resets can mean the upstream outcome may be unknown.
+The server reports that condition and does not automatically replay
+the paid synthesis request. Durable resume is not implemented yet; that is a
+later revival milestone rather than a recovery-release claim. Passing local
+and CI tests is evidence for the covered behavior, not production readiness or
+live-provider/audio-quality evidence.
+
+Inherited repository-wide Ruff and Pyright findings remain tracked separately;
+new MAID children run focused static checks plus full behavioral verification.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -1,123 +1,93 @@
-name: Publish Python 🐍 distribution 📦 to PyPI and TestPyPI
+name: Manually publish Python distribution
 
 on:
-  push:
-    branches:
-      - dev
-      - main
-    tags:
-      - '*'  # This will trigger the workflow on any tag push
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Publication target
+        required: true
+        type: choice
+        options:
+          - testpypi
+          - pypi
+      confirmation:
+        description: Type publish to authorize external publication
+        required: true
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    name: Build distribution 📦
+    if: inputs.confirmation == 'publish'
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-    - name: Install pypa/build
-      run: >-
-        python3 -m pip install build
-    - name: Build a binary wheel and a source tarball
-      run: python3 -m build
-    - name: Store the distribution packages
-      uses: actions/upload-artifact@v4
-      with:
-        name: python-package-distributions
-        path: dist/
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Build locked artifacts
+        run: |
+          uv sync --frozen --dev
+          uv run pytest -q
+          uv run maid validate
+          uv build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish-to-testpypi:
+    if: inputs.confirmation == 'publish' && inputs.target == 'testpypi'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/elevenlabs-mcp-server
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
 
   publish-to-pypi:
-    name: >-
-      Publish Python 🐍 distribution 📦 to PyPI
-    if: startsWith(github.ref, 'refs/tags/')  # only publish to PyPI on tag pushes
-    needs:
-    - build
-    runs-on: ubuntu-latest  
+    if: inputs.confirmation == 'publish' && inputs.target == 'pypi' && startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
     environment:
       name: pypi
       url: https://pypi.org/p/elevenlabs-mcp-server
     permissions:
       id-token: write
-
     steps:
-      - name: Download all the dists
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
-
-      - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-
+      - uses: pypa/gh-action-pypi-publish@release/v1
 
   github-release:
-    name: >-
-        Sign the Python 🐍 distribution 📦 with Sigstore
-        and upload them to GitHub Release
-    needs:
-    - publish-to-pypi
+    if: inputs.confirmation == 'publish' && inputs.target == 'pypi' && startsWith(github.ref, 'refs/tags/')
+    needs: publish-to-pypi
     runs-on: ubuntu-latest
-
     permissions:
-        contents: write
-        id-token: write
-
+      contents: write
+      id-token: write
     steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v4
-      with:
-        name: python-package-distributions
-        path: dist/
-    - name: Sign the dists with Sigstore
-      uses: sigstore/gh-action-sigstore-python@v3.0.0
-      with:
-        inputs: >-
-            ./dist/*.tar.gz
-            ./dist/*.whl
-    - name: Create GitHub Release
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      run: >-
-        gh release create
-        '${{ github.ref_name }}'
-        --repo '${{ github.repository }}'
-        --notes ""
-    - name: Upload artifact signatures to GitHub Release
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-        # Upload to GitHub Release using the `gh` CLI.
-        # `dist/` contains the built packages, and the
-        # sigstore-produced signatures and certificates.
-      run: >-
-        gh release upload
-        '${{ github.ref_name }}' dist/**
-        --repo '${{ github.repository }}'
-
-  publish-to-testpypi:
-    name: Publish Python 🐍 distribution 📦 to TestPyPI
-    if: github.ref == 'refs/heads/dev'
-    needs:
-    - build
-    runs-on: ubuntu-latest
-
-    environment:
-        name: testpypi
-        url: https://test.pypi.org/p/elevenlabs-mcp-server
-
-    permissions:
-        id-token: write
-
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v4
-      with:
-        name: python-package-distributions
-        path: dist/
-    - name: Publish distribution 📦 to TestPyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
+      - uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+      - uses: sigstore/gh-action-sigstore-python@v3.0.0
+        with:
+          inputs: ./dist/*
+      - name: Create GitHub release and upload artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create '${{ github.ref_name }}' --repo '${{ github.repository }}' --generate-notes
+          gh release upload '${{ github.ref_name }}' dist/** --repo '${{ github.repository }}'

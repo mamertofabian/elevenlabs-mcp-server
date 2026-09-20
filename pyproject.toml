@@ -38,6 +38,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/elevenlabs_mcp"]
 
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+
 [dependency-groups]
 dev = [
     "maid-runner==2.27.6",

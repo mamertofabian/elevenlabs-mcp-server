@@ -1,0 +1,37 @@
+name: Credential-free CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - dev
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+      - name: Install locked development environment
+        run: uv sync --frozen --dev
+      - name: Validate GitHub Actions workflows
+        uses: docker://rhysd/actionlint:1.7.7
+      - name: Run credential-free tests
+        run: uv run pytest -q
+      - name: Validate MAID contracts
+        run: uv run maid validate
+      - name: Run MAID contract commands
+        run: uv run maid test
+      - name: Build distributions
+        run: uv build
