@@ -33,6 +33,10 @@ class _MissingAPIKeyError(ValueError):
     """Credential absence detected before provider dispatch."""
 
 
+class _NonRetryableProviderError(RuntimeError):
+    """A deterministic provider rejection that must not be replayed."""
+
+
 class PartialGenerationError(RuntimeError):
     """A required script part failed after zero or more parts were retained."""
 
@@ -76,7 +80,9 @@ class ElevenLabsAPI:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=retry_if_not_exception_type(_MissingAPIKeyError),
+        retry=retry_if_not_exception_type(
+            (_MissingAPIKeyError, _NonRetryableProviderError)
+        ),
     )
     def get_voices(self) -> List[VoiceData]:
         """Fetch available voices from ElevenLabs API"""
@@ -88,7 +94,8 @@ class ElevenLabsAPI:
         
         response = requests.get(
             f"{self.base_url}/voices",
-            headers=headers
+            headers=headers,
+            timeout=(5.0, 60.0),
         )
         
         if response.status_code == 200:
@@ -106,7 +113,10 @@ class ElevenLabsAPI:
                 for voice in voices_data
             ]
         else:
-            raise Exception(f"Failed to fetch voices: {response.text}")
+            error_message = f"Failed to fetch voices: {response.text}"
+            if response.status_code in {400, 401, 403, 404, 422}:
+                raise _NonRetryableProviderError(error_message)
+            raise Exception(error_message)
 
     def __init__(self, environ: Mapping[str, str] | None = None):
         environment = os.environ if environ is None else environ
@@ -136,7 +146,9 @@ class ElevenLabsAPI:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=4, max=10),
-        retry=retry_if_not_exception_type(_MissingAPIKeyError),
+        retry=retry_if_not_exception_type(
+            (_MissingAPIKeyError, _NonRetryableProviderError)
+        ),
     )
     def generate_audio_segment(self, text: str, voice_id: str, output_file: Optional[str] = None,
                       previous_text: Optional[str] = None, next_text: Optional[str] = None,
@@ -177,7 +189,8 @@ class ElevenLabsAPI:
             response = requests.post(
                 f"{self.base_url}/text-to-speech/{voice_id}",
                 json=data,
-                headers=headers
+                headers=headers,
+                timeout=(5.0, 60.0),
             )
             
             logging.debug(f"API response status: {response.status_code}")
@@ -194,6 +207,8 @@ class ElevenLabsAPI:
                 logging.error(f"API error response: {response.status_code}")
                 logging.error(f"API error details: {response.text}")
                 logging.error(f"Request data: {data}")
+                if response.status_code in {400, 401, 403, 404, 422}:
+                    raise _NonRetryableProviderError(error_message)
                 raise Exception(error_message)
         except requests.exceptions.RequestException as e:
             error_message = f"Network error during API call: {str(e)}"

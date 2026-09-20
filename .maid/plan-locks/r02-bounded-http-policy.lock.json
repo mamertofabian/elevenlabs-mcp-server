@@ -1,0 +1,226 @@
+{
+  "manifest_path": "manifests/r02-bounded-http-policy.manifest.yaml",
+  "manifest_hash": "sha256-contract:fe177a4d645f9a71a463ba8d2260ecfd15255ae8a475da83be43d5d40205e60b",
+  "test_hashes": {
+    "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+    "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:bb30a0e395017ff4549ca53c9e419309464160fe2e2a14cfb6212d6315d4f9ef"
+  },
+  "created_at": "2026-09-20T05:38:29.408014+00:00",
+  "revision": 3,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:daf910b23e433e2e65e92afd1a2930fc3296961c65cd1c990a962a3aeb4044fa",
+      "prior_test_hashes": {
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:bb30a0e395017ff4549ca53c9e419309464160fe2e2a14cfb6212d6315d4f9ef"
+      },
+      "revised_at": "2026-09-20T05:38:31.128859+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r02-bounded-http-policy.manifest.yaml -> manifests/r02-bounded-http-policy.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:fe177a4d645f9a71a463ba8d2260ecfd15255ae8a475da83be43d5d40205e60b",
+      "prior_test_hashes": {
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_bounded_http_policy.py": "sha256-pyast:v2:bb30a0e395017ff4549ca53c9e419309464160fe2e2a14cfb6212d6315d4f9ef"
+      },
+      "revised_at": "2026-09-20T05:41:42.026892+00:00",
+      "reason": "Capture reviewed bounded HTTP policy Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T05:38:30.918521+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_bounded_http_policy.py",
+        "exit_code": 1,
+        "output_tail": "ERROR    root:elevenlabs_api.py:195 API error details: provider failure\nERROR    root:elevenlabs_api.py:196 Request data: {'text': 'Fixture', 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.5, 'similarity_boost': 0.75, 'style': 0.1}}\nERROR    root:elevenlabs_api.py:194 API error response: 422\nERROR    root:elevenlabs_api.py:195 API error details: provider failure\nERROR    root:elevenlabs_api.py:196 Request data: {'text': 'Fixture', 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.5, 'similarity_boost': 0.75, 'style': 0.1}}\nERROR    root:elevenlabs_api.py:194 API error response: 422\nERROR    root:elevenlabs_api.py:195 API error details: provider failure\nERROR    root:elevenlabs_api.py:196 Request data: {'text': 'Fixture', 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.5, 'similarity_boost': 0.75, 'style': 0.1}}\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_bounded_http_policy.py::test_voice_metadata_uses_finite_timeout_and_one_401_dispatch\nFAILED tests/acceptance/test_bounded_http_policy.py::test_synthesis_uses_finite_timeout_and_one_422_dispatch\n2 failed, 1 passed, 1 warning in 0.14s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run pytest -q tests/acceptance/test_bounded_http_policy.py tests/acceptance/test_credential_free_discovery.py",
+        "exit_code": 1,
+        "output_tail": "ERROR    root:elevenlabs_api.py:195 API error details: provider failure\nERROR    root:elevenlabs_api.py:196 Request data: {'text': 'Fixture', 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.5, 'similarity_boost': 0.75, 'style': 0.1}}\nERROR    root:elevenlabs_api.py:194 API error response: 422\nERROR    root:elevenlabs_api.py:195 API error details: provider failure\nERROR    root:elevenlabs_api.py:196 Request data: {'text': 'Fixture', 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.5, 'similarity_boost': 0.75, 'style': 0.1}}\nERROR    root:elevenlabs_api.py:194 API error response: 422\nERROR    root:elevenlabs_api.py:195 API error details: provider failure\nERROR    root:elevenlabs_api.py:196 Request data: {'text': 'Fixture', 'model_id': 'eleven_multilingual_v2', 'voice_settings': {'stability': 0.5, 'similarity_boost': 0.75, 'style': 0.1}}\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_bounded_http_policy.py::test_voice_metadata_uses_finite_timeout_and_one_401_dispatch\nFAILED tests/acceptance/test_bounded_http_policy.py::test_synthesis_uses_finite_timeout_and_one_422_dispatch\n2 failed, 5 passed, 1 warning in 0.36s\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/acceptance/test_bounded_http_policy.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/acceptance/test_bounded_http_policy.py",
+        "exit_code": 0,
+        "output_tail": "0 errors, 0 warnings, 0 informations\n\nwarning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead",
+        "classification": "not_red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=debug_info:type=Optional[List[str]]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=next_text:type=Optional[str]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=output_file:type=Optional[str]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=previous_request_ids:type=Optional[List[str]]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=previous_text:type=Optional[str]:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=text:type=str:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:arg=voice_id:type=str:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:kind=method",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:of=ElevenLabsAPI",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.generate_audio_segment:returns=tuple[bytes, str]",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.get_voices",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.get_voices:arg=self:type=None:default=None",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.get_voices:kind=method",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.get_voices:of=ElevenLabsAPI",
+      "src/elevenlabs_mcp/elevenlabs_api.py:method:ElevenLabsAPI.get_voices:returns=List[VoiceData]",
+      "tests/acceptance/test_bounded_http_policy.py:test_server_failures_retain_bounded_three_attempt_policy",
+      "tests/acceptance/test_bounded_http_policy.py:test_server_failures_retain_bounded_three_attempt_policy:kind=test_function",
+      "tests/acceptance/test_bounded_http_policy.py:test_synthesis_uses_finite_timeout_and_one_422_dispatch",
+      "tests/acceptance/test_bounded_http_policy.py:test_synthesis_uses_finite_timeout_and_one_422_dispatch:kind=test_function",
+      "tests/acceptance/test_bounded_http_policy.py:test_voice_metadata_uses_finite_timeout_and_one_401_dispatch",
+      "tests/acceptance/test_bounded_http_policy.py:test_voice_metadata_uses_finite_timeout_and_one_401_dispatch:kind=test_function"
+    ],
+    "files": {
+      "create": [],
+      "edit": [
+        "src/elevenlabs_mcp/elevenlabs_api.py",
+        "tests/acceptance/test_bounded_http_policy.py"
+      ],
+      "read": [
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "manifests/r01-credential-free-discovery.manifest.yaml",
+        "tests/acceptance/test_credential_free_discovery.py"
+      ],
+      "scope": [],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "edit": [
+        {
+          "path": "src/elevenlabs_mcp/elevenlabs_api.py",
+          "artifacts": [
+            {
+              "kind": "method",
+              "name": "get_voices",
+              "of": "ElevenLabsAPI",
+              "args": [
+                {
+                  "name": "self"
+                }
+              ],
+              "returns": "List[VoiceData]"
+            },
+            {
+              "kind": "method",
+              "name": "generate_audio_segment",
+              "of": "ElevenLabsAPI",
+              "args": [
+                {
+                  "name": "self"
+                },
+                {
+                  "name": "text",
+                  "type": "str"
+                },
+                {
+                  "name": "voice_id",
+                  "type": "str"
+                },
+                {
+                  "name": "output_file",
+                  "type": "Optional[str]",
+                  "default": "None"
+                },
+                {
+                  "name": "previous_text",
+                  "type": "Optional[str]",
+                  "default": "None"
+                },
+                {
+                  "name": "next_text",
+                  "type": "Optional[str]",
+                  "default": "None"
+                },
+                {
+                  "name": "previous_request_ids",
+                  "type": "Optional[List[str]]",
+                  "default": "None"
+                },
+                {
+                  "name": "debug_info",
+                  "type": "Optional[List[str]]",
+                  "default": "None"
+                }
+              ],
+              "returns": "tuple[bytes, str]"
+            }
+          ]
+        },
+        {
+          "path": "tests/acceptance/test_bounded_http_policy.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_voice_metadata_uses_finite_timeout_and_one_401_dispatch",
+              "description": "A12 captures the GET timeout tuple and proves a 401 response reaches requests.get exactly once."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_synthesis_uses_finite_timeout_and_one_422_dispatch",
+              "description": "A27 captures the POST timeout tuple and proves a 422 response reaches requests.post exactly once."
+            },
+            {
+              "kind": "test_function",
+              "name": "test_server_failures_retain_bounded_three_attempt_policy",
+              "description": "Fake 500 responses still dispatch three times for metadata and synthesis, proving this child did not broaden retry reclassification."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "manifests/r01-credential-free-discovery.manifest.yaml",
+        "docs/revival/02_ENGINEERING_SPEC.md",
+        "docs/revival/04_ACCEPTANCE_AND_RELEASE.md",
+        "tests/acceptance/test_credential_free_discovery.py"
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_bounded_http_policy.py",
+      "tests/acceptance/test_credential_free_discovery.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_bounded_http_policy.py",
+      "uv run pytest -q tests/acceptance/test_bounded_http_policy.py tests/acceptance/test_credential_free_discovery.py",
+      "uv run ruff check tests/acceptance/test_bounded_http_policy.py",
+      "uv run pyright tests/acceptance/test_bounded_http_policy.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_bounded_http_policy.py"
+    ]
+  }
+}
