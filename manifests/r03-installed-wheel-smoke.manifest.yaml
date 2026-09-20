@@ -1,0 +1,85 @@
+# manifest-kind: implementation
+# MAID manifest - a machine-checked contract for one change.
+# Declares the intent, the files it may touch, and the commands that verify it.
+# Nothing here is needed to build or run this project; safe to ignore.
+# What it is: https://github.com/mamertofabian/maid-runner
+schema: "2"
+goal: Prove the built wheel installs and completes real credential-free stdio discovery at both the MCP 1.1.2 lower bound and newest allowed v1 resolution.
+description: |
+  R03/A47 packaging smoke child. Build the actual wheel and, for each profile,
+  create a disposable uv virtual environment outside the checkout, install the
+  wheel with dependencies but without its dev extra, and inspect installed
+  metadata. The lower profile forces mcp==1.1.2; the current-v1 profile lets the
+  wheel's <2 constraint select the newest available v1. In both, pytest must be
+  absent, package/distribution versions must match, and the installed
+  elevenlabs-mcp-server console script must complete a real credential-free
+  stdio initialize/list-tools/shutdown with exactly the six legacy tools and an
+  empty PATH (no FFmpeg). No live ElevenLabs request, source-checkout import,
+  publication, version bump, or v2 migration is allowed. If newest v1 reveals
+  an API incompatibility, repair the v1 adapter rather than weakening the smoke
+  to source imports. This is a packaging/integration contract; its expected red
+  is whichever current wheel/install/runtime defect the isolated matrix exposes.
+temptations:
+  - risk: Run the console script from the project .venv and call that an installed-wheel smoke.
+    instead: Use the environment-specific console executable and inspect sys.path/metadata from its isolated Python.
+  - risk: Install the optional dev extra so pytest is available at runtime.
+    instead: Install the plain wheel and assert importlib.util.find_spec('pytest') is None.
+  - risk: Test only the locked MCP version and assume the advertised <2 range works.
+    instead: Run both forced 1.1.2 and resolver-selected newest v1 profiles.
+  - risk: Invoke a generation tool during smoke testing.
+    instead: Initialize, list six tool names, and shut down with an empty key and fail if discovery attempts provider access.
+type: fix
+files:
+  create:
+    - path: tests/acceptance/test_installed_wheel_smoke.py
+      artifacts:
+        - kind: test_function
+          name: test_installed_wheel_stdio_matrix
+          description: Parameterized lower/current-v1 isolated installations prove metadata, no runtime pytest, installed entry point, version consistency, and six-tool credential-free stdio discovery.
+  read:
+    - manifests/r03-runtime-dependency-containment.manifest.yaml
+    - manifests/r03-version-reporting.manifest.yaml
+    - pyproject.toml
+    - uv.lock
+    - tests/acceptance/test_credential_free_discovery.py
+  scope:
+    - path: src/elevenlabs_mcp/server.py
+      reason: Make the private MCP-v1 concurrency adapter delegate to the SDK-native concurrent loop when legacy request_ctx is absent, while preserving the 1.1.2 compatibility path and public server/tool surface.
+validate:
+  - [uv, run, pytest, -q, tests/acceptance/test_installed_wheel_smoke.py]
+  - [uv, run, pytest, -q, tests/acceptance/test_installed_wheel_smoke.py, tests/acceptance/test_credential_free_discovery.py]
+  - [uv, run, ruff, check, tests/acceptance/test_installed_wheel_smoke.py]
+  - [uv, run, pyright, tests/acceptance/test_installed_wheel_smoke.py]
+acceptance:
+  tests:
+    - [uv, run, pytest, -q, tests/acceptance/test_installed_wheel_smoke.py]
+  immutable: true
+outcome:
+  status: completed
+  summary: The built plain wheel installs outside the checkout and completes real credential-free stdio discovery with exactly six tools at MCP 1.1.2 and resolver-selected MCP 1.30.0, without runtime pytest or FFmpeg.
+  rationale: The matrix validates both ends of the advertised v1 compatibility range through the generated console entry point; the private server adapter uses legacy request context only on 1.1.2 and delegates to native concurrent dispatch on newer v1.
+  lessons:
+    - lesson_type: installed-artifact-testing
+      summary: Source and project-venv tests cannot prove package compatibility; build/install the wheel in disposable environments and exercise its generated entry point against both dependency bounds.
+      tags: [wheel, mcp, compatibility, isolation]
+      paths: [src/elevenlabs_mcp/server.py, tests/acceptance/test_installed_wheel_smoke.py]
+  review_notes:
+    - source: maid-implementation-reviewer:r03_wheel_smoke_review
+      severity: ready
+      summary: No findings; isolated provenance, dependency profiles, runtime exclusions, console transport, and SDK-generation delegation are valid.
+  validation:
+    - command: [uv, run, pytest, -q]
+      status: passed
+      summary: All 75 tests passed.
+    - command: [uv, run, maid, test, --manifest, manifests/r03-installed-wheel-smoke.manifest.yaml]
+      status: passed
+      summary: All four child commands passed across both install profiles.
+    - command: [uv, run, --with, coverage, maid, verify, --profile, deep, --manifest-dir, manifests, --test-scope, task, --file-tracking-scope, task, --require-plan-lock, --require-red-evidence, --since, 1b2ecd2, --summary, --packet]
+      status: passed
+      summary: All 11 deep stages passed.
+  completed_at: "2026-09-20T16:26:19+08:00"
+created: "2026-09-20T08:23:13Z"
+metadata:
+  author: Codex
+  tags: [revival, r03, wheel, installation, stdio]
+  priority: critical

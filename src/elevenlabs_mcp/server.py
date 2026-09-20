@@ -38,7 +38,7 @@ from .version import package_version
 
 log_level = os.getenv("ELEVENLABS_LOG_LEVEL", "ERROR").upper()
 valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
-_request_ctx = cast(Any, mcp_server).request_ctx
+_request_ctx = getattr(cast(Any, mcp_server), "request_ctx", None)
 if log_level not in valid_levels:
     log_level = "ERROR"
     print("Invalid log level; using ERROR.", file=sys.stderr)
@@ -59,6 +59,14 @@ class _ConcurrentServer(Server):
         initialization_options: InitializationOptions,
         raise_exceptions: bool = False,
     ) -> None:
+        if _request_ctx is None:
+            await super().run(
+                read_stream,
+                write_stream,
+                initialization_options,
+                raise_exceptions=raise_exceptions,
+            )
+            return
         async with ServerSession(
             read_stream, write_stream, initialization_options
         ) as session:

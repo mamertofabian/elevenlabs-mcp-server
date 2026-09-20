@@ -1,0 +1,164 @@
+{
+  "manifest_path": "manifests/r03-installed-wheel-smoke.manifest.yaml",
+  "manifest_hash": "sha256-contract:d9cef4e21559fb785f0397882d5c9a34c76c80676dc6479ae6b03432ff90ca09",
+  "test_hashes": {
+    "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+    "tests/acceptance/test_installed_wheel_smoke.py": "sha256-pyast:v2:c69ba03898c8bd81deb92b93d2cd3aa0dfc6f94828c796234653d34fb0484e80"
+  },
+  "created_at": "2026-09-20T08:23:10.816539+00:00",
+  "revision": 4,
+  "revisions": [
+    {
+      "prior_manifest_hash": "sha256-contract:02a92cd40afda67d928dea7f6a3dcdc08f1668bde176828dbaef634a132cb97f",
+      "prior_test_hashes": {
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_installed_wheel_smoke.py": "sha256-pyast:v2:c69ba03898c8bd81deb92b93d2cd3aa0dfc6f94828c796234653d34fb0484e80"
+      },
+      "revised_at": "2026-09-20T08:23:13.880329+00:00",
+      "reason": "Migrated by maid manifest promote: manifests/drafts/r03-installed-wheel-smoke.manifest.yaml -> manifests/r03-installed-wheel-smoke.manifest.yaml",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:a4f01a4292b0e10a50a2a4d3b975568e00a061242cd71b60eb96bfef4512844f",
+      "prior_test_hashes": {
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_installed_wheel_smoke.py": "sha256-pyast:v2:c69ba03898c8bd81deb92b93d2cd3aa0dfc6f94828c796234653d34fb0484e80"
+      },
+      "revised_at": "2026-09-20T08:23:42.613246+00:00",
+      "reason": "Keep credential-free discovery explicit while adapting the private concurrency loop across MCP 1.1.2 and newest allowed v1",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [
+          "uv run pytest -q tests/acceptance/test_installed_wheel_smoke.py tests/acceptance/test_credential_free_discovery.py"
+        ],
+        "validate_commands_removed": []
+      }
+    },
+    {
+      "prior_manifest_hash": "sha256-contract:d9cef4e21559fb785f0397882d5c9a34c76c80676dc6479ae6b03432ff90ca09",
+      "prior_test_hashes": {
+        "tests/acceptance/test_credential_free_discovery.py": "sha256-pyast:v2:8498cacc798e8b0dee79cae1ae37e02bc67c22f5d7c2cabe0bbed04505f922de",
+        "tests/acceptance/test_installed_wheel_smoke.py": "sha256-pyast:v2:c69ba03898c8bd81deb92b93d2cd3aa0dfc6f94828c796234653d34fb0484e80"
+      },
+      "revised_at": "2026-09-20T08:26:46.433363+00:00",
+      "reason": "Capture reviewed installed-wheel smoke Outcome",
+      "agent": null,
+      "contract_delta": {
+        "artifacts_added": [],
+        "artifacts_removed": [],
+        "files_added": [],
+        "files_removed": [],
+        "validate_commands_added": [],
+        "validate_commands_removed": []
+      }
+    }
+  ],
+  "red_evidence": {
+    "red": true,
+    "captured_at": "2026-09-20T08:23:47.735595+00:00",
+    "commands": [
+      {
+        "command": "uv run pytest -q tests/acceptance/test_installed_wheel_smoke.py",
+        "exit_code": 1,
+        "output_tail": "E           File \"<string>\", line 5, in <module>\nE           File \"/tmp/pytest-of-atomrem/pytest-1257/test_installed_wheel_stdio_mat1/venv-current-v1/lib/python3.11/site-packages/elevenlabs_mcp/__init__.py\", line 7, in <module>\nE             from .server import ElevenLabsServer, main\nE           File \"/tmp/pytest-of-atomrem/pytest-1257/test_installed_wheel_stdio_mat1/venv-current-v1/lib/python3.11/site-packages/elevenlabs_mcp/server.py\", line 41, in <module>\nE             _request_ctx = cast(Any, mcp_server).request_ctx\nE                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE         AttributeError: module 'mcp.server' has no attribute 'request_ctx'\nE         \nE       assert 1 == 0\nE        +  where 1 = CompletedProcess(args=['/tmp/pytest-of-atomrem/pytest-1257/test_installed_wheel_stdio_mat1/venv-current-v1/bin/python'...          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAttributeError: module \\'mcp.server\\' has no attribute \\'request_ctx\\'\\n').returncode\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_installed_wheel_smoke.py:97: AssertionError\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_installed_wheel_smoke.py::test_installed_wheel_stdio_matrix[current-v1-None]\n1 failed, 1 passed in 1.74s\n\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
+        "classification": "red"
+      },
+      {
+        "command": "uv run pytest -q tests/acceptance/test_installed_wheel_smoke.py tests/acceptance/test_credential_free_discovery.py",
+        "exit_code": 1,
+        "output_tail": "E         AttributeError: module 'mcp.server' has no attribute 'request_ctx'\nE         \nE       assert 1 == 0\nE        +  where 1 = CompletedProcess(args=['/tmp/pytest-of-atomrem/pytest-1258/test_installed_wheel_stdio_mat1/venv-current-v1/bin/python'...          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAttributeError: module \\'mcp.server\\' has no attribute \\'request_ctx\\'\\n').returncode\n\n/mnt/storage/development/elevenlabs-mcp-server/tests/acceptance/test_installed_wheel_smoke.py:97: AssertionError\n=============================== warnings summary ===============================\n.venv/lib/python3.11/site-packages/pydub/utils.py:14\n  /mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pydub/utils.py:14: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13\n    import audioop\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ============================\nFAILED tests/acceptance/test_installed_wheel_smoke.py::test_installed_wheel_stdio_matrix[current-v1-None]\n1 failed, 5 passed, 1 warning in 1.98s\n\n/mnt/storage/development/elevenlabs-mcp-server/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:207: PytestDeprecationWarning: The configuration option \"asyncio_default_fixture_loop_scope\" is unset.\nThe event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: \"function\", \"class\", \"module\", \"package\", \"session\"\n\n  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))",
+        "classification": "red"
+      },
+      {
+        "command": "uv run ruff check tests/acceptance/test_installed_wheel_smoke.py",
+        "exit_code": 0,
+        "output_tail": "All checks passed!",
+        "classification": "not_red"
+      },
+      {
+        "command": "uv run pyright tests/acceptance/test_installed_wheel_smoke.py",
+        "exit_code": 0,
+        "output_tail": "0 errors, 0 warnings, 0 informations",
+        "classification": "not_red"
+      }
+    ]
+  },
+  "legacy_baseline": null,
+  "agent": null,
+  "_manifest_contract": {
+    "artifacts": [
+      "tests/acceptance/test_installed_wheel_smoke.py:test_installed_wheel_stdio_matrix",
+      "tests/acceptance/test_installed_wheel_smoke.py:test_installed_wheel_stdio_matrix:kind=test_function"
+    ],
+    "files": {
+      "create": [
+        "tests/acceptance/test_installed_wheel_smoke.py"
+      ],
+      "edit": [],
+      "read": [
+        "manifests/r03-runtime-dependency-containment.manifest.yaml",
+        "manifests/r03-version-reporting.manifest.yaml",
+        "pyproject.toml",
+        "tests/acceptance/test_credential_free_discovery.py",
+        "uv.lock"
+      ],
+      "scope": [
+        "src/elevenlabs_mcp/server.py"
+      ],
+      "delete": [],
+      "snapshot": []
+    },
+    "file_contract": {
+      "create": [
+        {
+          "path": "tests/acceptance/test_installed_wheel_smoke.py",
+          "artifacts": [
+            {
+              "kind": "test_function",
+              "name": "test_installed_wheel_stdio_matrix",
+              "description": "Parameterized lower/current-v1 isolated installations prove metadata, no runtime pytest, installed entry point, version consistency, and six-tool credential-free stdio discovery."
+            }
+          ]
+        }
+      ],
+      "read": [
+        "manifests/r03-runtime-dependency-containment.manifest.yaml",
+        "manifests/r03-version-reporting.manifest.yaml",
+        "pyproject.toml",
+        "uv.lock",
+        "tests/acceptance/test_credential_free_discovery.py"
+      ],
+      "scope": [
+        {
+          "path": "src/elevenlabs_mcp/server.py",
+          "reason": "Make the private MCP-v1 concurrency adapter delegate to the SDK-native concurrent loop when legacy request_ctx is absent, while preserving the 1.1.2 compatibility path and public server/tool surface."
+        }
+      ]
+    },
+    "test_files": [
+      "tests/acceptance/test_credential_free_discovery.py",
+      "tests/acceptance/test_installed_wheel_smoke.py"
+    ],
+    "validate_commands": [
+      "uv run pytest -q tests/acceptance/test_installed_wheel_smoke.py",
+      "uv run pytest -q tests/acceptance/test_installed_wheel_smoke.py tests/acceptance/test_credential_free_discovery.py",
+      "uv run ruff check tests/acceptance/test_installed_wheel_smoke.py",
+      "uv run pyright tests/acceptance/test_installed_wheel_smoke.py"
+    ],
+    "acceptance_commands": [
+      "uv run pytest -q tests/acceptance/test_installed_wheel_smoke.py"
+    ]
+  }
+}
