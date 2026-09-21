@@ -23,6 +23,10 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ matrix.python-version }}
+      - name: Install audio verification dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
       - name: Install locked development environment
         run: uv sync --frozen --dev
       - name: Validate GitHub Actions workflows

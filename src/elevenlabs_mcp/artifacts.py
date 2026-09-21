@@ -8,6 +8,8 @@ import stat
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
+from tempfile import TemporaryFile
+from typing import BinaryIO
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
@@ -62,6 +64,21 @@ class ArtifactVerifier:
         reuse; it is neither a decode result nor permission to skip recovery checks.
         Platforms without no-follow, descriptor-relative opens fail explicitly.
         """
+        return self._verify_complete(identity)
+
+    @contextmanager
+    def verified_snapshot(
+        self, identity: ArtifactIdentity
+    ) -> Iterator[tuple[ArtifactIntegrityResult, BinaryIO]]:
+        """Keep an owned copy of the exact verified bytes open for local decoding."""
+        with TemporaryFile(mode="w+b") as snapshot:
+            result = self._verify_complete(identity, snapshot)
+            snapshot.seek(0)
+            yield result, snapshot
+
+    def _verify_complete(
+        self, identity: ArtifactIdentity, snapshot: BinaryIO | None = None
+    ) -> ArtifactIntegrityResult:
         if (
             not hasattr(os, "O_NOFOLLOW")
             or not hasattr(os, "O_DIRECTORY")
@@ -110,6 +127,8 @@ class ArtifactVerifier:
                             break
                         count += len(block)
                         digest.update(block)
+                        if snapshot is not None:
+                            snapshot.write(block)
                     if (
                         count != record.byte_size
                         or "sha256:" + digest.hexdigest() != record.sha256

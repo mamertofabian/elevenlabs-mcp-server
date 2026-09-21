@@ -25,6 +25,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
+      - name: Install audio verification dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
       - name: Build locked artifacts
         run: |
           uv sync --frozen --dev
