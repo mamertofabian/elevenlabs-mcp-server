@@ -251,3 +251,11 @@ class ResumeResult(_StrictModel):
     status: Literal["queued", "completed"]
     warnings: tuple[str, ...] = ()
     replayed: bool
+
+
+class ArtifactRecordResult(_StrictModel):
+    artifact_id: str = Field(min_length=1, max_length=128)
+    job_id: str = Field(min_length=1, max_length=128)
+    chunk_id: str = Field(min_length=1, max_length=128)
+    attempt_id: str = Field(min_length=1, max_length=128)
+    replayed: bool

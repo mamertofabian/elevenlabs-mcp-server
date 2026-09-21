@@ -10,7 +10,10 @@ from typing import List, Literal, Optional
 
 import aiosqlite
 
+from .artifacts import CompletionRecord
+from .audio import AudioVerificationResult
 from .contracts import (
+    ArtifactRecordResult,
     AttemptDispatch,
     AttemptFailureResult,
     AttemptReservation,
@@ -355,6 +358,10 @@ class UncertainAttemptError(RuntimeError):
 
 class ArtifactVerificationRequiredError(RuntimeError):
     """Successful artifacts require trusted verification before resume."""
+
+
+class ArtifactConflictError(RuntimeError):
+    """Artifact metadata conflicts with ownership, an immutable plan, or prior evidence."""
 
 
 class JobStore:
@@ -1045,6 +1052,123 @@ class JobStore:
                     "input_digest, result_ref, committed_at, tombstone) "
                     "VALUES (?, 'resume', ?, ?, ?, ?, 0)",
                     (workspace_id, idempotency_key, digest, result.model_dump_json(), timestamp),
+                )
+                await connection.commit()
+                return result
+            except BaseException:
+                await connection.rollback()
+                raise
+
+    async def record_verified_artifact(
+        self,
+        artifact_id: str,
+        verification: AudioVerificationResult,
+        completed_at: datetime,
+    ) -> ArtifactRecordResult:
+        """Record trusted verifier evidence; never perform file or media I/O in SQL.
+
+        This is an internal persistence boundary, not a client-supplied attestation.
+        The source must be checked again before reuse: recorded evidence describes
+        the verifier's snapshot, not a promise that the path remains unchanged.
+        """
+        verification = AudioVerificationResult.model_validate(verification.model_dump())
+        integrity = verification.integrity
+        identity = integrity.identity
+        CompletionRecord(
+            schema_version="1", identity=identity, sha256=integrity.sha256,
+            byte_size=integrity.byte_size,
+        )
+        relative_path = (
+            f"jobs/{identity.job_id}/chunks/{identity.chunk_id}/{identity.attempt_id}.mp3"
+        )
+        if integrity.relative_path != relative_path:
+            raise ArtifactConflictError("artifact path does not match attempt ownership")
+        if completed_at.tzinfo is None or completed_at.utcoffset() is None:
+            raise ValueError("completed_at must be timezone-aware")
+        completed_at = completed_at.astimezone(UTC)
+        result = ArtifactRecordResult(
+            artifact_id=artifact_id, job_id=identity.job_id, chunk_id=identity.chunk_id,
+            attempt_id=identity.attempt_id, replayed=False,
+        )
+        expected = (
+            identity.job_id, identity.chunk_id, identity.attempt_id, relative_path,
+            integrity.sha256, integrity.byte_size, "audio/mpeg", "mp3",
+            verification.duration_ms, 1, None,
+        )
+        async with self.connect() as connection:
+            await connection.execute("BEGIN IMMEDIATE")
+            try:
+                async with connection.execute(
+                    """
+                    SELECT a.job_id, a.chunk_id, a.dispatch_state, a.started_at,
+                           c.generation_fingerprint, c.status, j.status, j.deleted_at
+                    FROM generation_attempts a
+                    JOIN voiceover_chunks c ON c.job_id=a.job_id AND c.chunk_id=a.chunk_id
+                    JOIN voiceover_jobs j ON j.job_id=a.job_id
+                    WHERE a.attempt_id = ?
+                    """, (identity.attempt_id,),
+                ) as cursor:
+                    attempt = await cursor.fetchone()
+                if attempt is None:
+                    raise AttemptNotFoundError(identity.attempt_id)
+                if (attempt[0], attempt[1], attempt[4]) != (
+                    identity.job_id, identity.chunk_id, identity.generation_fingerprint,
+                ):
+                    raise ArtifactConflictError("artifact does not match owned plan")
+                async with connection.execute(
+                    "SELECT job_id,chunk_id,attempt_id,relative_path,sha256,byte_size,"
+                    "mime_type,codec,duration_ms,complete,deleted_at "
+                    "FROM production_artifacts WHERE artifact_id = ?", (artifact_id,),
+                ) as cursor:
+                    existing = await cursor.fetchone()
+                if existing is not None:
+                    if tuple(existing) != expected:
+                        raise ArtifactConflictError("artifact ID already has different evidence")
+                    await connection.commit()
+                    return result.model_copy(update={"replayed": True})
+                if (
+                    attempt[2] != "dispatched" or attempt[5] != "generating"
+                    or attempt[6] not in {"running", "paused", "failed"}
+                    or attempt[7] is not None
+                ):
+                    raise AttemptStateError(identity.attempt_id)
+                if completed_at < datetime.fromisoformat(attempt[3]):
+                    raise ValueError("completion cannot precede reservation")
+                await connection.execute(
+                    "INSERT INTO production_artifacts (artifact_id,job_id,chunk_id,attempt_id,"
+                    "relative_path,sha256,byte_size,mime_type,codec,duration_ms,complete,deleted_at) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (artifact_id, *expected),
+                )
+                await connection.execute(
+                    "UPDATE generation_attempts SET dispatch_state='succeeded', ended_at=?, "
+                    "sanitized_outcome='AUDIO_VERIFIED', outcome_unknown=0 WHERE attempt_id=?",
+                    (completed_at.isoformat(), identity.attempt_id),
+                )
+                await connection.execute(
+                    "UPDATE voiceover_chunks SET status='succeeded', successful_artifact_id=?, "
+                    "latest_error=NULL WHERE job_id=? AND chunk_id=?",
+                    (artifact_id, identity.job_id, identity.chunk_id),
+                )
+                async with connection.execute(
+                    "SELECT status,source_spans_json FROM voiceover_chunks WHERE job_id=?",
+                    (identity.job_id,),
+                ) as cursor:
+                    chunks = await cursor.fetchall()
+                all_parts: set[str] = set()
+                incomplete_parts: set[str] = set()
+                verified_chunks = 0
+                for status, spans_json in chunks:
+                    parts = {span["part_id"] for span in json.loads(spans_json)}
+                    all_parts.update(parts)
+                    if status == "succeeded":
+                        verified_chunks += 1
+                    else:
+                        incomplete_parts.update(parts)
+                await connection.execute(
+                    "UPDATE voiceover_jobs SET verified_chunks=?,verified_parts=?,updated_at=? "
+                    "WHERE job_id=?",
+                    (verified_chunks, len(all_parts - incomplete_parts),
+                     completed_at.isoformat(), identity.job_id),
                 )
                 await connection.commit()
                 return result
