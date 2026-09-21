@@ -10,8 +10,8 @@ from typing import List, Optional
 
 import aiosqlite
 
+from .contracts import AttemptDispatch, AttemptReservation, JobCreateResult, VoiceoverPlan
 from .models import AudioJob
-from .contracts import AttemptReservation, JobCreateResult, VoiceoverPlan
 
 CREATE_VOICES_TABLE = """
 CREATE TABLE IF NOT EXISTS voices (
@@ -309,6 +309,18 @@ class ReservationStateError(RuntimeError):
         super().__init__(
             f"cannot reserve {job_id}/{chunk_id} from {job_status}/{chunk_status}"
         )
+
+
+class AttemptNotFoundError(RuntimeError):
+    def __init__(self, attempt_id: str) -> None:
+        self.attempt_id = attempt_id
+        super().__init__(f"attempt not found: {attempt_id}")
+
+
+class AttemptStateError(RuntimeError):
+    def __init__(self, attempt_id: str) -> None:
+        self.attempt_id = attempt_id
+        super().__init__(f"attempt cannot be dispatched: {attempt_id}")
 
 
 class JobStore:
@@ -643,6 +655,70 @@ class JobStore:
                         chunk[0],
                         started_at.astimezone(UTC).isoformat(),
                     ),
+                )
+                await connection.commit()
+                return result
+            except BaseException:
+                await connection.rollback()
+                raise
+
+    async def mark_attempt_dispatched(
+        self, attempt_id: str, dispatched_at: datetime
+    ) -> AttemptDispatch:
+        """Commit dispatch intent before HTTP; duplicate calls fail closed.
+
+        A caller may dispatch only after a successful return, exactly once. A
+        crash after commit is conservatively uncertain, not permission to replay.
+        Reservations remain charged against the local exposure ceiling.
+        """
+        if dispatched_at.tzinfo is None or dispatched_at.utcoffset() is None:
+            raise ValueError("dispatched_at must be timezone-aware")
+        dispatched_at = dispatched_at.astimezone(UTC)
+        async with self.connect() as connection:
+            await connection.execute("BEGIN IMMEDIATE")
+            try:
+                async with connection.execute(
+                    """
+                    SELECT a.job_id, a.chunk_id, a.dispatch_state, a.started_at,
+                           j.status, j.cancel_requested, j.deleted_at, c.status
+                    FROM generation_attempts a
+                    JOIN voiceover_jobs j ON j.job_id = a.job_id
+                    JOIN voiceover_chunks c
+                      ON c.job_id = a.job_id AND c.chunk_id = a.chunk_id
+                    WHERE a.attempt_id = ?
+                    """,
+                    (attempt_id,),
+                ) as cursor:
+                    attempt = await cursor.fetchone()
+                if attempt is None:
+                    raise AttemptNotFoundError(attempt_id)
+                if (
+                    attempt[2] != "reserved"
+                    or attempt[4] not in {"queued", "running"}
+                    or attempt[5]
+                    or attempt[6] is not None
+                    or attempt[7] != "pending"
+                ):
+                    raise AttemptStateError(attempt_id)
+                if dispatched_at < datetime.fromisoformat(attempt[3]):
+                    raise ValueError("dispatch cannot precede reservation")
+                result = AttemptDispatch(
+                    attempt_id=attempt_id, job_id=attempt[0], chunk_id=attempt[1]
+                )
+                await connection.execute(
+                    "UPDATE generation_attempts SET dispatch_state = 'dispatched' "
+                    "WHERE attempt_id = ?",
+                    (attempt_id,),
+                )
+                await connection.execute(
+                    "UPDATE voiceover_chunks SET status = 'generating' "
+                    "WHERE job_id = ? AND chunk_id = ?",
+                    (attempt[0], attempt[1]),
+                )
+                await connection.execute(
+                    "UPDATE voiceover_jobs SET status = 'running', updated_at = ? "
+                    "WHERE job_id = ?",
+                    (dispatched_at.isoformat(), attempt[0]),
                 )
                 await connection.commit()
                 return result

@@ -214,3 +214,11 @@ class AttemptReservation(_StrictModel):
 class PlanVoiceoverInput(_StrictModel):
     script: Script
     options: VoiceoverOptions
+
+
+class AttemptDispatch(_StrictModel):
+    """A newly committed dispatch; this result must never be replayed as permission."""
+
+    attempt_id: str = Field(min_length=1, max_length=128)
+    job_id: str = Field(min_length=1, max_length=128)
+    chunk_id: str = Field(min_length=1, max_length=128)
