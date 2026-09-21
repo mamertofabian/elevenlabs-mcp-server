@@ -14,6 +14,7 @@ from .contracts import (
     AttemptDispatch,
     AttemptFailureResult,
     AttemptReservation,
+    CancellationResult,
     JobCreateResult,
     VoiceoverPlan,
 )
@@ -335,6 +336,14 @@ class AttemptOutcomeConflictError(RuntimeError):
         super().__init__(f"attempt outcome already recorded differently: {attempt_id}")
 
 
+class RevisionConflictError(RuntimeError):
+    def __init__(self, job_id: str, expected_revision: int, actual_revision: int) -> None:
+        self.job_id = job_id
+        self.expected_revision = expected_revision
+        self.actual_revision = actual_revision
+        super().__init__(f"job revision conflict: {job_id}")
+
+
 class JobStore:
     def __init__(self, db_path: str | os.PathLike[str]) -> None:
         self.db_path = os.fspath(db_path)
@@ -600,7 +609,7 @@ class JobStore:
                 async with connection.execute(
                     """
                     SELECT max_total_characters, max_total_requests,
-                           reserved_characters, reserved_requests, status
+                           reserved_characters, reserved_requests, status, cancel_requested
                     FROM voiceover_jobs
                     WHERE job_id = ? AND deleted_at IS NULL
                     """,
@@ -620,7 +629,7 @@ class JobStore:
                     chunk = await cursor.fetchone()
                 if chunk is None:
                     raise ChunkNotFoundError(job_id, chunk_id)
-                if job[4] not in {"queued", "running"} or chunk[1] != "pending":
+                if job[4] not in {"queued", "running"} or job[5] or chunk[1] != "pending":
                     raise ReservationStateError(job_id, chunk_id, job[4], chunk[1])
 
                 required_characters = job[2] + chunk[0]
@@ -825,6 +834,83 @@ class JobStore:
                     ("paused" if has_unknown else "failed",
                      "UPSTREAM_OUTCOME_UNKNOWN" if has_unknown else reason,
                      ended_at.isoformat(), attempt[0]),
+                )
+                await connection.commit()
+                return result
+            except BaseException:
+                await connection.rollback()
+                raise
+
+    async def request_cancel(
+        self,
+        workspace_id: str,
+        job_id: str,
+        expected_revision: int,
+        idempotency_key: str,
+        requested_at: datetime,
+    ) -> CancellationResult:
+        """Persist cancellation intent and its original acknowledgment atomically.
+
+        Receipt lookup precedes revision checks. Workers must reconcile active
+        attempts before marking work cancelled; this method only blocks scheduling.
+        """
+        if type(expected_revision) is not int or expected_revision < 0:
+            raise ValueError("expected_revision must be a nonnegative integer")
+        for value in (workspace_id, job_id, idempotency_key):
+            if not isinstance(value, str) or not 1 <= len(value) <= 128:
+                raise ValueError("workspace, job and idempotency IDs require 1 to 128 characters")
+        if requested_at.tzinfo is None or requested_at.utcoffset() is None:
+            raise ValueError("requested_at must be timezone-aware")
+        timestamp = requested_at.astimezone(UTC).isoformat()
+        digest = "sha256:" + hashlib.sha256(_json({
+            "job_id": job_id, "expected_revision": expected_revision,
+        }).encode("utf-8")).hexdigest()
+        async with self.connect() as connection:
+            await connection.execute("BEGIN IMMEDIATE")
+            try:
+                async with connection.execute(
+                    "SELECT input_digest, result_ref FROM operation_receipts "
+                    "WHERE workspace_id = ? AND operation = 'cancel' AND idempotency_key = ?",
+                    (workspace_id, idempotency_key),
+                ) as cursor:
+                    receipt = await cursor.fetchone()
+                if receipt is not None:
+                    if receipt[0] != digest:
+                        raise IdempotencyConflictError(workspace_id, "cancel", idempotency_key)
+                    # Cancel receipts embed the original acknowledgment, not mutable job state.
+                    result = CancellationResult.model_validate_json(receipt[1])
+                    await connection.commit()
+                    return result.model_copy(update={"replayed": True})
+                async with connection.execute(
+                    "SELECT revision, status, reason, cancel_requested FROM voiceover_jobs "
+                    "WHERE job_id = ? AND deleted_at IS NULL", (job_id,),
+                ) as cursor:
+                    job = await cursor.fetchone()
+                if job is None:
+                    raise JobNotFoundError(job_id)
+                if job[0] != expected_revision:
+                    raise RevisionConflictError(job_id, expected_revision, job[0])
+                change = job[1] not in {"completed", "cancelled"} and not job[3]
+                result = CancellationResult(
+                    job_id=job_id, revision=job[0] + int(change), status=job[1],
+                    reason=job[2], cancel_requested=bool(job[3]) or change,
+                    replayed=False,
+                )
+                if change:
+                    await connection.execute(
+                        "UPDATE voiceover_jobs SET cancel_requested = 1, revision = ?, updated_at = ? "
+                        "WHERE job_id = ?",
+                        (result.revision, timestamp, job_id),
+                    )
+                await connection.execute(
+                    """
+                    INSERT INTO operation_receipts (
+                        workspace_id, operation, idempotency_key, input_digest,
+                        result_ref, committed_at, tombstone
+                    ) VALUES (?, 'cancel', ?, ?, ?, ?, 0)
+                    """,
+                    (workspace_id, idempotency_key, digest,
+                     result.model_dump_json(), timestamp),
                 )
                 await connection.commit()
                 return result

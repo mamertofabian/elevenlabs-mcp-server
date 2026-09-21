@@ -230,3 +230,16 @@ class AttemptFailureResult(_StrictModel):
     chunk_id: str = Field(min_length=1, max_length=128)
     outcome: Literal["failed", "unknown"]
     replayed: bool
+
+
+class CancellationResult(_StrictModel):
+    """Original acknowledgment; a request flag does not mean upstream stopped."""
+
+    job_id: str = Field(min_length=1, max_length=128)
+    revision: int = Field(ge=0)
+    status: Literal[
+        "queued", "running", "assembling", "completed", "failed", "paused", "cancelled"
+    ]
+    reason: str | None
+    cancel_requested: bool
+    replayed: bool
