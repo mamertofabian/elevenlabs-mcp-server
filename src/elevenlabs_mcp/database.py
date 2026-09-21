@@ -19,10 +19,12 @@ from .contracts import (
     AttemptReservation,
     CancellationResult,
     JobCreateResult,
+    RestartReconciliationResult,
     ResumeResult,
     VoiceoverPlan,
 )
 from .models import AudioJob
+from .workspace import WorkspaceLock, WorkspaceOwnershipError
 
 CREATE_VOICES_TABLE = """
 CREATE TABLE IF NOT EXISTS voices (
@@ -1169,6 +1171,89 @@ class JobStore:
                     "WHERE job_id=?",
                     (verified_chunks, len(all_parts - incomplete_parts),
                      completed_at.isoformat(), identity.job_id),
+                )
+                await connection.commit()
+                return result
+            except BaseException:
+                await connection.rollback()
+                raise
+
+    async def reconcile_interrupted(
+        self, ownership: WorkspaceLock, reconciled_at: datetime
+    ) -> RestartReconciliationResult:
+        """Pause abandoned work under the database directory's exclusive lock.
+
+        No artifact/provider I/O occurs here. Successful artifacts still require
+        independent re-verification and complete sidecars require explicit adoption.
+        The caller must retain ownership throughout recovery and worker execution.
+        """
+        database_identity = ownership.require_database(Path(self.db_path))
+        if reconciled_at.tzinfo is None or reconciled_at.utcoffset() is None:
+            raise ValueError("reconciled_at must be timezone-aware")
+        timestamp = reconciled_at.astimezone(UTC).isoformat()
+        paused: list[str] = []
+        uncertain: list[str] = []
+        abandoned: list[str] = []
+        async with self.connect() as connection:
+            await connection.execute("BEGIN IMMEDIATE")
+            try:
+                async with connection.execute(
+                    """
+                    SELECT job_id FROM voiceover_jobs j
+                    WHERE deleted_at IS NULL AND status NOT IN ('completed', 'cancelled')
+                      AND (status IN ('queued', 'running', 'assembling')
+                        OR EXISTS (SELECT 1 FROM generation_attempts a
+                          WHERE a.job_id=j.job_id AND a.dispatch_state IN ('reserved','dispatched'))
+                        OR EXISTS (SELECT 1 FROM voiceover_chunks c
+                          WHERE c.job_id=j.job_id AND c.status='generating'))
+                    ORDER BY job_id
+                    """,
+                ) as cursor:
+                    jobs = await cursor.fetchall()
+                for (job_id,) in jobs:
+                    async with connection.execute(
+                        "SELECT attempt_id,chunk_id,dispatch_state FROM generation_attempts "
+                        "WHERE job_id=? AND dispatch_state IN ('reserved','dispatched') "
+                        "ORDER BY attempt_id", (job_id,),
+                    ) as cursor:
+                        attempts = await cursor.fetchall()
+                    for attempt_id, chunk_id, state in attempts:
+                        unknown = state == "dispatched"
+                        (uncertain if unknown else abandoned).append(attempt_id)
+                        reason = "UPSTREAM_OUTCOME_UNKNOWN" if unknown else "RESTART_ABANDONED_RESERVATION"
+                        await connection.execute(
+                            "UPDATE generation_attempts SET dispatch_state=?,ended_at=?,"
+                            "sanitized_outcome=?,outcome_unknown=? WHERE attempt_id=?",
+                            ("unknown" if unknown else "cancelled", timestamp, reason,
+                             int(unknown), attempt_id),
+                        )
+                        if unknown:
+                            await connection.execute(
+                                "UPDATE voiceover_chunks SET status='unknown',latest_error=? "
+                                "WHERE job_id=? AND chunk_id=? AND status!='succeeded'",
+                                (reason, job_id, chunk_id),
+                            )
+                    # A generating chunk without a ledger row is also unsafe to replay.
+                    await connection.execute(
+                        "UPDATE voiceover_chunks SET status='unknown',"
+                        "latest_error='UPSTREAM_OUTCOME_UNKNOWN' WHERE job_id=? AND status='generating'",
+                        (job_id,),
+                    )
+                    async with connection.execute(
+                        "SELECT 1 FROM voiceover_chunks WHERE job_id=? AND status='unknown' LIMIT 1",
+                        (job_id,),
+                    ) as cursor:
+                        has_unknown = await cursor.fetchone() is not None
+                    await connection.execute(
+                        "UPDATE voiceover_jobs SET status='paused',reason=?,updated_at=? WHERE job_id=?",
+                        ("UPSTREAM_OUTCOME_UNKNOWN" if has_unknown else "PROCESS_RESTARTED", timestamp, job_id),
+                    )
+                    paused.append(job_id)
+                if ownership.require_database(Path(self.db_path)) != database_identity:
+                    raise WorkspaceOwnershipError("Database changed during reconciliation")
+                result = RestartReconciliationResult(
+                    paused_job_ids=tuple(paused), uncertain_attempt_ids=tuple(uncertain),
+                    abandoned_reservation_ids=tuple(abandoned),
                 )
                 await connection.commit()
                 return result

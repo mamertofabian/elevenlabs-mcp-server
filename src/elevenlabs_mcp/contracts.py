@@ -259,3 +259,9 @@ class ArtifactRecordResult(_StrictModel):
     chunk_id: str = Field(min_length=1, max_length=128)
     attempt_id: str = Field(min_length=1, max_length=128)
     replayed: bool
+
+
+class RestartReconciliationResult(_StrictModel):
+    paused_job_ids: tuple[str, ...]
+    uncertain_attempt_ids: tuple[str, ...]
+    abandoned_reservation_ids: tuple[str, ...]
