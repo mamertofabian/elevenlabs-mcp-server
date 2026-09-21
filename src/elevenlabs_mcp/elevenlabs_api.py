@@ -62,6 +62,7 @@ from pydub import AudioSegment
 import io
 from tenacity import (
     retry,
+    retry_if_exception_type,
     retry_if_not_exception_type,
     stop_after_attempt,
     wait_exponential,
@@ -83,6 +84,8 @@ class UpstreamOutcomeUnknownError(RuntimeError):
         self.operation = operation
         self.cause_type = cause_type
         self.retryable = False
+        self.partial_output_file: str | None = None
+        self.completed_parts = 0
         super().__init__(
             f"{operation} upstream outcome is unknown after {cause_type}; "
             "retryable: false"
@@ -206,17 +209,13 @@ class ElevenLabsAPI:
     @retry(
         stop=stop_after_attempt(3),
         wait=_retry_wait,
-        retry=retry_if_not_exception_type(
-            (
-                _MissingAPIKeyError,
-                _NonRetryableProviderError,
-                UpstreamOutcomeUnknownError,
-            )
+        retry=retry_if_exception_type(
+            (_RetryableRateLimitError, requests.exceptions.ConnectTimeout)
         ),
     )
     def generate_audio_segment(self, text: str, voice_id: str, output_file: Optional[str] = None,
                       previous_text: Optional[str] = None, next_text: Optional[str] = None,
-                      previous_request_ids: Optional[List[str]] = None, debug_info: Optional[List[str]] = None) -> tuple[bytes, str]:
+                      previous_request_ids: Optional[List[str]] = None, debug_info: Optional[List[str]] = None) -> tuple[bytes, str | None]:
         """Generate audio using specified voice with context conditioning"""
         api_key = self._require_api_key()
         headers = {
@@ -264,7 +263,7 @@ class ElevenLabsAPI:
                 if output_file:
                     with open(output_file, 'wb') as f:
                         f.write(response.content)
-                return response.content, response.headers["request-id"]
+                return response.content, response.headers.get("request-id")
             else:
                 error_message = (
                     f"Audio provider request failed with status {response.status_code}"
@@ -274,15 +273,15 @@ class ElevenLabsAPI:
                     raise _RetryableRateLimitError(_retry_after_seconds(response))
                 if response.status_code in {400, 401, 403, 404, 422}:
                     raise _NonRetryableProviderError(error_message)
-                if response.status_code in {500, 502, 503, 504}:
+                if response.status_code >= 500 or response.status_code == 408:
                     raise UpstreamOutcomeUnknownError(
                         "synthesis", f"HTTP_{response.status_code}"
                     )
-                raise Exception(error_message)
+                raise _NonRetryableProviderError(error_message)
         except requests.exceptions.ConnectTimeout as e:
             error_message = f"Network error during API call: {type(e).__name__}"
             logging.error(error_message)
-            raise Exception(error_message)
+            raise
         except (
             requests.exceptions.ReadTimeout,
             requests.exceptions.ConnectionError,
@@ -312,6 +311,7 @@ class ElevenLabsAPI:
         previous_request_ids = []
         failed_part_indexes: list[int] = []
         completed_parts = 0
+        unknown_outcome: UpstreamOutcomeUnknownError | None = None
         
         all_texts = []
         for part in script_parts:
@@ -351,7 +351,8 @@ class ElevenLabsAPI:
                 )
                 
                 # Add request ID to history
-                previous_request_ids.append(request_id)
+                if request_id:
+                    previous_request_ids.append(request_id)
                 
                 # Convert audio content to AudioSegment and add to segments
                 audio_segment = AudioSegment.from_mp3(io.BytesIO(audio_content))
@@ -361,6 +362,10 @@ class ElevenLabsAPI:
 
                 # Wait for the specified wait_time
                 time.sleep(self.MODELS[self.model_id]["wait_time"])
+            except UpstreamOutcomeUnknownError as e:
+                unknown_outcome = e
+                failed_part_indexes.append(i)
+                break
             except Exception as e:
                 debug_info.append(f"Part {i} failed: {type(e).__name__}")
                 failed_part_indexes.append(i)
@@ -370,24 +375,36 @@ class ElevenLabsAPI:
         if segments:
             output_prefix = "partial_audio" if failed_part_indexes else "full_audio"
             output_file = output_dir / f"{output_prefix}_{canonical_output_id}.mp3"
-            final_audio = segments[0]
-            for segment in segments[1:]:
-                final_audio = final_audio + segment
-            
-            # Export to an owned temporary file, then atomically publish without
-            # replacing an existing artifact for the same job identity.
-            with NamedTemporaryFile(
-                dir=output_dir,
-                prefix=f".full_audio_{canonical_output_id}_",
-                suffix=".tmp",
-                delete=False,
-            ) as temporary:
-                temporary_path = Path(temporary.name)
             try:
-                final_audio.export(temporary_path, format="mp3")
-                os.link(temporary_path, output_file)
-            finally:
-                temporary_path.unlink(missing_ok=True)
+                final_audio = segments[0]
+                for segment in segments[1:]:
+                    final_audio = final_audio + segment
+
+                # Export to an owned temporary file, then atomically publish without
+                # replacing an existing artifact for the same job identity.
+                with NamedTemporaryFile(
+                    dir=output_dir,
+                    prefix=f".full_audio_{canonical_output_id}_",
+                    suffix=".tmp",
+                    delete=False,
+                ) as temporary:
+                    temporary_path = Path(temporary.name)
+                try:
+                    final_audio.export(temporary_path, format="mp3")
+                    os.link(temporary_path, output_file)
+                finally:
+                    temporary_path.unlink(missing_ok=True)
+
+            except Exception as assembly_error:
+                if unknown_outcome is not None:
+                    unknown_outcome.completed_parts = completed_parts
+                    raise unknown_outcome from assembly_error
+                raise
+
+            if unknown_outcome is not None:
+                unknown_outcome.partial_output_file = str(output_file)
+                unknown_outcome.completed_parts = completed_parts
+                raise unknown_outcome
 
             if not failed_part_indexes:
                 logging.debug("All parts generated successfully")
@@ -403,6 +420,8 @@ class ElevenLabsAPI:
                     failed_part_indexes=tuple(failed_part_indexes),
                 )
             return str(output_file), debug_info, completed_parts
+        if unknown_outcome is not None:
+            raise unknown_outcome
         if failed_part_indexes:
             raise PartialGenerationError(
                 partial_output_file=None,

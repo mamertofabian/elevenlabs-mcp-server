@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any, cast
 
@@ -19,9 +20,7 @@ class _Response:
     content = b"audio"
     text = ""
 
-    def __init__(
-        self, status_code: int, headers: dict[str, str] | None = None
-    ) -> None:
+    def __init__(self, status_code: int, headers: dict[str, str] | None = None) -> None:
         self.status_code = status_code
         self.headers = headers or {}
 
@@ -115,11 +114,17 @@ def test_connect_timeout_retains_three_bounded_attempts(
     assert calls == 3
 
 
+@pytest.mark.parametrize(
+    "tool_name, completed",
+    [
+        ("generate_audio_simple", 0),
+        ("generate_audio_script", 0),
+        ("generate_audio_script", 1),
+    ],
+)
 def test_legacy_job_persists_and_returns_unknown_outcome(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, tool_name: str, completed: int
 ) -> None:
-    from elevenlabs_mcp.elevenlabs_api import UpstreamOutcomeUnknownError
-
     server = ElevenLabsServer(
         Settings(
             launch_cwd=tmp_path,
@@ -130,16 +135,28 @@ def test_legacy_job_persists_and_returns_unknown_outcome(
         environ={"ELEVENLABS_API_KEY": "fixture"},
     )
     server.api.api_key = None
+    calls = []
+
+    class RetainedAudio:
+        def export(self, path: Path, format: str) -> None:
+            path.write_bytes(b"retained-audio")
+
     monkeypatch.setattr(
-        server.api,
-        "generate_full_audio",
-        lambda *args, **kwargs: (_ for _ in ()).throw(
-            UpstreamOutcomeUnknownError("synthesis", "ReadTimeout")
-        ),
+        "elevenlabs_mcp.elevenlabs_api.AudioSegment.from_mp3", lambda _: RetainedAudio()
     )
+    monkeypatch.setattr("elevenlabs_mcp.elevenlabs_api.time.sleep", lambda _: None)
+
+    def post(*args: object, **kwargs: object) -> _Response:
+        calls.append(kwargs)
+        if len(calls) <= completed:
+            return _Response(200)
+        raise ReadTimeout("private timeout detail")
+
+    monkeypatch.setattr("elevenlabs_mcp.elevenlabs_api.requests.post", post)
 
     async def scenario() -> None:
         await server.initialize()
+        server.api.api_key = "fixture"
         client_send, server_read = anyio.create_memory_object_stream(10)
         server_send, client_read = anyio.create_memory_object_stream(10)
         async with anyio.create_task_group() as tasks:
@@ -152,7 +169,14 @@ def test_legacy_job_persists_and_returns_unknown_outcome(
             async with ClientSession(client_read, client_send) as session:
                 await session.initialize()
                 result = await session.call_tool(
-                    "generate_audio_simple", {"text": "Fixture"}
+                    tool_name,
+                    {"text": "Fixture"}
+                    if tool_name == "generate_audio_simple"
+                    else {
+                        "script": json.dumps(
+                            [{"text": "one"}, {"text": "two"}, {"text": "three"}]
+                        )
+                    },
                 )
             tasks.cancel_scope.cancel()
 
@@ -165,5 +189,60 @@ def test_legacy_job_persists_and_returns_unknown_outcome(
         assert jobs[0].error is not None
         assert "upstream outcome is unknown" in jobs[0].error.lower()
         assert "retryable: false" in jobs[0].error.lower()
+        assert len(calls) == completed + 1
+        assert jobs[0].completed_parts == completed
+        if completed:
+            assert jobs[0].output_file is not None
+            assert Path(jobs[0].output_file).read_bytes() == b"retained-audio"
+        else:
+            assert jobs[0].output_file is None
+        assert "private timeout detail" not in text.text
 
     anyio.run(scenario)
+
+
+def test_success_without_request_id_does_not_repeat_synthesis(monkeypatch):
+    api = ElevenLabsAPI({"ELEVENLABS_API_KEY": "fixture"})
+    calls = []
+
+    def post(*args, **kwargs):
+        calls.append(kwargs)
+        return _Response(200)
+
+    monkeypatch.setattr("elevenlabs_mcp.elevenlabs_api.requests.post", post)
+    monkeypatch.setattr(_retry_state(), "sleep", lambda _: None)
+    assert api.generate_audio_segment("hello", "voice") == (b"audio", None)
+    assert len(calls) == 1
+
+
+def test_local_write_failure_does_not_repeat_successful_synthesis(
+    tmp_path, monkeypatch
+):
+    api = ElevenLabsAPI({"ELEVENLABS_API_KEY": "fixture"})
+    calls = []
+
+    def post(*args, **kwargs):
+        calls.append(kwargs)
+        return _Response(200, {"request-id": "request"})
+
+    monkeypatch.setattr("elevenlabs_mcp.elevenlabs_api.requests.post", post)
+    monkeypatch.setattr(_retry_state(), "sleep", lambda _: None)
+    with pytest.raises(OSError):
+        api.generate_audio_segment("hello", "voice", output_file=str(tmp_path))
+    assert len(calls) == 1
+
+
+@pytest.mark.parametrize("status", [408, 409, 501, 507])
+def test_unclassified_http_failure_is_not_replayed(status, monkeypatch):
+    api = ElevenLabsAPI({"ELEVENLABS_API_KEY": "fixture"})
+    calls = []
+
+    def post(*args, **kwargs):
+        calls.append(kwargs)
+        return _Response(status)
+
+    monkeypatch.setattr("elevenlabs_mcp.elevenlabs_api.requests.post", post)
+    monkeypatch.setattr(_retry_state(), "sleep", lambda _: None)
+    with pytest.raises(RuntimeError):
+        api.generate_audio_segment("hello", "voice")
+    assert len(calls) == 1

@@ -17,9 +17,8 @@ def _part(text: str):
 
 
 def test_exact_character_boundary_and_overflow_are_lossless() -> None:
-    from elevenlabs_mcp.planner import TextFragment, TextFragments, fragment_text
-
     from elevenlabs_mcp.contracts import SourceSpan
+    from elevenlabs_mcp.planner import TextFragment, TextFragments, fragment_text
 
     exact: TextFragments = fragment_text(_part("x" * 2_000), 2_000)
     overflow = fragment_text(_part("x" * 2_001), 2_000)
@@ -125,3 +124,26 @@ def test_unicode_segmenter_is_a_direct_runtime_dependency() -> None:
 
     assert "regex>=2024.11.6,<2027" in project["dependencies"]
     assert importlib.import_module("regex").fullmatch(r"\X", "👩🏽‍🔧") is not None
+
+
+@pytest.mark.parametrize(
+    "text", ["Hello world", "First. Second", "First\n\nSecond", "  Hello world  "]
+)
+def test_text_that_fits_is_one_tts_request(text):
+    from elevenlabs_mcp.contracts import PlanningLimits, Script, VoiceoverOptions
+    from elevenlabs_mcp.planner import ScriptPlanner
+
+    script = Script.model_validate(
+        {
+            "script_version": "1",
+            "cast": {"narrator": {"voice_id": "voice"}},
+            "scenes": [{"id": "scene", "parts": [_part(text)]}],
+        }
+    )
+    plan = ScriptPlanner().plan(
+        script,
+        VoiceoverOptions(engine="tts", model_id="eleven_multilingual_v2"),
+        PlanningLimits(),
+    )
+    assert len(plan.requests) == 1
+    assert plan.requests[0].chunk.fragments[0].text == text

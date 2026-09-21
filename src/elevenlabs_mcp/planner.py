@@ -141,12 +141,16 @@ def fragment_text(part: ScriptPart, max_characters: int) -> TextFragments:
 
         hard_end = min(start + max_characters, len(text))
         legal_stop = bisect_right(token_ends, hard_end, lo=token_index)
-        end = _preferred_end(
-            start,
-            token_ends[legal_stop - 1],
-            paragraph_ends,
-            sentence_ends,
-            whitespace_ends,
+        end = (
+            len(text)
+            if hard_end == len(text)
+            else _preferred_end(
+                start,
+                token_ends[legal_stop - 1],
+                paragraph_ends,
+                sentence_ends,
+                whitespace_ends,
+            )
         )
         fragments.append(
             TextFragment(

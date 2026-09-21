@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, ClassVar, cast
 from uuid import UUID
 
 import anyio
@@ -163,3 +164,53 @@ def test_legacy_tool_persists_failed_partial_job_without_success_substring(
         assert "failed part indexes: 1" in job.error
 
     anyio.run(scenario)
+
+
+@pytest.mark.parametrize("assembly_fails", [False, True])
+def test_unknown_outcome_stops_dispatch_and_preserves_completed_audio(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, assembly_fails: bool
+) -> None:
+    from requests import ReadTimeout
+
+    from elevenlabs_mcp.elevenlabs_api import UpstreamOutcomeUnknownError
+
+    api = _api(monkeypatch)
+    calls = []
+    if assembly_fails:
+
+        def fail_export(*args: object, **kwargs: object) -> None:
+            raise OSError("synthetic disk failure")
+
+        monkeypatch.setattr(_FakeAudio, "export", fail_export)
+
+    class Response:
+        status_code = 200
+        content = b"first-part"
+        headers: ClassVar[dict[str, str]] = {}
+
+    def post(*args, **kwargs):
+        calls.append(kwargs)
+        if len(calls) == 1:
+            return Response()
+        raise ReadTimeout("private")
+
+    monkeypatch.setattr("elevenlabs_mcp.elevenlabs_api.requests.post", post)
+    monkeypatch.setattr(
+        cast(Any, ElevenLabsAPI.generate_audio_segment).retry, "sleep", lambda _: None
+    )
+    with pytest.raises(UpstreamOutcomeUnknownError) as caught:
+        api.generate_full_audio(
+            [{"text": "one"}, {"text": "two"}, {"text": "three"}], tmp_path
+        )
+    assert len(calls) == 2
+    assert "previous_request_ids" not in calls[1]["json"]
+    assert caught.value.completed_parts == 1
+    if assembly_fails:
+        assert caught.value.partial_output_file is None
+        assert isinstance(caught.value.__cause__, OSError)
+        assert not list(tmp_path.iterdir())
+    else:
+        assert caught.value.partial_output_file is not None
+        assert Path(caught.value.partial_output_file).read_bytes() == b"first-part"
+    assert "retryable: false" in str(caught.value)
+    assert not list(tmp_path.glob("full_audio_*.mp3"))

@@ -500,6 +500,8 @@ class ElevenLabsServer:
                         #         }
                         #     })
                     except UpstreamOutcomeUnknownError as e:
+                        job.output_file = e.partial_output_file
+                        job.completed_parts = e.completed_parts
                         job.status = "failed"
                         job.error = str(e)
                         await self.db.update_job(job)
@@ -579,6 +581,8 @@ class ElevenLabsServer:
                         job.completed_parts = completed_parts
                         await self.db.update_job(job)
                     except UpstreamOutcomeUnknownError as e:
+                        job.output_file = e.partial_output_file
+                        job.completed_parts = e.completed_parts
                         job.status = "failed"
                         job.error = str(e)
                         await self.db.update_job(job)

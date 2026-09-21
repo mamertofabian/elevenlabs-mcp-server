@@ -16,7 +16,7 @@ class _Response:
 
 def _capture_body(
     monkeypatch: pytest.MonkeyPatch, model_id: str
-) -> tuple[dict[str, Any], tuple[bytes, str]]:
+) -> tuple[dict[str, Any], tuple[bytes, str | None]]:
     api = ElevenLabsAPI(
         {
             "ELEVENLABS_API_KEY": "fixture",
