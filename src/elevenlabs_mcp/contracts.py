@@ -222,3 +222,11 @@ class AttemptDispatch(_StrictModel):
     attempt_id: str = Field(min_length=1, max_length=128)
     job_id: str = Field(min_length=1, max_length=128)
     chunk_id: str = Field(min_length=1, max_length=128)
+
+
+class AttemptFailureResult(_StrictModel):
+    attempt_id: str = Field(min_length=1, max_length=128)
+    job_id: str = Field(min_length=1, max_length=128)
+    chunk_id: str = Field(min_length=1, max_length=128)
+    outcome: Literal["failed", "unknown"]
+    replayed: bool

@@ -6,11 +6,17 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 import aiosqlite
 
-from .contracts import AttemptDispatch, AttemptReservation, JobCreateResult, VoiceoverPlan
+from .contracts import (
+    AttemptDispatch,
+    AttemptFailureResult,
+    AttemptReservation,
+    JobCreateResult,
+    VoiceoverPlan,
+)
 from .models import AudioJob
 
 CREATE_VOICES_TABLE = """
@@ -321,6 +327,12 @@ class AttemptStateError(RuntimeError):
     def __init__(self, attempt_id: str) -> None:
         self.attempt_id = attempt_id
         super().__init__(f"attempt cannot be dispatched: {attempt_id}")
+
+
+class AttemptOutcomeConflictError(RuntimeError):
+    def __init__(self, attempt_id: str) -> None:
+        self.attempt_id = attempt_id
+        super().__init__(f"attempt outcome already recorded differently: {attempt_id}")
 
 
 class JobStore:
@@ -719,6 +731,100 @@ class JobStore:
                     "UPDATE voiceover_jobs SET status = 'running', updated_at = ? "
                     "WHERE job_id = ?",
                     (dispatched_at.isoformat(), attempt[0]),
+                )
+                await connection.commit()
+                return result
+            except BaseException:
+                await connection.rollback()
+                raise
+
+    async def record_attempt_failure(
+        self,
+        attempt_id: str,
+        outcome: Literal["failed", "unknown"],
+        ended_at: datetime,
+        provider_request_id: str | None = None,
+    ) -> AttemptFailureResult:
+        """Finalize a dispatched failure without refunding exposure or retrying.
+
+        Only fixed outcome codes enter diagnostics, never raw provider errors.
+        Identical retries preserve the first terminal timestamp and all job state.
+        Unknown outcomes pause the job until an explicit recovery decision.
+        """
+        if outcome not in {"failed", "unknown"}:
+            raise ValueError("outcome must be failed or unknown")
+        if ended_at.tzinfo is None or ended_at.utcoffset() is None:
+            raise ValueError("ended_at must be timezone-aware")
+        if provider_request_id is not None and (
+            not isinstance(provider_request_id, str)
+            or not 1 <= len(provider_request_id) <= 128
+        ):
+            raise ValueError("provider_request_id must contain 1 to 128 characters")
+        ended_at = ended_at.astimezone(UTC)
+        reason = "UPSTREAM_OUTCOME_UNKNOWN" if outcome == "unknown" else "GENERATION_FAILED"
+        async with self.connect() as connection:
+            await connection.execute("BEGIN IMMEDIATE")
+            try:
+                async with connection.execute(
+                    """
+                    SELECT a.job_id, a.chunk_id, a.dispatch_state, a.started_at,
+                           a.provider_request_id, j.status, j.deleted_at, c.status
+                    FROM generation_attempts a
+                    JOIN voiceover_jobs j ON j.job_id = a.job_id
+                    JOIN voiceover_chunks c
+                      ON c.job_id = a.job_id AND c.chunk_id = a.chunk_id
+                    WHERE a.attempt_id = ?
+                    """,
+                    (attempt_id,),
+                ) as cursor:
+                    attempt = await cursor.fetchone()
+                if attempt is None:
+                    raise AttemptNotFoundError(attempt_id)
+                replayed = attempt[2] in {"failed", "unknown"}
+                result = AttemptFailureResult(
+                    attempt_id=attempt_id, job_id=attempt[0], chunk_id=attempt[1],
+                    outcome=outcome, replayed=replayed,
+                )
+                if replayed:
+                    if attempt[2] != outcome or attempt[4] != provider_request_id:
+                        raise AttemptOutcomeConflictError(attempt_id)
+                    await connection.commit()
+                    return result
+                if (
+                    attempt[2] != "dispatched"
+                    or attempt[5] not in {"running", "paused", "failed"}
+                    or attempt[6] is not None
+                    or attempt[7] != "generating"
+                ):
+                    raise AttemptStateError(attempt_id)
+                if ended_at < datetime.fromisoformat(attempt[3]):
+                    raise ValueError("attempt cannot end before reservation")
+                await connection.execute(
+                    """
+                    UPDATE generation_attempts
+                    SET dispatch_state = ?, ended_at = ?, provider_request_id = ?,
+                        sanitized_outcome = ?, outcome_unknown = ?
+                    WHERE attempt_id = ?
+                    """,
+                    (outcome, ended_at.isoformat(), provider_request_id, reason,
+                     int(outcome == "unknown"), attempt_id),
+                )
+                await connection.execute(
+                    "UPDATE voiceover_chunks SET status = ?, latest_error = ? "
+                    "WHERE job_id = ? AND chunk_id = ?",
+                    (outcome, reason, attempt[0], attempt[1]),
+                )
+                async with connection.execute(
+                    "SELECT 1 FROM voiceover_chunks WHERE job_id = ? "
+                    "AND status = 'unknown' LIMIT 1", (attempt[0],),
+                ) as cursor:
+                    has_unknown = await cursor.fetchone() is not None
+                await connection.execute(
+                    "UPDATE voiceover_jobs SET status = ?, reason = ?, updated_at = ? "
+                    "WHERE job_id = ?",
+                    ("paused" if has_unknown else "failed",
+                     "UPSTREAM_OUTCOME_UNKNOWN" if has_unknown else reason,
+                     ended_at.isoformat(), attempt[0]),
                 )
                 await connection.commit()
                 return result
