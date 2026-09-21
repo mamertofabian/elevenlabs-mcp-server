@@ -17,7 +17,7 @@ def _yaml(relative: str) -> dict:
     return yaml.load(_read(relative), Loader=yaml.BaseLoader)
 
 
-def test_ci_runs_credential_free_python_and_maid_gates() -> None:
+def test_ci_runs_credential_free_python_and_runtime_gates() -> None:
     assert (PROJECT_ROOT / ".github/workflows/ci.yml").exists()
     workflow = _read(".github/workflows/ci.yml")
 
@@ -26,8 +26,9 @@ def test_ci_runs_credential_free_python_and_maid_gates() -> None:
     assert 'python-version: ["3.11", "3.12"]' in workflow
     assert "uv sync --frozen --dev" in workflow
     assert "uv run pytest -q" in workflow
-    assert "uv run maid validate" in workflow
-    assert "uv run maid test" in workflow
+    assert "uv run ruff check src" in workflow
+    assert "uv run pyright" in workflow
+    assert "uv run maid" not in workflow
     assert "uv build" in workflow
     assert "docker://rhysd/actionlint:1.7.7" in workflow
     assert "test_installed_wheel_smoke.py" not in workflow
@@ -84,13 +85,13 @@ def test_readme_states_recovery_commands_and_limits() -> None:
     for text in (
         "uv sync --frozen --dev",
         "uv run pytest -q",
-        "uv run maid validate",
+        "uv run ruff check src",
         "Scripts and job history stay local",
         "speech text is sent to ElevenLabs",
         "legacy generation tools remain synchronous",
         "process lifetime",
         "upstream outcome may be unknown",
-        "Durable resume is not implemented yet",
+        "Explicit resume reuses verified completed chunks",
         "not production readiness",
     ):
         assert text in section

@@ -345,3 +345,52 @@ def _managed_directory(
         yield directory
     finally:
         os.close(directory)
+
+
+def remove_job_tree(root: Path, job_id: str) -> None:
+    """Remove only this owned job tree, including crash orphans, without following links."""
+    ArtifactIdentity(
+        job_id=job_id,
+        chunk_id="cleanup",
+        attempt_id="cleanup",
+        generation_fingerprint="sha256:" + "0" * 64,
+    )
+    remaining = 100_000
+
+    def remove_contents(directory: int) -> None:
+        nonlocal remaining
+        for name in os.listdir(directory):
+            remaining -= 1
+            if remaining < 0:
+                raise ArtifactPublicationError("CLEANUP_FAILED")
+            info = os.stat(name, dir_fd=directory, follow_symlinks=False)
+            if stat.S_ISDIR(info.st_mode):
+                child = os.open(
+                    name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=directory
+                )
+                try:
+                    remove_contents(child)
+                finally:
+                    os.close(child)
+                os.rmdir(name, dir_fd=directory)
+            else:
+                os.unlink(name, dir_fd=directory)
+
+    try:
+        with _managed_directory(root, ("jobs",)) as jobs:
+            try:
+                directory = os.open(
+                    job_id, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=jobs
+                )
+            except FileNotFoundError:
+                return
+            try:
+                remove_contents(directory)
+            finally:
+                os.close(directory)
+            os.rmdir(job_id, dir_fd=jobs)
+            os.fsync(jobs)
+    except FileNotFoundError:
+        return
+    except OSError:
+        raise ArtifactPublicationError("CLEANUP_FAILED") from None

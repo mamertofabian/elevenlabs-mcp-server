@@ -11,7 +11,6 @@ import anyio
 import pytest
 from mcp import ClientSession
 from mcp.types import TextContent, TextResourceContents
-from pydantic import AnyUrl
 from requests import ConnectionError
 from tenacity import RetryError
 
@@ -52,6 +51,7 @@ def _server(tmp_path: Path) -> ElevenLabsServer:
             database_path_explicit=True,
         ),
         environ={"ELEVENLABS_API_KEY": KEY_SENTINEL},
+        enable_revival=False,
     )
 
 
@@ -294,7 +294,7 @@ def test_voice_network_failure_is_sanitized_in_api_and_tool(
         assert isinstance(text, TextContent)
         assert sentinel not in text.text
         assert "error" in text.text
-        resource = await session.read_resource(AnyUrl("voiceover://voices"))
+        resource = await session.read_resource("voiceover://voices")
         resource_text = resource.contents[0]
         assert isinstance(resource_text, TextResourceContents)
         assert sentinel not in resource_text.text

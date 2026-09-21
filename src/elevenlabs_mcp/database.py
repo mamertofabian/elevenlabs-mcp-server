@@ -2,11 +2,11 @@ import asyncio
 import hashlib
 import json
 import os
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Mapping, Sequence
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import List, Literal, Optional
+from typing import Literal
 
 import aiosqlite
 
@@ -343,7 +343,9 @@ class AttemptOutcomeConflictError(RuntimeError):
 
 
 class RevisionConflictError(RuntimeError):
-    def __init__(self, job_id: str, expected_revision: int, actual_revision: int) -> None:
+    def __init__(
+        self, job_id: str, expected_revision: int, actual_revision: int
+    ) -> None:
         self.job_id = job_id
         self.expected_revision = expected_revision
         self.actual_revision = actual_revision
@@ -356,6 +358,10 @@ class JobBusyError(RuntimeError):
 
 class UncertainAttemptError(RuntimeError):
     """Resuming uncertain work requires explicit duplicate-charge acknowledgment."""
+
+    def __init__(self, job_id: str):
+        self.job_id = job_id
+        super().__init__("UPSTREAM_OUTCOME_UNKNOWN")
 
 
 class ArtifactVerificationRequiredError(RuntimeError):
@@ -446,16 +452,21 @@ class JobStore:
         max_total_characters: int,
         max_total_requests: int,
         created_at: datetime,
+        *,
+        credential_context: str | None = None,
+        legacy_script_parts: list[dict] | None = None,
     ) -> JobCreateResult:
         required_characters = sum(
             request.chunk.character_count for request in plan.requests
         )
         required_requests = len(plan.requests)
-        digest_payload = {
+        digest_payload: dict[str, object] = {
             "max_total_characters": max_total_characters,
             "max_total_requests": max_total_requests,
             "plan": plan.model_dump(mode="json"),
         }
+        if legacy_script_parts is not None:
+            digest_payload["legacy_script_parts"] = legacy_script_parts
         digest_json = json.dumps(
             digest_payload,
             sort_keys=True,
@@ -582,6 +593,16 @@ class JobStore:
                             None,
                         ),
                     )
+                if credential_context is not None:
+                    await connection.execute(
+                        "INSERT INTO job_context VALUES(?,?)",
+                        (job_id, credential_context),
+                    )
+                if legacy_script_parts is not None:
+                    await connection.execute(
+                        "INSERT INTO legacy_render_inputs VALUES(?,?)",
+                        (job_id, _json(legacy_script_parts)),
+                    )
                 await connection.execute(
                     """
                     INSERT INTO operation_receipts (
@@ -651,7 +672,11 @@ class JobStore:
                     chunk = await cursor.fetchone()
                 if chunk is None:
                     raise ChunkNotFoundError(job_id, chunk_id)
-                if job[4] not in {"queued", "running"} or job[5] or chunk[1] != "pending":
+                if (
+                    job[4] not in {"queued", "running"}
+                    or job[5]
+                    or chunk[1] != "pending"
+                ):
                     raise ReservationStateError(job_id, chunk_id, job[4], chunk[1])
 
                 required_characters = job[2] + chunk[0]
@@ -792,7 +817,9 @@ class JobStore:
         ):
             raise ValueError("provider_request_id must contain 1 to 128 characters")
         ended_at = ended_at.astimezone(UTC)
-        reason = "UPSTREAM_OUTCOME_UNKNOWN" if outcome == "unknown" else "GENERATION_FAILED"
+        reason = (
+            "UPSTREAM_OUTCOME_UNKNOWN" if outcome == "unknown" else "GENERATION_FAILED"
+        )
         async with self.connect() as connection:
             await connection.execute("BEGIN IMMEDIATE")
             try:
@@ -813,8 +840,11 @@ class JobStore:
                     raise AttemptNotFoundError(attempt_id)
                 replayed = attempt[2] in {"failed", "unknown"}
                 result = AttemptFailureResult(
-                    attempt_id=attempt_id, job_id=attempt[0], chunk_id=attempt[1],
-                    outcome=outcome, replayed=replayed,
+                    attempt_id=attempt_id,
+                    job_id=attempt[0],
+                    chunk_id=attempt[1],
+                    outcome=outcome,
+                    replayed=replayed,
                 )
                 if replayed:
                     if attempt[2] != outcome or attempt[4] != provider_request_id:
@@ -837,8 +867,14 @@ class JobStore:
                         sanitized_outcome = ?, outcome_unknown = ?
                     WHERE attempt_id = ?
                     """,
-                    (outcome, ended_at.isoformat(), provider_request_id, reason,
-                     int(outcome == "unknown"), attempt_id),
+                    (
+                        outcome,
+                        ended_at.isoformat(),
+                        provider_request_id,
+                        reason,
+                        int(outcome == "unknown"),
+                        attempt_id,
+                    ),
                 )
                 await connection.execute(
                     "UPDATE voiceover_chunks SET status = ?, latest_error = ? "
@@ -847,15 +883,19 @@ class JobStore:
                 )
                 async with connection.execute(
                     "SELECT 1 FROM voiceover_chunks WHERE job_id = ? "
-                    "AND status = 'unknown' LIMIT 1", (attempt[0],),
+                    "AND status = 'unknown' LIMIT 1",
+                    (attempt[0],),
                 ) as cursor:
                     has_unknown = await cursor.fetchone() is not None
                 await connection.execute(
                     "UPDATE voiceover_jobs SET status = ?, reason = ?, updated_at = ? "
                     "WHERE job_id = ?",
-                    ("paused" if has_unknown else "failed",
-                     "UPSTREAM_OUTCOME_UNKNOWN" if has_unknown else reason,
-                     ended_at.isoformat(), attempt[0]),
+                    (
+                        "paused" if has_unknown else "failed",
+                        "UPSTREAM_OUTCOME_UNKNOWN" if has_unknown else reason,
+                        ended_at.isoformat(),
+                        attempt[0],
+                    ),
                 )
                 await connection.commit()
                 return result
@@ -880,13 +920,23 @@ class JobStore:
             raise ValueError("expected_revision must be a nonnegative integer")
         for value in (workspace_id, job_id, idempotency_key):
             if not isinstance(value, str) or not 1 <= len(value) <= 128:
-                raise ValueError("workspace, job and idempotency IDs require 1 to 128 characters")
+                raise ValueError(
+                    "workspace, job and idempotency IDs require 1 to 128 characters"
+                )
         if requested_at.tzinfo is None or requested_at.utcoffset() is None:
             raise ValueError("requested_at must be timezone-aware")
         timestamp = requested_at.astimezone(UTC).isoformat()
-        digest = "sha256:" + hashlib.sha256(_json({
-            "job_id": job_id, "expected_revision": expected_revision,
-        }).encode("utf-8")).hexdigest()
+        digest = (
+            "sha256:"
+            + hashlib.sha256(
+                _json(
+                    {
+                        "job_id": job_id,
+                        "expected_revision": expected_revision,
+                    }
+                ).encode("utf-8")
+            ).hexdigest()
+        )
         async with self.connect() as connection:
             await connection.execute("BEGIN IMMEDIATE")
             try:
@@ -898,14 +948,17 @@ class JobStore:
                     receipt = await cursor.fetchone()
                 if receipt is not None:
                     if receipt[0] != digest:
-                        raise IdempotencyConflictError(workspace_id, "cancel", idempotency_key)
+                        raise IdempotencyConflictError(
+                            workspace_id, "cancel", idempotency_key
+                        )
                     # Cancel receipts embed the original acknowledgment, not mutable job state.
                     result = CancellationResult.model_validate_json(receipt[1])
                     await connection.commit()
                     return result.model_copy(update={"replayed": True})
                 async with connection.execute(
                     "SELECT revision, status, reason, cancel_requested FROM voiceover_jobs "
-                    "WHERE job_id = ? AND deleted_at IS NULL", (job_id,),
+                    "WHERE job_id = ? AND deleted_at IS NULL",
+                    (job_id,),
                 ) as cursor:
                     job = await cursor.fetchone()
                 if job is None:
@@ -914,8 +967,11 @@ class JobStore:
                     raise RevisionConflictError(job_id, expected_revision, job[0])
                 change = job[1] not in {"completed", "cancelled"} and not job[3]
                 result = CancellationResult(
-                    job_id=job_id, revision=job[0] + int(change), status=job[1],
-                    reason=job[2], cancel_requested=bool(job[3]) or change,
+                    job_id=job_id,
+                    revision=job[0] + int(change),
+                    status=job[1],
+                    reason=job[2],
+                    cancel_requested=bool(job[3]) or change,
                     replayed=False,
                 )
                 if change:
@@ -931,8 +987,13 @@ class JobStore:
                         result_ref, committed_at, tombstone
                     ) VALUES (?, 'cancel', ?, ?, ?, ?, 0)
                     """,
-                    (workspace_id, idempotency_key, digest,
-                     result.model_dump_json(), timestamp),
+                    (
+                        workspace_id,
+                        idempotency_key,
+                        digest,
+                        result.model_dump_json(),
+                        timestamp,
+                    ),
                 )
                 await connection.commit()
                 return result
@@ -950,11 +1011,13 @@ class JobStore:
         max_total_requests: int,
         requested_at: datetime,
         retry_uncertain: bool = False,
+        *,
+        verified_artifacts: tuple[str, ...] = (),
     ) -> ResumeResult:
         """Authorize fresh attempts without resetting historical exposure.
 
-        This storage primitive refuses successful chunks until artifact verification
-        is implemented. It never treats an unverified file as reusable audio.
+        Successful chunks require the exact artifact IDs reverified by the trusted
+        service. File verification stays outside this atomic mutation transaction.
         """
         if type(expected_revision) is not int or expected_revision < 0:
             raise ValueError("expected_revision must be a nonnegative integer")
@@ -965,16 +1028,26 @@ class JobStore:
             raise ValueError("retry_uncertain must be a boolean")
         for value in (workspace_id, job_id, idempotency_key):
             if not isinstance(value, str) or not 1 <= len(value) <= 128:
-                raise ValueError("workspace, job and idempotency IDs require 1 to 128 characters")
+                raise ValueError(
+                    "workspace, job and idempotency IDs require 1 to 128 characters"
+                )
         if requested_at.tzinfo is None or requested_at.utcoffset() is None:
             raise ValueError("requested_at must be timezone-aware")
         timestamp = requested_at.astimezone(UTC).isoformat()
-        digest = "sha256:" + hashlib.sha256(_json({
-            "job_id": job_id, "expected_revision": expected_revision,
-            "max_total_characters": max_total_characters,
-            "max_total_requests": max_total_requests,
-            "retry_uncertain": retry_uncertain,
-        }).encode("utf-8")).hexdigest()
+        digest = (
+            "sha256:"
+            + hashlib.sha256(
+                _json(
+                    {
+                        "job_id": job_id,
+                        "expected_revision": expected_revision,
+                        "max_total_characters": max_total_characters,
+                        "max_total_requests": max_total_requests,
+                        "retry_uncertain": retry_uncertain,
+                    }
+                ).encode("utf-8")
+            ).hexdigest()
+        )
         async with self.connect() as connection:
             await connection.execute("BEGIN IMMEDIATE")
             try:
@@ -986,7 +1059,9 @@ class JobStore:
                     receipt = await cursor.fetchone()
                 if receipt is not None:
                     if receipt[0] != digest:
-                        raise IdempotencyConflictError(workspace_id, "resume", idempotency_key)
+                        raise IdempotencyConflictError(
+                            workspace_id, "resume", idempotency_key
+                        )
                     result = ResumeResult.model_validate_json(receipt[1])
                     await connection.commit()
                     return result.model_copy(update={"replayed": True})
@@ -1006,26 +1081,44 @@ class JobStore:
                     if job[1] not in {"paused", "failed", "cancelled"}:
                         raise JobBusyError(job_id)
                     async with connection.execute(
-                        "SELECT status FROM voiceover_chunks WHERE job_id = ?", (job_id,),
+                        "SELECT status FROM voiceover_chunks WHERE job_id = ?",
+                        (job_id,),
                     ) as cursor:
                         states = {row[0] for row in await cursor.fetchall()}
                     async with connection.execute(
                         "SELECT 1 FROM generation_attempts WHERE job_id = ? "
-                        "AND dispatch_state = 'dispatched' LIMIT 1", (job_id,),
+                        "AND dispatch_state = 'dispatched' LIMIT 1",
+                        (job_id,),
                     ) as cursor:
                         inflight = await cursor.fetchone() is not None
                     if inflight or "generating" in states:
                         raise JobBusyError(job_id)
                     if "succeeded" in states:
-                        raise ArtifactVerificationRequiredError(job_id)
-                    if not states or not states <= {"pending", "failed", "unknown", "cancelled"}:
+                        async with connection.execute(
+                            "SELECT successful_artifact_id FROM voiceover_chunks WHERE job_id=? AND status='succeeded'",
+                            (job_id,),
+                        ) as cursor:
+                            required = {r[0] for r in await cursor.fetchall()}
+                        if None in required or required != set(verified_artifacts):
+                            raise ArtifactVerificationRequiredError(job_id)
+                    if not states or not states <= {
+                        "pending",
+                        "failed",
+                        "unknown",
+                        "cancelled",
+                        "succeeded",
+                    }:
                         raise JobBusyError(job_id)
                     if "unknown" in states:
                         if not retry_uncertain:
                             raise UncertainAttemptError(job_id)
-                        warnings = ("Retrying uncertain synthesis may incur duplicate charges.",)
+                        warnings = (
+                            "Retrying uncertain synthesis may incur duplicate charges.",
+                        )
                     if max_total_characters < job[2] or max_total_requests < job[3]:
-                        raise BudgetExceededError(max_total_characters, job[2], max_total_requests, job[3])
+                        raise BudgetExceededError(
+                            max_total_characters, job[2], max_total_requests, job[3]
+                        )
                     # Retire undispatched reservations so stale callers cannot use
                     # an old attempt after this explicit new authorization.
                     await connection.execute(
@@ -1035,25 +1128,39 @@ class JobStore:
                         (timestamp, job_id),
                     )
                     await connection.execute(
-                        "UPDATE voiceover_chunks SET status = 'pending' WHERE job_id = ?",
+                        "UPDATE voiceover_chunks SET status = 'pending' WHERE job_id = ? AND status != 'succeeded'",
                         (job_id,),
                     )
                     await connection.execute(
                         "UPDATE voiceover_jobs SET status = 'queued', reason = NULL, "
                         "cancel_requested = 0, revision = ?, updated_at = ?, "
                         "max_total_characters = ?, max_total_requests = ? WHERE job_id = ?",
-                        (job[0] + 1, timestamp, max_total_characters, max_total_requests, job_id),
+                        (
+                            job[0] + 1,
+                            timestamp,
+                            max_total_characters,
+                            max_total_requests,
+                            job_id,
+                        ),
                     )
                 result = ResumeResult(
-                    job_id=job_id, revision=job[0] + int(not completed),
+                    job_id=job_id,
+                    revision=job[0] + int(not completed),
                     status="completed" if completed else "queued",
-                    warnings=warnings, replayed=False,
+                    warnings=warnings,
+                    replayed=False,
                 )
                 await connection.execute(
                     "INSERT INTO operation_receipts (workspace_id, operation, idempotency_key, "
                     "input_digest, result_ref, committed_at, tombstone) "
                     "VALUES (?, 'resume', ?, ?, ?, ?, 0)",
-                    (workspace_id, idempotency_key, digest, result.model_dump_json(), timestamp),
+                    (
+                        workspace_id,
+                        idempotency_key,
+                        digest,
+                        result.model_dump_json(),
+                        timestamp,
+                    ),
                 )
                 await connection.commit()
                 return result
@@ -1077,31 +1184,45 @@ class JobStore:
         """
         database_identity = (
             recovery_owner.require_database(Path(self.db_path))
-            if recovery_owner is not None else None
+            if recovery_owner is not None
+            else None
         )
         verification = AudioVerificationResult.model_validate(verification.model_dump())
         integrity = verification.integrity
         identity = integrity.identity
         CompletionRecord(
-            schema_version="1", identity=identity, sha256=integrity.sha256,
+            schema_version="1",
+            identity=identity,
+            sha256=integrity.sha256,
             byte_size=integrity.byte_size,
         )
-        relative_path = (
-            f"jobs/{identity.job_id}/chunks/{identity.chunk_id}/{identity.attempt_id}.mp3"
-        )
+        relative_path = f"jobs/{identity.job_id}/chunks/{identity.chunk_id}/{identity.attempt_id}.mp3"
         if integrity.relative_path != relative_path:
-            raise ArtifactConflictError("artifact path does not match attempt ownership")
+            raise ArtifactConflictError(
+                "artifact path does not match attempt ownership"
+            )
         if completed_at.tzinfo is None or completed_at.utcoffset() is None:
             raise ValueError("completed_at must be timezone-aware")
         completed_at = completed_at.astimezone(UTC)
         result = ArtifactRecordResult(
-            artifact_id=artifact_id, job_id=identity.job_id, chunk_id=identity.chunk_id,
-            attempt_id=identity.attempt_id, replayed=False,
+            artifact_id=artifact_id,
+            job_id=identity.job_id,
+            chunk_id=identity.chunk_id,
+            attempt_id=identity.attempt_id,
+            replayed=False,
         )
         expected = (
-            identity.job_id, identity.chunk_id, identity.attempt_id, relative_path,
-            integrity.sha256, integrity.byte_size, "audio/mpeg", "mp3",
-            verification.duration_ms, 1, None,
+            identity.job_id,
+            identity.chunk_id,
+            identity.attempt_id,
+            relative_path,
+            integrity.sha256,
+            integrity.byte_size,
+            "audio/mpeg",
+            "mp3",
+            verification.duration_ms,
+            1,
+            None,
         )
         async with self.connect() as connection:
             await connection.execute("BEGIN IMMEDIATE")
@@ -1114,39 +1235,49 @@ class JobStore:
                     JOIN voiceover_chunks c ON c.job_id=a.job_id AND c.chunk_id=a.chunk_id
                     JOIN voiceover_jobs j ON j.job_id=a.job_id
                     WHERE a.attempt_id = ?
-                    """, (identity.attempt_id,),
+                    """,
+                    (identity.attempt_id,),
                 ) as cursor:
                     attempt = await cursor.fetchone()
                 if attempt is None:
                     raise AttemptNotFoundError(identity.attempt_id)
                 if (attempt[0], attempt[1], attempt[4]) != (
-                    identity.job_id, identity.chunk_id, identity.generation_fingerprint,
+                    identity.job_id,
+                    identity.chunk_id,
+                    identity.generation_fingerprint,
                 ):
                     raise ArtifactConflictError("artifact does not match owned plan")
                 async with connection.execute(
                     "SELECT job_id,chunk_id,attempt_id,relative_path,sha256,byte_size,"
                     "mime_type,codec,duration_ms,complete,deleted_at "
-                    "FROM production_artifacts WHERE artifact_id = ?", (artifact_id,),
+                    "FROM production_artifacts WHERE artifact_id = ?",
+                    (artifact_id,),
                 ) as cursor:
                     existing = await cursor.fetchone()
                 if existing is not None:
                     if tuple(existing) != expected:
-                        raise ArtifactConflictError("artifact ID already has different evidence")
+                        raise ArtifactConflictError(
+                            "artifact ID already has different evidence"
+                        )
                     await connection.commit()
                     return result.model_copy(update={"replayed": True})
                 if recovery_owner is not None:
                     async with connection.execute(
                         "SELECT 1 FROM generation_attempts WHERE job_id=? AND chunk_id=? "
-                        "AND rowid>? LIMIT 1", (identity.job_id, identity.chunk_id, attempt[8]),
+                        "AND rowid>? LIMIT 1",
+                        (identity.job_id, identity.chunk_id, attempt[8]),
                     ) as cursor:
                         newer_attempt = await cursor.fetchone() is not None
                     valid_state = (
-                        attempt[2] == "unknown" and attempt[5] == "unknown"
-                        and attempt[6] == "paused" and not newer_attempt
+                        attempt[2] == "unknown"
+                        and attempt[5] == "unknown"
+                        and attempt[6] in {"paused", "cancelled"}
+                        and not newer_attempt
                     )
                 else:
                     valid_state = (
-                        attempt[2] == "dispatched" and attempt[5] == "generating"
+                        attempt[2] == "dispatched"
+                        and attempt[5] == "generating"
                         and attempt[6] in {"running", "paused", "failed"}
                     )
                 if not valid_state or attempt[7] is not None:
@@ -1156,7 +1287,8 @@ class JobStore:
                 await connection.execute(
                     "INSERT INTO production_artifacts (artifact_id,job_id,chunk_id,attempt_id,"
                     "relative_path,sha256,byte_size,mime_type,codec,duration_ms,complete,deleted_at) "
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (artifact_id, *expected),
+                    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (artifact_id, *expected),
                 )
                 # Recovery preserves the historical uncertain-attempt record;
                 # the verified artifact and successful chunk resolve current work.
@@ -1189,13 +1321,23 @@ class JobStore:
                 await connection.execute(
                     "UPDATE voiceover_jobs SET verified_chunks=?,verified_parts=?,updated_at=?, "
                     "reason=CASE WHEN ? THEN 'PROCESS_RESTARTED' ELSE reason END WHERE job_id=?",
-                    (verified_chunks, len(all_parts - incomplete_parts),
-                     completed_at.isoformat(), recovery_owner is not None and
-                     not any(status == "unknown" for status, _ in chunks), identity.job_id),
+                    (
+                        verified_chunks,
+                        len(all_parts - incomplete_parts),
+                        completed_at.isoformat(),
+                        recovery_owner is not None
+                        and not any(status == "unknown" for status, _ in chunks),
+                        identity.job_id,
+                    ),
                 )
-                if recovery_owner is not None:
-                    if recovery_owner.require_database(Path(self.db_path)) != database_identity:
-                        raise WorkspaceOwnershipError("Database changed during artifact adoption")
+                if (
+                    recovery_owner is not None
+                    and recovery_owner.require_database(Path(self.db_path))
+                    != database_identity
+                ):
+                    raise WorkspaceOwnershipError(
+                        "Database changed during artifact adoption"
+                    )
                 await connection.commit()
                 return result
             except BaseException:
@@ -1223,8 +1365,8 @@ class JobStore:
             try:
                 async with connection.execute(
                     """
-                    SELECT job_id FROM voiceover_jobs j
-                    WHERE deleted_at IS NULL AND status NOT IN ('completed', 'cancelled')
+                    SELECT job_id,status FROM voiceover_jobs j
+                    WHERE deleted_at IS NULL AND status != 'completed'
                       AND (status IN ('queued', 'running', 'assembling')
                         OR EXISTS (SELECT 1 FROM generation_attempts a
                           WHERE a.job_id=j.job_id AND a.dispatch_state IN ('reserved','dispatched'))
@@ -1234,22 +1376,32 @@ class JobStore:
                     """,
                 ) as cursor:
                     jobs = await cursor.fetchall()
-                for (job_id,) in jobs:
+                for job_id, prior_status in jobs:
                     async with connection.execute(
                         "SELECT attempt_id,chunk_id,dispatch_state FROM generation_attempts "
                         "WHERE job_id=? AND dispatch_state IN ('reserved','dispatched') "
-                        "ORDER BY attempt_id", (job_id,),
+                        "ORDER BY attempt_id",
+                        (job_id,),
                     ) as cursor:
                         attempts = await cursor.fetchall()
                     for attempt_id, chunk_id, state in attempts:
                         unknown = state == "dispatched"
                         (uncertain if unknown else abandoned).append(attempt_id)
-                        reason = "UPSTREAM_OUTCOME_UNKNOWN" if unknown else "RESTART_ABANDONED_RESERVATION"
+                        reason = (
+                            "UPSTREAM_OUTCOME_UNKNOWN"
+                            if unknown
+                            else "RESTART_ABANDONED_RESERVATION"
+                        )
                         await connection.execute(
                             "UPDATE generation_attempts SET dispatch_state=?,ended_at=?,"
                             "sanitized_outcome=?,outcome_unknown=? WHERE attempt_id=?",
-                            ("unknown" if unknown else "cancelled", timestamp, reason,
-                             int(unknown), attempt_id),
+                            (
+                                "unknown" if unknown else "cancelled",
+                                timestamp,
+                                reason,
+                                int(unknown),
+                                attempt_id,
+                            ),
                         )
                         if unknown:
                             await connection.execute(
@@ -1269,14 +1421,25 @@ class JobStore:
                     ) as cursor:
                         has_unknown = await cursor.fetchone() is not None
                     await connection.execute(
-                        "UPDATE voiceover_jobs SET status='paused',reason=?,updated_at=? WHERE job_id=?",
-                        ("UPSTREAM_OUTCOME_UNKNOWN" if has_unknown else "PROCESS_RESTARTED", timestamp, job_id),
+                        "UPDATE voiceover_jobs SET status=?,reason=?,updated_at=? WHERE job_id=?",
+                        (
+                            "cancelled" if prior_status == "cancelled" else "paused",
+                            "UPSTREAM_OUTCOME_UNKNOWN"
+                            if has_unknown
+                            else "PROCESS_RESTARTED",
+                            timestamp,
+                            job_id,
+                        ),
                     )
-                    paused.append(job_id)
+                    if prior_status != "cancelled":
+                        paused.append(job_id)
                 if ownership.require_database(Path(self.db_path)) != database_identity:
-                    raise WorkspaceOwnershipError("Database changed during reconciliation")
+                    raise WorkspaceOwnershipError(
+                        "Database changed during reconciliation"
+                    )
                 result = RestartReconciliationResult(
-                    paused_job_ids=tuple(paused), uncertain_attempt_ids=tuple(uncertain),
+                    paused_job_ids=tuple(paused),
+                    uncertain_attempt_ids=tuple(uncertain),
                     abandoned_reservation_ids=tuple(abandoned),
                 )
                 await connection.commit()
@@ -1286,31 +1449,41 @@ class JobStore:
                 raise
 
     async def recovery_candidates(
-        self, ownership: WorkspaceLock
+        self, ownership: WorkspaceLock, job_id: str | None = None
     ) -> tuple[ArtifactIdentity, ...]:
         """Return only latest uncertain attempts eligible for complete-sidecar checks."""
         database_identity = ownership.require_database(Path(self.db_path))
-        async with self.connect() as connection:
-            async with connection.execute(
+        async with (
+            self.connect() as connection,
+            connection.execute(
                 """
                 SELECT a.job_id,a.chunk_id,a.attempt_id,c.generation_fingerprint
                 FROM generation_attempts a
                 JOIN voiceover_chunks c ON c.job_id=a.job_id AND c.chunk_id=a.chunk_id
                 JOIN voiceover_jobs j ON j.job_id=a.job_id
                 WHERE a.dispatch_state='unknown' AND c.status='unknown'
-                  AND j.status='paused' AND j.deleted_at IS NULL
+                  AND j.status IN ('paused','cancelled') AND j.deleted_at IS NULL
+                  AND (? IS NULL OR a.job_id=?)
                   AND NOT EXISTS (SELECT 1 FROM generation_attempts newer
                     WHERE newer.job_id=a.job_id AND newer.chunk_id=a.chunk_id
                       AND newer.rowid>a.rowid)
                 ORDER BY a.job_id,c.chunk_index,a.attempt_id
                 """,
-            ) as cursor:
-                rows = await cursor.fetchall()
+                (job_id, job_id),
+            ) as cursor,
+        ):
+            rows = await cursor.fetchall()
         if ownership.require_database(Path(self.db_path)) != database_identity:
             raise WorkspaceOwnershipError("Database changed during recovery inventory")
-        return tuple(ArtifactIdentity(
-            job_id=row[0], chunk_id=row[1], attempt_id=row[2], generation_fingerprint=row[3],
-        ) for row in rows)
+        return tuple(
+            ArtifactIdentity(
+                job_id=row[0],
+                chunk_id=row[1],
+                attempt_id=row[2],
+                generation_fingerprint=row[3],
+            )
+            for row in rows
+        )
 
 
 async def _user_version(connection: aiosqlite.Connection) -> int:
@@ -1369,7 +1542,7 @@ class Database:
 
     async def update_job(self, job: AudioJob) -> None:
         """Update an existing audio job in the database."""
-        job.updated_at = datetime.utcnow()
+        job.updated_at = datetime.now(UTC).replace(tzinfo=None)
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 """
@@ -1391,7 +1564,7 @@ class Database:
             )
             await db.commit()
 
-    async def get_job(self, job_id: str) -> Optional[AudioJob]:
+    async def get_job(self, job_id: str) -> AudioJob | None:
         """Get a specific audio job by ID."""
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
@@ -1415,7 +1588,7 @@ class Database:
                     }
                 )
 
-    async def get_all_jobs(self) -> List[AudioJob]:
+    async def get_all_jobs(self) -> list[AudioJob]:
         """Get all audio jobs."""
         async with aiosqlite.connect(self.db_path) as db:
             db.row_factory = aiosqlite.Row
@@ -1453,10 +1626,10 @@ class Database:
         if os.path.exists(self.db_path):
             os.remove(self.db_path)
 
-    async def upsert_voices(self, voices: list[dict[str, object]]) -> None:
+    async def upsert_voices(self, voices: Sequence[Mapping[str, object]]) -> None:
         """Insert or update voice data in the database."""
         async with aiosqlite.connect(self.db_path) as db:
-            now = datetime.utcnow().isoformat()
+            now = datetime.now(UTC).replace(tzinfo=None).isoformat()
             for voice in voices:
                 await db.execute(
                     """
@@ -1487,7 +1660,7 @@ class Database:
             await db.commit()
 
     async def get_voices(
-        self, max_age_seconds: Optional[int] = None
+        self, max_age_seconds: int | None = None
     ) -> tuple[list[dict[str, object]], bool]:
         """
         Get all voices from the database.
@@ -1505,7 +1678,7 @@ class Database:
                     needs_refresh = True
                 else:
                     max_age = max_age_seconds or self.CACHE_DURATION_SECONDS
-                    now = datetime.utcnow()
+                    now = datetime.now(UTC).replace(tzinfo=None)
 
                     for row in rows:
                         last_updated = datetime.fromisoformat(row["last_updated"])

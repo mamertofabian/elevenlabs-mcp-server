@@ -12,12 +12,10 @@ import mcp.server.stdio
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.types import (
-    ClientRequest,
     ListResourceTemplatesRequest,
     ListResourceTemplatesResult,
     TextResourceContents,
 )
-from pydantic import AnyUrl
 
 from elevenlabs_mcp.database import CREATE_VOICES_TABLE
 from elevenlabs_mcp.server import ElevenLabsServer, main
@@ -68,17 +66,15 @@ async def _discover_server(
         await session.initialize()
         tools = await session.list_tools()
         templates = await session.send_request(
-            ClientRequest(
-                ListResourceTemplatesRequest(method="resources/templates/list")
-            ),
+            ListResourceTemplatesRequest(method="resources/templates/list"),
             ListResourceTemplatesResult,
         )
-        history = await session.read_resource(AnyUrl("voiceover://history"))
+        history = await session.read_resource("voiceover://history")
         history_content = history.contents[0]
         assert isinstance(history_content, TextResourceContents)
         return (
             [tool.name for tool in tools.tools],
-            [str(template.uriTemplate) for template in templates.resourceTemplates],
+            [str(template.uri_template) for template in templates.resource_templates],
             history_content.text,
         )
 
@@ -92,7 +88,7 @@ async def _discover_server_with_timeout(
 def test_legacy_server_registers_six_tools_and_three_resource_uris(
     tmp_path: Path,
 ) -> None:
-    server = ElevenLabsServer()
+    server = ElevenLabsServer(enable_revival=False)
     assert server.api is not None
     assert server.setup_tools() is None
     assert server.setup_resources() is None
@@ -102,7 +98,7 @@ def test_legacy_server_registers_six_tools_and_three_resource_uris(
         _discover_server_with_timeout(tmp_path)
     )
 
-    assert tool_names == [
+    assert tool_names[:6] == [
         "generate_audio_simple",
         "generate_audio_script",
         "delete_job",
@@ -110,13 +106,13 @@ def test_legacy_server_registers_six_tools_and_three_resource_uris(
         "list_voices",
         "get_voiceover_history",
     ]
-    assert templates == ["voiceover://history/{job_id}", "voiceover://voices"]
+    assert templates[:2] == ["voiceover://history/{job_id}", "voiceover://voices"]
     assert history_text == "[]"
 
 
 def test_legacy_server_parses_supported_script_forms(tmp_path: Path) -> None:
     del tmp_path
-    server = ElevenLabsServer()
+    server = ElevenLabsServer(enable_revival=False)
 
     plain, _ = server.parse_script("Fixture narration")
     direct, _ = server.parse_script('[{"text":"Direct","actor":"Narrator"}]')
@@ -138,11 +134,11 @@ def test_legacy_stdio_entrypoint_discovers_tools_without_provider_network(
 
     tool_names, _, _ = asyncio.run(_discover_server_with_timeout(tmp_path))
 
-    assert len(tool_names) == 6
+    assert len(tool_names) == 15
     assert "generate_audio_simple" in tool_names
 
     run_events: list[str] = []
-    server = ElevenLabsServer()
+    server = ElevenLabsServer(enable_revival=False)
 
     async def fake_initialize() -> None:
         run_events.append("initialized")

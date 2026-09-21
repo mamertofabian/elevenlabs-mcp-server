@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import json
 from datetime import datetime
 from typing import Literal
+from uuid import NAMESPACE_URL, uuid5
 
 from pydantic import BaseModel, ConfigDict
 
 from .artifacts import ArtifactVerificationError
-from .audio import AudioVerificationError, AudioVerifier
+from .audio import AudioDependencyError, AudioVerificationError, AudioVerifier
 from .contracts import RestartReconciliationResult
 from .database import AttemptStateError, JobStore
 from .workspace import WorkspaceLock
@@ -21,7 +21,12 @@ class ArtifactRecoveryFailure(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
 
     attempt_id: str
-    code: Literal["INTEGRITY_CHECK_FAILED", "AUDIO_CHECK_FAILED", "STATE_CHANGED"]
+    code: Literal[
+        "INTEGRITY_CHECK_FAILED",
+        "AUDIO_CHECK_FAILED",
+        "STATE_CHANGED",
+        "DEPENDENCY_MISSING",
+    ]
 
 
 class ArtifactRecoveryResult(BaseModel):
@@ -44,7 +49,20 @@ class ArtifactRecovery:
     ) -> ArtifactRecoveryResult:
         """Require caller-held ownership for the entire lifecycle; never synthesize."""
         reconciliation = await self.store.reconcile_interrupted(ownership, recovered_at)
-        candidates = await self.store.recovery_candidates(ownership)
+        result = await self.adopt_ready(ownership, recovered_at)
+        return result.model_copy(update={"reconciliation": reconciliation})
+
+    async def adopt_ready(
+        self,
+        ownership: WorkspaceLock,
+        recovered_at: datetime,
+        job_id: str | None = None,
+    ) -> ArtifactRecoveryResult:
+        """Adopt published results without reconciling or interrupting other live jobs."""
+        reconciliation = RestartReconciliationResult(
+            paused_job_ids=(), uncertain_attempt_ids=(), abandoned_reservation_ids=()
+        )
+        candidates = await self.store.recovery_candidates(ownership, job_id)
         adopted: list[str] = []
         failures: list[ArtifactRecoveryFailure] = []
         for identity in candidates:
@@ -55,6 +73,13 @@ class ArtifactRecovery:
                     ArtifactRecoveryFailure(
                         attempt_id=identity.attempt_id,
                         code="INTEGRITY_CHECK_FAILED",
+                    )
+                )
+                continue
+            except AudioDependencyError:
+                failures.append(
+                    ArtifactRecoveryFailure(
+                        attempt_id=identity.attempt_id, code="DEPENDENCY_MISSING"
                     )
                 )
                 continue
@@ -69,7 +94,7 @@ class ArtifactRecovery:
             key = json.dumps(
                 identity.model_dump(), sort_keys=True, separators=(",", ":")
             )
-            artifact_id = "recovered_" + hashlib.sha256(key.encode("utf-8")).hexdigest()
+            artifact_id = str(uuid5(NAMESPACE_URL, key))
             try:
                 result = await self.store.record_verified_artifact(
                     artifact_id,

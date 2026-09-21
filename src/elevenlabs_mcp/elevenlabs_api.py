@@ -2,12 +2,15 @@ import logging
 import os
 import sys
 import time
-import requests
 from collections.abc import Mapping
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Dict, List, Optional, TypedDict
+from typing import ClassVar, NotRequired, TypedDict
 from uuid import UUID, uuid4
+
+import requests
+
+logger = logging.getLogger(__name__)
 
 log_level = os.getenv("ELEVENLABS_LOG_LEVEL", "ERROR").upper()
 valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
@@ -17,17 +20,19 @@ if log_level not in valid_levels:
 
 logging.basicConfig(
     level=getattr(logging, log_level),
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
+
 class VoiceData(TypedDict):
+    is_default: NotRequired[bool]
     voice_id: str
     name: str
     category: str
-    labels: Dict[str, str]
+    labels: dict[str, str]
     description: str
     preview_url: str
-    high_quality_base_model_ids: List[str]
+    high_quality_base_model_ids: list[str]
 
 
 class _MissingAPIKeyError(ValueError):
@@ -43,7 +48,7 @@ class PartialGenerationError(RuntimeError):
 
     def __init__(
         self,
-        partial_output_file: Optional[str],
+        partial_output_file: str | None,
         completed_parts: int,
         failed_part_indexes: tuple[int, ...],
     ) -> None:
@@ -58,8 +63,9 @@ class PartialGenerationError(RuntimeError):
         )
 
 
-from pydub import AudioSegment
 import io
+
+from pydub import AudioSegment
 from tenacity import (
     retry,
     retry_if_exception_type,
@@ -111,15 +117,31 @@ def _retry_after_seconds(response) -> float | None:
         return None
     return seconds if 0.0 <= seconds <= 10.0 else None
 
+
 class ElevenLabsAPI:
     # Add model list as class constant
-    MODELS = {
-        "eleven_multilingual_v2": {"description": "Our most lifelike model with rich emotional expression", "languages": "32",
-                                   "supports_stitching": True, "supports_style": True, "wait_time": 0.1},
-        "eleven_flash_v2_5": {"description": "Ultra-fast model optimized for real-time use (~75ms†)", "languages": "32",
-                              "supports_stitching": False, "supports_style": False, "wait_time": 0.1},
-        "eleven_flash_v2": {"description": "Ultra-fast model optimized for real-time use (~75ms†)", "languages": "English",
-                             "supports_stitching": False, "supports_style": False, "wait_time": 0.1}
+    MODELS: ClassVar[dict] = {
+        "eleven_multilingual_v2": {
+            "description": "Our most lifelike model with rich emotional expression",
+            "languages": "32",
+            "supports_stitching": True,
+            "supports_style": True,
+            "wait_time": 0.1,
+        },
+        "eleven_flash_v2_5": {
+            "description": "Ultra-fast model optimized for real-time use (~75ms†)",
+            "languages": "32",
+            "supports_stitching": False,
+            "supports_style": False,
+            "wait_time": 0.1,
+        },
+        "eleven_flash_v2": {
+            "description": "Ultra-fast model optimized for real-time use (~75ms†)",
+            "languages": "English",
+            "supports_stitching": False,
+            "supports_style": False,
+            "wait_time": 0.1,
+        },
     }
 
     @retry(
@@ -133,14 +155,11 @@ class ElevenLabsAPI:
             )
         ),
     )
-    def get_voices(self) -> List[VoiceData]:
+    def get_voices(self) -> list[VoiceData]:
         """Fetch available voices from ElevenLabs API"""
         api_key = self._require_api_key()
-        headers = {
-            "Accept": "application/json",
-            "xi-api-key": api_key
-        }
-        
+        headers = {"Accept": "application/json", "xi-api-key": api_key}
+
         try:
             response = requests.get(
                 f"{self.base_url}/voices",
@@ -149,9 +168,9 @@ class ElevenLabsAPI:
             )
         except requests.exceptions.RequestException as error:
             error_message = f"Voice metadata network error: {type(error).__name__}"
-            logging.error(error_message)
-            raise Exception(error_message)
-        
+            logger.error(error_message)
+            raise RuntimeError(error_message)
+
         if response.status_code == 200:
             try:
                 voices_data = response.json()["voices"]
@@ -163,37 +182,47 @@ class ElevenLabsAPI:
                         "labels": voice.get("labels", {}),
                         "description": voice.get("description", ""),
                         "preview_url": voice.get("preview_url", ""),
-                        "high_quality_base_model_ids": voice.get("high_quality_base_model_ids", [])
+                        "high_quality_base_model_ids": voice.get(
+                            "high_quality_base_model_ids", []
+                        ),
                     }
                     for voice in voices_data
                 ]
-            except Exception as error:
+            except Exception as error:  # noqa: BLE001 - sanitize failures at the IO/protocol boundary
                 error_message = (
                     f"Voice metadata response invalid: {type(error).__name__}"
                 )
-                logging.error(error_message)
-                raise Exception(error_message)
+                logger.error(error_message)
+                raise RuntimeError(error_message)
         else:
-            error_message = f"Voice metadata request failed with status {response.status_code}"
+            error_message = (
+                f"Voice metadata request failed with status {response.status_code}"
+            )
             if response.status_code == 429:
                 raise _RetryableRateLimitError(_retry_after_seconds(response))
             if response.status_code in {400, 401, 403, 404, 422}:
                 raise _NonRetryableProviderError(error_message)
-            raise Exception(error_message)
+            raise RuntimeError(error_message)
 
     def __init__(self, environ: Mapping[str, str] | None = None):
         environment = os.environ if environ is None else environ
         self.api_key = environment.get("ELEVENLABS_API_KEY") or None
 
         self.voice_id = environment.get("ELEVENLABS_VOICE_ID") or "iEw1wkYocsNy7I7pteSN"
-        self.model_id = environment.get("ELEVENLABS_MODEL_ID") or "eleven_multilingual_v2"
-        
-        logging.info(f"Initializing ElevenLabsAPI with model_id: {self.model_id}")
-        
+        self.model_id = (
+            environment.get("ELEVENLABS_MODEL_ID") or "eleven_multilingual_v2"
+        )
+
+        logger.info(f"Initializing ElevenLabsAPI with model_id: {self.model_id}")
+
         # Add validation for model_id
         if self.model_id not in self.MODELS:
-            logging.error(f"Invalid model_id: {self.model_id}. Valid models: {list(self.MODELS.keys())}")
-            raise ValueError(f"Invalid model_id: {self.model_id}. Must be one of {list(self.MODELS.keys())}")
+            logger.error(
+                f"Invalid model_id: {self.model_id}. Valid models: {list(self.MODELS.keys())}"
+            )
+            raise ValueError(
+                f"Invalid model_id: {self.model_id}. Must be one of {list(self.MODELS.keys())}"
+            )
         self.stability = float(environment.get("ELEVENLABS_STABILITY", "0.5"))
         self.similarity_boost = float(
             environment.get("ELEVENLABS_SIMILARITY_BOOST", "0.75")
@@ -213,24 +242,31 @@ class ElevenLabsAPI:
             (_RetryableRateLimitError, requests.exceptions.ConnectTimeout)
         ),
     )
-    def generate_audio_segment(self, text: str, voice_id: str, output_file: Optional[str] = None,
-                      previous_text: Optional[str] = None, next_text: Optional[str] = None,
-                      previous_request_ids: Optional[List[str]] = None, debug_info: Optional[List[str]] = None) -> tuple[bytes, str | None]:
+    def generate_audio_segment(
+        self,
+        text: str,
+        voice_id: str,
+        output_file: str | None = None,
+        previous_text: str | None = None,
+        next_text: str | None = None,
+        previous_request_ids: list[str] | None = None,
+        debug_info: list[str] | None = None,
+    ) -> tuple[bytes, str | None]:
         """Generate audio using specified voice with context conditioning"""
         api_key = self._require_api_key()
         headers = {
             "Accept": "application/json",
             "xi-api-key": api_key,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
-        
+
         data = {
             "text": text,
             "model_id": self.model_id,
             "voice_settings": {
                 "stability": self.stability,
-                "similarity_boost": self.similarity_boost
-            }
+                "similarity_boost": self.similarity_boost,
+            },
         }
 
         if self.MODELS[self.model_id]["supports_style"]:
@@ -243,11 +279,15 @@ class ElevenLabsAPI:
             if next_text is not None:
                 data["next_text"] = next_text
             if previous_request_ids:
-                data["previous_request_ids"] = previous_request_ids[-3:]  # Maximum of 3 previous IDs
-        
-        logging.info("Generating audio for text length: %s chars", len(text))
-        logging.debug(f"Generation parameters: stability={self.stability}, similarity_boost={self.similarity_boost}, model={self.model_id}")
-        
+                data["previous_request_ids"] = previous_request_ids[
+                    -3:
+                ]  # Maximum of 3 previous IDs
+
+        logger.info("Generating audio for text length: %s chars", len(text))
+        logger.debug(
+            f"Generation parameters: stability={self.stability}, similarity_boost={self.similarity_boost}, model={self.model_id}"
+        )
+
         try:
             response = requests.post(
                 f"{self.base_url}/text-to-speech/{voice_id}",
@@ -255,20 +295,20 @@ class ElevenLabsAPI:
                 headers=headers,
                 timeout=(5.0, 60.0),
             )
-            
-            logging.debug(f"API response status: {response.status_code}")
-            
+
+            logger.debug(f"API response status: {response.status_code}")
+
             if response.status_code == 200:
-                logging.info("Audio generation successful")
+                logger.info("Audio generation successful")
                 if output_file:
-                    with open(output_file, 'wb') as f:
+                    with open(output_file, "wb") as f:
                         f.write(response.content)
                 return response.content, response.headers.get("request-id")
             else:
                 error_message = (
                     f"Audio provider request failed with status {response.status_code}"
                 )
-                logging.error(f"API error response: {response.status_code}")
+                logger.error(f"API error response: {response.status_code}")
                 if response.status_code == 429:
                     raise _RetryableRateLimitError(_retry_after_seconds(response))
                 if response.status_code in {400, 401, 403, 404, 422}:
@@ -280,7 +320,7 @@ class ElevenLabsAPI:
                 raise _NonRetryableProviderError(error_message)
         except requests.exceptions.ConnectTimeout as e:
             error_message = f"Network error during API call: {type(e).__name__}"
-            logging.error(error_message)
+            logger.error(error_message)
             raise
         except (
             requests.exceptions.ReadTimeout,
@@ -292,54 +332,57 @@ class ElevenLabsAPI:
 
     def generate_full_audio(
         self,
-        script_parts: List[Dict],
+        script_parts: list[dict],
         output_dir: Path,
-        output_id: Optional[str] = None,
-    ) -> tuple[str, List[str], int]:
+        output_id: str | None = None,
+    ) -> tuple[str, list[str], int]:
         """Generate audio for multiple parts using request stitching. Returns tuple of (output_file_path, debug_info, completed_parts)"""
         self._require_api_key()
-        canonical_output_id = str(uuid4()) if output_id is None else str(UUID(output_id))
+        canonical_output_id = (
+            str(uuid4()) if output_id is None else str(UUID(output_id))
+        )
         # Create output directory if it doesn't exist
         output_dir.mkdir(exist_ok=True)
 
         debug_info = []
         debug_info.append("ElevenLabsAPI - Starting generate_full_audio")
         debug_info.append(f"Script part count: {len(script_parts)}")
-        
+
         # Initialize segments list and request IDs tracking
         segments = []
         previous_request_ids = []
         failed_part_indexes: list[int] = []
         completed_parts = 0
         unknown_outcome: UpstreamOutcomeUnknownError | None = None
-        
+
         all_texts = []
         for part in script_parts:
-            text = str(part.get('text', ''))
+            text = str(part.get("text", ""))
             all_texts.append(text)
-        
+
         for i, part in enumerate(script_parts):
             debug_info.append(f"Processing part index: {i}")
-            part_voice_id = part.get('voice_id')
+            part_voice_id = part.get("voice_id")
             if not part_voice_id:
                 part_voice_id = self.voice_id
-            text = str(part.get('text', ''))
+            text = str(part.get("text", ""))
             if not text:
                 continue
-                
-            
+
             # Determine previous and next text for context
             is_first = i == 0
             is_last = i == len(script_parts) - 1
-            
+
             previous_text = None if is_first else " ".join(all_texts[:i])
-            next_text = None if is_last else " ".join(all_texts[i + 1:])
-            
+            next_text = None if is_last else " ".join(all_texts[i + 1 :])
+
             try:
-                logging.info(f"Processing part {i+1}/{len(script_parts)}")
-                logging.info(f"Text length: {len(text)} chars")
-                logging.debug(f"Context - Previous text: {'Yes' if previous_text else 'No'}, Next text: {'Yes' if next_text else 'No'}")
-                
+                logger.info(f"Processing part {i + 1}/{len(script_parts)}")
+                logger.info(f"Text length: {len(text)} chars")
+                logger.debug(
+                    f"Context - Previous text: {'Yes' if previous_text else 'No'}, Next text: {'Yes' if next_text else 'No'}"
+                )
+
                 # Generate audio with context conditioning
                 audio_content, request_id = self.generate_audio_segment(
                     text=text,
@@ -347,13 +390,13 @@ class ElevenLabsAPI:
                     previous_text=previous_text,
                     next_text=next_text,
                     previous_request_ids=previous_request_ids,
-                    debug_info=debug_info
+                    debug_info=debug_info,
                 )
-                
+
                 # Add request ID to history
                 if request_id:
                     previous_request_ids.append(request_id)
-                
+
                 # Convert audio content to AudioSegment and add to segments
                 audio_segment = AudioSegment.from_mp3(io.BytesIO(audio_content))
                 segments.append(audio_segment)
@@ -366,11 +409,11 @@ class ElevenLabsAPI:
                 unknown_outcome = e
                 failed_part_indexes.append(i)
                 break
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - sanitize failures at the IO/protocol boundary
                 debug_info.append(f"Part {i} failed: {type(e).__name__}")
                 failed_part_indexes.append(i)
                 continue
-        
+
         # Combine all segments
         if segments:
             output_prefix = "partial_audio" if failed_part_indexes else "full_audio"
@@ -407,12 +450,12 @@ class ElevenLabsAPI:
                 raise unknown_outcome
 
             if not failed_part_indexes:
-                logging.debug("All parts generated successfully")
+                logger.debug("All parts generated successfully")
                 debug_info.append("All parts generated successfully")
-            
+
             debug_info.append(f"Model: {self.model_id}")
-            logging.debug(f"Model: {self.model_id}")
-            
+            logger.debug(f"Model: {self.model_id}")
+
             if failed_part_indexes:
                 raise PartialGenerationError(
                     partial_output_file=str(output_file),
@@ -429,9 +472,8 @@ class ElevenLabsAPI:
                 failed_part_indexes=tuple(failed_part_indexes),
             )
         else:
-            error_msg = "\n".join([
-                "No audio segments were generated. Debug info:",
-                *debug_info
-            ])
-            logging.error("No audio segments were generated. Debug info: %s", debug_info)
-            raise Exception(error_msg)
+            error_msg = "\n".join(
+                ["No audio segments were generated. Debug info:", *debug_info]
+            )
+            logger.error("No audio segments were generated. Debug info: %s", debug_info)
+            raise RuntimeError(error_msg)

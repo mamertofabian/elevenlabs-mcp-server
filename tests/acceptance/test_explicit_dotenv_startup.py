@@ -131,7 +131,7 @@ def test_server_composition_passes_one_resolved_mapping(
     monkeypatch.chdir(launch_cwd)
     process_key_before = os.environ.get("ELEVENLABS_API_KEY")
 
-    server = ElevenLabsServer(environ=operator)
+    server = ElevenLabsServer(environ=operator, enable_revival=False)
 
     assert server.api.api_key == "operator-key"
     assert server.settings.output_dir == explicit_output.resolve()

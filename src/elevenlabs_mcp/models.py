@@ -1,25 +1,26 @@
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Dict, List, Optional
 
 
 def utc_now() -> datetime:
     return datetime.now(UTC)
 
+
 @dataclass
 class ScriptPart:
     text: str
-    voice_id: Optional[str] = None
-    actor: Optional[str] = None
+    voice_id: str | None = None
+    actor: str | None = None
+
 
 @dataclass
 class AudioJob:
     id: str
     status: str  # 'pending', 'processing', 'completed', 'failed'
-    script_parts: List[Dict]
-    output_file: Optional[str] = None
-    error: Optional[str] = None
+    script_parts: list[dict]
+    output_file: str | None = None
+    error: str | None = None
     created_at: datetime = field(default_factory=utc_now)
     updated_at: datetime = field(default_factory=utc_now)
     total_parts: int = 1
@@ -30,7 +31,7 @@ class AudioJob:
         cls,
         id: str,
         status: str,
-        script_parts: List[Dict],
+        script_parts: list[dict],
         total_parts: int = 1,
         clock: Callable[[], datetime] = utc_now,
     ) -> "AudioJob":
@@ -44,7 +45,7 @@ class AudioJob:
             total_parts=total_parts,
         )
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "id": self.id,
             "status": self.status,
@@ -54,11 +55,11 @@ class AudioJob:
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
             "total_parts": self.total_parts,
-            "completed_parts": self.completed_parts
+            "completed_parts": self.completed_parts,
         }
 
     @staticmethod
-    def from_dict(data: Dict) -> "AudioJob":
+    def from_dict(data: dict) -> "AudioJob":
         created_at = _as_utc(
             datetime.fromisoformat(data["created_at"])
             if isinstance(data["created_at"], str)
@@ -78,7 +79,7 @@ class AudioJob:
             created_at=created_at,
             updated_at=updated_at,
             total_parts=data.get("total_parts", 1),
-            completed_parts=data.get("completed_parts", 0)
+            completed_parts=data.get("completed_parts", 0),
         )
 
 

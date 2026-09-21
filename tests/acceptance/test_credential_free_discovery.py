@@ -92,7 +92,7 @@ def test_real_stdio_discovery_lists_six_tools_without_key_or_ffmpeg(
 ) -> None:
     tool_names = asyncio.run(_list_tools_with_timeout(tmp_path))
 
-    assert tool_names == [
+    assert tool_names[:6] == [
         "generate_audio_simple",
         "generate_audio_script",
         "delete_job",

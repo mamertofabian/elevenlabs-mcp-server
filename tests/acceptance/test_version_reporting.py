@@ -39,7 +39,7 @@ def test_source_fallback_matches_current_distribution_version(
         (PROJECT_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     )
 
-    assert package_version() == "0.1.1"
+    assert package_version() == "0.2.0.dev0"
     assert package_version() == pyproject["project"]["version"]
 
 
@@ -65,8 +65,8 @@ def test_real_mcp_initialization_reports_distribution_version(tmp_path: Path) ->
         ):
             async with asyncio.timeout(10):
                 initialized = await session.initialize()
-                assert initialized.serverInfo.name == "elevenlabs-server"
-                assert initialized.serverInfo.version == importlib.metadata.version(
+                assert initialized.server_info.name == "elevenlabs-server"
+                assert initialized.server_info.version == importlib.metadata.version(
                     DISTRIBUTION_NAME
                 )
 

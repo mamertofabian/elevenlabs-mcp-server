@@ -33,7 +33,7 @@ def _environment_executables(environment: Path) -> tuple[Path, Path]:
 
 @pytest.mark.parametrize(
     ("profile", "mcp_requirement"),
-    [("lower", "mcp==1.1.2"), ("current-v1", None)],
+    [("lower", "mcp==2.2.0"), ("current-v2", None)],
 )
 def test_installed_wheel_stdio_matrix(
     tmp_path: Path, profile: str, mcp_requirement: str | None
@@ -96,14 +96,14 @@ print(json.dumps({
     )
     assert inspected.returncode == 0, inspected.stderr
     metadata = json.loads(inspected.stdout)
-    assert metadata["distribution"] == "0.1.1"
+    assert metadata["distribution"] == "0.2.0.dev0"
     assert metadata["package"] == metadata["distribution"]
     assert metadata["pytest"] is False
     assert str(PROJECT_ROOT) not in metadata["package_file"]
     if profile == "lower":
-        assert metadata["mcp"] == "1.1.2"
+        assert metadata["mcp"] == "2.2.0"
     else:
-        assert int(metadata["mcp"].split(".", 1)[0]) == 1
+        assert int(metadata["mcp"].split(".", 1)[0]) == 2
 
     env = {
         **os.environ,
@@ -124,8 +124,8 @@ print(json.dumps({
             async with asyncio.timeout(15):
                 initialized = await session.initialize()
                 tools = await session.list_tools()
-                assert initialized.serverInfo.name == "elevenlabs-server"
-                assert initialized.serverInfo.version == "0.1.1"
-                assert [tool.name for tool in tools.tools] == EXPECTED_TOOLS
+                assert initialized.server_info.name == "elevenlabs-server"
+                assert initialized.server_info.version == "0.2.0.dev0"
+                assert [tool.name for tool in tools.tools][:6] == EXPECTED_TOOLS
 
     asyncio.run(scenario())

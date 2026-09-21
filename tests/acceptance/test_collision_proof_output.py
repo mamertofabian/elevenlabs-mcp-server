@@ -117,7 +117,9 @@ def test_legacy_server_tools_publish_with_persisted_job_ids(
         database_path=tmp_path / "state" / "history.db",
         database_path_explicit=True,
     )
-    server = ElevenLabsServer(settings, environ={"ELEVENLABS_API_KEY": "fixture"})
+    server = ElevenLabsServer(
+        settings, environ={"ELEVENLABS_API_KEY": "fixture"}, enable_revival=False
+    )
     captured_ids: list[str] = []
 
     def fake_generate(

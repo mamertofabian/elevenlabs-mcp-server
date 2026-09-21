@@ -20,6 +20,10 @@ class AudioVerificationError(RuntimeError):
     """Dependency, decode, or resource-policy failure with sanitized diagnostics."""
 
 
+class AudioDependencyError(AudioVerificationError):
+    """Audio tooling is unavailable; this is not evidence of corrupt media."""
+
+
 class AudioDecoder(Protocol):
     def check_dependencies(self) -> None: ...
 
@@ -39,7 +43,7 @@ class FFmpegDecoder:
 
     def check_dependencies(self) -> None:
         if shutil.which(self.executable) is None:
-            raise AudioVerificationError("FFmpeg is unavailable")
+            raise AudioDependencyError("FFmpeg is unavailable")
 
     def decode(
         self,
@@ -91,7 +95,7 @@ class FFmpegDecoder:
                 "Audio decoding exceeded its time limit"
             ) from None
         except OSError:
-            raise AudioVerificationError("Audio decoder could not run") from None
+            raise AudioDependencyError("Audio decoder could not run") from None
         if result.returncode != 0:
             raise AudioVerificationError("Source audio failed strict MP3 decoding")
 

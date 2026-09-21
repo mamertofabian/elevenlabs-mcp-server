@@ -27,7 +27,7 @@ class _StrictModel(BaseModel):
 
 
 class CastVoice(_StrictModel):
-    voice_id: str = Field(min_length=1, max_length=128)
+    voice_id: str = Field(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9_-]+$")
 
 
 class ScriptPart(_StrictModel):
@@ -144,7 +144,7 @@ class PlanningLimits(_StrictModel):
 class PlannedFragment(_StrictModel):
     text: str = Field(min_length=1, max_length=2_000)
     actor: str = Field(pattern=_IDENTIFIER_PATTERN)
-    voice_id: str = Field(min_length=1, max_length=128)
+    voice_id: str = Field(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9_-]+$")
     source_span: SourceSpan
 
     @model_validator(mode="after")

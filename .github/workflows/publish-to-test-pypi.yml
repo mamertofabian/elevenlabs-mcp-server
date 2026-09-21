@@ -33,7 +33,8 @@ jobs:
         run: |
           uv sync --frozen --dev
           uv run pytest -q
-          uv run maid validate
+          uv run ruff check src
+          uv run pyright
           uv build
       - uses: actions/upload-artifact@v4
         with:

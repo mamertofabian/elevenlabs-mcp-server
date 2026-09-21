@@ -25,7 +25,7 @@ def test_project_runtime_dependencies_bound_mcp_and_exclude_pytest() -> None:
     assert project["name"] == "elevenlabs-mcp-server"
     assert project["license"] == {"file": "LICENSE"}
     assert project["scripts"] == {"elevenlabs-mcp-server": "elevenlabs_mcp.server:main"}
-    assert "mcp>=1.1.2,<2" in runtime
+    assert "mcp>=2.2,<3" in runtime
     assert "pydantic>=2.10,<3" in runtime
     assert "regex>=2024.11.6,<2027" in runtime
     assert not any(requirement.startswith("pytest") for requirement in runtime)
@@ -36,6 +36,7 @@ def test_project_runtime_dependencies_bound_mcp_and_exclude_pytest() -> None:
     assert "tool" not in document or "uv" not in document["tool"]
     assert set(document["dependency-groups"]["dev"]) == {
         "maid-runner==2.27.6",
+        "jsonschema>=4.23,<5",
         "pyright>=1.1.389",
         "pytest>=8.3.3",
         "pytest-asyncio",
@@ -43,16 +44,19 @@ def test_project_runtime_dependencies_bound_mcp_and_exclude_pytest() -> None:
     }
 
 
-def test_lock_resolves_tested_mcp_v1_without_runtime_pytest() -> None:
+def test_lock_resolves_tested_mcp_v2_without_runtime_pytest() -> None:
     document = _lock()
     packages = {package["name"]: package for package in document["package"]}
     project = packages["elevenlabs-mcp-server"]
     mcp = packages["mcp"]
     requirements = project["metadata"]["requires-dist"]
 
-    assert mcp["version"] == "1.1.2"
+    assert mcp["version"] == "2.2.0"
     assert {item["name"] for item in project["dependencies"]} == {
         "aiosqlite",
+        "audioop-lts",
+        "elevenlabs",
+        "httpx",
         "mcp",
         "pydub",
         "pydantic",
@@ -66,10 +70,10 @@ def test_lock_resolves_tested_mcp_v1_without_runtime_pytest() -> None:
         item for item in requirements if item["name"] == "pydantic"
     )
     regex_requirement = next(item for item in requirements if item["name"] == "regex")
-    assert mcp_requirement["specifier"] == ">=1.1.2,<2"
+    assert mcp_requirement["specifier"] == ">=2.2,<3"
     assert pydantic_requirement["specifier"] == ">=2.10,<3"
     assert regex_requirement["specifier"] == ">=2024.11.6,<2027"
-    assert packages["pydantic"]["version"] == "2.10.4"
+    assert packages["pydantic"]["version"] == "2.13.5"
     assert not any(
         item["name"] == "pytest" and "marker" not in item for item in requirements
     )
@@ -109,8 +113,8 @@ def test_built_wheel_preserves_identity_license_and_safe_requirements(
     )
     regex_requirement = next(item for item in requirements if item.startswith("regex"))
     assert metadata["Name"] == "elevenlabs-mcp-server"
-    assert ">=1.1.2" in mcp_requirement
-    assert "<2" in mcp_requirement
+    assert ">=2.2" in mcp_requirement
+    assert "<3" in mcp_requirement
     assert ">=2.10" in pydantic_requirement
     assert "<3" in pydantic_requirement
     assert ">=2024.11.6" in regex_requirement

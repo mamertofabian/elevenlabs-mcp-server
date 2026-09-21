@@ -32,7 +32,7 @@ def test_startup_refuses_fresh_database_when_different_legacy_history_exists(
     monkeypatch.delenv("ELEVENLABS_DATABASE_PATH", raising=False)
     fake_server_file = package_root / "src" / "elevenlabs_mcp" / "server.py"
     monkeypatch.setattr(server_module, "__file__", str(fake_server_file))
-    server = ElevenLabsServer(settings)
+    server = ElevenLabsServer(settings, enable_revival=False)
     server.api.get_voices = list
     monkeypatch.setenv(
         "ELEVENLABS_DATABASE_PATH", str(tmp_path / "late-change" / "ignored.db")

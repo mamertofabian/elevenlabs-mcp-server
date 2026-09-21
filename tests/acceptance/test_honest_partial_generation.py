@@ -111,7 +111,9 @@ def test_legacy_tool_persists_failed_partial_job_without_success_substring(
         database_path=tmp_path / "state" / "history.db",
         database_path_explicit=True,
     )
-    server = ElevenLabsServer(settings, environ={"ELEVENLABS_API_KEY": "fixture"})
+    server = ElevenLabsServer(
+        settings, environ={"ELEVENLABS_API_KEY": "fixture"}, enable_revival=False
+    )
     server.api.api_key = None
     partial_path = settings.output_dir / "partial_audio_fixture.mp3"
 
@@ -130,6 +132,7 @@ def test_legacy_tool_persists_failed_partial_job_without_success_substring(
     monkeypatch.setattr(server.api, "generate_full_audio", fail_with_partial)
 
     async def scenario() -> None:
+        result = None
         await server.initialize()
         client_send, server_read = anyio.create_memory_object_stream(1)
         server_send, client_read = anyio.create_memory_object_stream(1)
@@ -148,6 +151,7 @@ def test_legacy_tool_persists_failed_partial_job_without_success_substring(
                 )
             tasks.cancel_scope.cancel()
 
+        assert result is not None
         text = result.content[0]
         assert isinstance(text, TextContent)
         first_line = text.text.splitlines()[0]

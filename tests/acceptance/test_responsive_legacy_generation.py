@@ -9,7 +9,6 @@ import anyio
 import pytest
 from anyio import to_thread
 from mcp import ClientSession
-from pydantic import AnyUrl
 
 from elevenlabs_mcp.config import Settings
 from elevenlabs_mcp.server import ElevenLabsServer
@@ -22,7 +21,9 @@ def _server(tmp_path: Path) -> ElevenLabsServer:
         database_path=tmp_path / "state" / "history.db",
         database_path_explicit=True,
     )
-    server = ElevenLabsServer(settings, environ={"ELEVENLABS_API_KEY": "fixture"})
+    server = ElevenLabsServer(
+        settings, environ={"ELEVENLABS_API_KEY": "fixture"}, enable_revival=False
+    )
     server.api.get_voices = list
     return server
 
@@ -87,7 +88,7 @@ def test_discovery_and_history_remain_responsive_during_blocked_render(
             observed = await to_thread.run_sync(render_started.wait, 1)
             assert observed
             tools = await session.list_tools()
-            history = await session.read_resource(AnyUrl("voiceover://history"))
+            history = await session.read_resource("voiceover://history")
             elapsed = time.perf_counter() - started
             assert len(tools.tools) == 6
             assert history.contents

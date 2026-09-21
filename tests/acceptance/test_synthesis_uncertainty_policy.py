@@ -133,6 +133,7 @@ def test_legacy_job_persists_and_returns_unknown_outcome(
             database_path_explicit=True,
         ),
         environ={"ELEVENLABS_API_KEY": "fixture"},
+        enable_revival=False,
     )
     server.api.api_key = None
     calls = []
@@ -155,6 +156,7 @@ def test_legacy_job_persists_and_returns_unknown_outcome(
     monkeypatch.setattr("elevenlabs_mcp.elevenlabs_api.requests.post", post)
 
     async def scenario() -> None:
+        result = None
         await server.initialize()
         server.api.api_key = "fixture"
         client_send, server_read = anyio.create_memory_object_stream(10)
@@ -180,6 +182,7 @@ def test_legacy_job_persists_and_returns_unknown_outcome(
                 )
             tasks.cancel_scope.cancel()
 
+        assert result is not None
         text = result.content[0]
         assert isinstance(text, TextContent)
         assert "upstream outcome is unknown" in text.text.lower()

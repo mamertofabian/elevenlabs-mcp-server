@@ -212,7 +212,7 @@ def test_initialize_creates_only_resolved_output_and_database_parents(
         output_dir=tmp_path / "nested" / "audio",
         database_path=tmp_path / "nested" / "state" / "history.db",
     )
-    server = ElevenLabsServer(settings)
+    server = ElevenLabsServer(settings, enable_revival=False)
     server.api.get_voices = list
 
     assert server.output_dir == settings.output_dir

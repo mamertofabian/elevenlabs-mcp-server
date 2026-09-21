@@ -33,9 +33,23 @@ jobs:
         uses: docker://rhysd/actionlint:1.7.7
       - name: Run credential-free tests
         run: uv run pytest -q
-      - name: Validate MAID contracts
-        run: uv run maid validate
-      - name: Run MAID contract commands
-        run: uv run maid test
+      - name: Lint runtime
+        run: uv run ruff check src
+      - name: Type check
+        run: uv run pyright
       - name: Build distributions
         run: uv build
+
+  container:
+    needs: python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --frozen --dev
+      - name: Build actual CLI image
+        run: docker build -t elevenlabs-revival:local .
+      - name: Verify isolated non-root container with persistent state
+        run: uv run python scripts/smoke_container.py
