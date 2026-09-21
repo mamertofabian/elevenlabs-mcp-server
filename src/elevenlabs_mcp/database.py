@@ -16,6 +16,7 @@ from .contracts import (
     AttemptReservation,
     CancellationResult,
     JobCreateResult,
+    ResumeResult,
     VoiceoverPlan,
 )
 from .models import AudioJob
@@ -342,6 +343,18 @@ class RevisionConflictError(RuntimeError):
         self.expected_revision = expected_revision
         self.actual_revision = actual_revision
         super().__init__(f"job revision conflict: {job_id}")
+
+
+class JobBusyError(RuntimeError):
+    """Job activity must finish or be reconciled before this mutation."""
+
+
+class UncertainAttemptError(RuntimeError):
+    """Resuming uncertain work requires explicit duplicate-charge acknowledgment."""
+
+
+class ArtifactVerificationRequiredError(RuntimeError):
+    """Successful artifacts require trusted verification before resume."""
 
 
 class JobStore:
@@ -911,6 +924,127 @@ class JobStore:
                     """,
                     (workspace_id, idempotency_key, digest,
                      result.model_dump_json(), timestamp),
+                )
+                await connection.commit()
+                return result
+            except BaseException:
+                await connection.rollback()
+                raise
+
+    async def request_resume(
+        self,
+        workspace_id: str,
+        job_id: str,
+        expected_revision: int,
+        idempotency_key: str,
+        max_total_characters: int,
+        max_total_requests: int,
+        requested_at: datetime,
+        retry_uncertain: bool = False,
+    ) -> ResumeResult:
+        """Authorize fresh attempts without resetting historical exposure.
+
+        This storage primitive refuses successful chunks until artifact verification
+        is implemented. It never treats an unverified file as reusable audio.
+        """
+        if type(expected_revision) is not int or expected_revision < 0:
+            raise ValueError("expected_revision must be a nonnegative integer")
+        for value in (max_total_characters, max_total_requests):
+            if type(value) is not int or value < 1:
+                raise ValueError("attempt ceilings must be positive integers")
+        if type(retry_uncertain) is not bool:
+            raise ValueError("retry_uncertain must be a boolean")
+        for value in (workspace_id, job_id, idempotency_key):
+            if not isinstance(value, str) or not 1 <= len(value) <= 128:
+                raise ValueError("workspace, job and idempotency IDs require 1 to 128 characters")
+        if requested_at.tzinfo is None or requested_at.utcoffset() is None:
+            raise ValueError("requested_at must be timezone-aware")
+        timestamp = requested_at.astimezone(UTC).isoformat()
+        digest = "sha256:" + hashlib.sha256(_json({
+            "job_id": job_id, "expected_revision": expected_revision,
+            "max_total_characters": max_total_characters,
+            "max_total_requests": max_total_requests,
+            "retry_uncertain": retry_uncertain,
+        }).encode("utf-8")).hexdigest()
+        async with self.connect() as connection:
+            await connection.execute("BEGIN IMMEDIATE")
+            try:
+                async with connection.execute(
+                    "SELECT input_digest, result_ref FROM operation_receipts "
+                    "WHERE workspace_id = ? AND operation = 'resume' AND idempotency_key = ?",
+                    (workspace_id, idempotency_key),
+                ) as cursor:
+                    receipt = await cursor.fetchone()
+                if receipt is not None:
+                    if receipt[0] != digest:
+                        raise IdempotencyConflictError(workspace_id, "resume", idempotency_key)
+                    result = ResumeResult.model_validate_json(receipt[1])
+                    await connection.commit()
+                    return result.model_copy(update={"replayed": True})
+                async with connection.execute(
+                    "SELECT revision, status, reserved_characters, reserved_requests "
+                    "FROM voiceover_jobs WHERE job_id = ? AND deleted_at IS NULL",
+                    (job_id,),
+                ) as cursor:
+                    job = await cursor.fetchone()
+                if job is None:
+                    raise JobNotFoundError(job_id)
+                if job[0] != expected_revision:
+                    raise RevisionConflictError(job_id, expected_revision, job[0])
+                warnings: tuple[str, ...] = ()
+                completed = job[1] == "completed"
+                if not completed:
+                    if job[1] not in {"paused", "failed", "cancelled"}:
+                        raise JobBusyError(job_id)
+                    async with connection.execute(
+                        "SELECT status FROM voiceover_chunks WHERE job_id = ?", (job_id,),
+                    ) as cursor:
+                        states = {row[0] for row in await cursor.fetchall()}
+                    async with connection.execute(
+                        "SELECT 1 FROM generation_attempts WHERE job_id = ? "
+                        "AND dispatch_state = 'dispatched' LIMIT 1", (job_id,),
+                    ) as cursor:
+                        inflight = await cursor.fetchone() is not None
+                    if inflight or "generating" in states:
+                        raise JobBusyError(job_id)
+                    if "succeeded" in states:
+                        raise ArtifactVerificationRequiredError(job_id)
+                    if not states or not states <= {"pending", "failed", "unknown", "cancelled"}:
+                        raise JobBusyError(job_id)
+                    if "unknown" in states:
+                        if not retry_uncertain:
+                            raise UncertainAttemptError(job_id)
+                        warnings = ("Retrying uncertain synthesis may incur duplicate charges.",)
+                    if max_total_characters < job[2] or max_total_requests < job[3]:
+                        raise BudgetExceededError(max_total_characters, job[2], max_total_requests, job[3])
+                    # Retire undispatched reservations so stale callers cannot use
+                    # an old attempt after this explicit new authorization.
+                    await connection.execute(
+                        "UPDATE generation_attempts SET dispatch_state = 'cancelled', "
+                        "ended_at = ?, sanitized_outcome = 'RESUME_ABANDONED_RESERVATION' "
+                        "WHERE job_id = ? AND dispatch_state = 'reserved'",
+                        (timestamp, job_id),
+                    )
+                    await connection.execute(
+                        "UPDATE voiceover_chunks SET status = 'pending' WHERE job_id = ?",
+                        (job_id,),
+                    )
+                    await connection.execute(
+                        "UPDATE voiceover_jobs SET status = 'queued', reason = NULL, "
+                        "cancel_requested = 0, revision = ?, updated_at = ?, "
+                        "max_total_characters = ?, max_total_requests = ? WHERE job_id = ?",
+                        (job[0] + 1, timestamp, max_total_characters, max_total_requests, job_id),
+                    )
+                result = ResumeResult(
+                    job_id=job_id, revision=job[0] + int(not completed),
+                    status="completed" if completed else "queued",
+                    warnings=warnings, replayed=False,
+                )
+                await connection.execute(
+                    "INSERT INTO operation_receipts (workspace_id, operation, idempotency_key, "
+                    "input_digest, result_ref, committed_at, tombstone) "
+                    "VALUES (?, 'resume', ?, ?, ?, ?, 0)",
+                    (workspace_id, idempotency_key, digest, result.model_dump_json(), timestamp),
                 )
                 await connection.commit()
                 return result

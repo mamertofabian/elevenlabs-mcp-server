@@ -243,3 +243,11 @@ class CancellationResult(_StrictModel):
     reason: str | None
     cancel_requested: bool
     replayed: bool
+
+
+class ResumeResult(_StrictModel):
+    job_id: str = Field(min_length=1, max_length=128)
+    revision: int = Field(ge=0)
+    status: Literal["queued", "completed"]
+    warnings: tuple[str, ...] = ()
+    replayed: bool
