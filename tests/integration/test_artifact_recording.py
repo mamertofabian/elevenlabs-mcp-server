@@ -200,18 +200,14 @@ async def test_transaction_failure_rolls_back_artifact_attempt_chunk_and_counts(
 
 @pytest.mark.asyncio
 async def test_real_verified_audio_can_be_recorded(tmp_path):
-    import hashlib
-    import json
     import subprocess
 
-    from elevenlabs_mcp.artifacts import ArtifactVerifier, CompletionRecord
+    from elevenlabs_mcp.artifacts import ArtifactPublisher, ArtifactVerifier
     from elevenlabs_mcp.audio import AudioVerifier
 
     store, results = await _store(tmp_path / "state.db")
     identity = results[0].integrity.identity
-    source = tmp_path / results[0].integrity.relative_path
-    source.parent.mkdir(parents=True)
-    await asyncio.to_thread(
+    generated = await asyncio.to_thread(
         subprocess.run,
         [
             "ffmpeg",
@@ -223,20 +219,18 @@ async def test_real_verified_audio_can_be_recorded(tmp_path):
             "sine=frequency=440:duration=0.1",
             "-codec:a",
             "libmp3lame",
-            str(source),
+            "-f",
+            "mp3",
+            "pipe:1",
         ],
         check=True,
         timeout=10,
         capture_output=True,
     )
-    payload = source.read_bytes()
-    marker = CompletionRecord(
-        schema_version="1",
-        identity=identity,
-        sha256="sha256:" + hashlib.sha256(payload).hexdigest(),
-        byte_size=len(payload),
+    payload = generated.stdout
+    published = await asyncio.to_thread(
+        ArtifactPublisher(tmp_path).publish, identity, [payload]
     )
-    source.with_suffix(".complete.json").write_text(json.dumps(marker.model_dump()))
     verified = await asyncio.to_thread(
         AudioVerifier(ArtifactVerifier(tmp_path)).verify, identity
     )
@@ -244,7 +238,7 @@ async def test_real_verified_audio_can_be_recorded(tmp_path):
     with sqlite3.connect(store.db_path) as db:
         assert db.execute(
             "SELECT sha256,byte_size,duration_ms FROM production_artifacts"
-        ).fetchone() == (marker.sha256, len(payload), verified.duration_ms)
+        ).fetchone() == (published.sha256, len(payload), verified.duration_ms)
 
 
 @pytest.mark.asyncio
