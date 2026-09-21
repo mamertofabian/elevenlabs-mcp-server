@@ -10,7 +10,7 @@ from typing import List, Literal, Optional
 
 import aiosqlite
 
-from .artifacts import CompletionRecord
+from .artifacts import ArtifactIdentity, CompletionRecord
 from .audio import AudioVerificationResult
 from .contracts import (
     ArtifactRecordResult,
@@ -1066,6 +1066,8 @@ class JobStore:
         artifact_id: str,
         verification: AudioVerificationResult,
         completed_at: datetime,
+        *,
+        recovery_owner: WorkspaceLock | None = None,
     ) -> ArtifactRecordResult:
         """Record trusted verifier evidence; never perform file or media I/O in SQL.
 
@@ -1073,6 +1075,10 @@ class JobStore:
         The source must be checked again before reuse: recorded evidence describes
         the verifier's snapshot, not a promise that the path remains unchanged.
         """
+        database_identity = (
+            recovery_owner.require_database(Path(self.db_path))
+            if recovery_owner is not None else None
+        )
         verification = AudioVerificationResult.model_validate(verification.model_dump())
         integrity = verification.integrity
         identity = integrity.identity
@@ -1103,7 +1109,7 @@ class JobStore:
                 async with connection.execute(
                     """
                     SELECT a.job_id, a.chunk_id, a.dispatch_state, a.started_at,
-                           c.generation_fingerprint, c.status, j.status, j.deleted_at
+                           c.generation_fingerprint, c.status, j.status, j.deleted_at, a.rowid
                     FROM generation_attempts a
                     JOIN voiceover_chunks c ON c.job_id=a.job_id AND c.chunk_id=a.chunk_id
                     JOIN voiceover_jobs j ON j.job_id=a.job_id
@@ -1128,11 +1134,22 @@ class JobStore:
                         raise ArtifactConflictError("artifact ID already has different evidence")
                     await connection.commit()
                     return result.model_copy(update={"replayed": True})
-                if (
-                    attempt[2] != "dispatched" or attempt[5] != "generating"
-                    or attempt[6] not in {"running", "paused", "failed"}
-                    or attempt[7] is not None
-                ):
+                if recovery_owner is not None:
+                    async with connection.execute(
+                        "SELECT 1 FROM generation_attempts WHERE job_id=? AND chunk_id=? "
+                        "AND rowid>? LIMIT 1", (identity.job_id, identity.chunk_id, attempt[8]),
+                    ) as cursor:
+                        newer_attempt = await cursor.fetchone() is not None
+                    valid_state = (
+                        attempt[2] == "unknown" and attempt[5] == "unknown"
+                        and attempt[6] == "paused" and not newer_attempt
+                    )
+                else:
+                    valid_state = (
+                        attempt[2] == "dispatched" and attempt[5] == "generating"
+                        and attempt[6] in {"running", "paused", "failed"}
+                    )
+                if not valid_state or attempt[7] is not None:
                     raise AttemptStateError(identity.attempt_id)
                 if completed_at < datetime.fromisoformat(attempt[3]):
                     raise ValueError("completion cannot precede reservation")
@@ -1141,11 +1158,14 @@ class JobStore:
                     "relative_path,sha256,byte_size,mime_type,codec,duration_ms,complete,deleted_at) "
                     "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (artifact_id, *expected),
                 )
-                await connection.execute(
-                    "UPDATE generation_attempts SET dispatch_state='succeeded', ended_at=?, "
-                    "sanitized_outcome='AUDIO_VERIFIED', outcome_unknown=0 WHERE attempt_id=?",
-                    (completed_at.isoformat(), identity.attempt_id),
-                )
+                # Recovery preserves the historical uncertain-attempt record;
+                # the verified artifact and successful chunk resolve current work.
+                if recovery_owner is None:
+                    await connection.execute(
+                        "UPDATE generation_attempts SET dispatch_state='succeeded', ended_at=?, "
+                        "sanitized_outcome='AUDIO_VERIFIED', outcome_unknown=0 WHERE attempt_id=?",
+                        (completed_at.isoformat(), identity.attempt_id),
+                    )
                 await connection.execute(
                     "UPDATE voiceover_chunks SET status='succeeded', successful_artifact_id=?, "
                     "latest_error=NULL WHERE job_id=? AND chunk_id=?",
@@ -1167,11 +1187,15 @@ class JobStore:
                     else:
                         incomplete_parts.update(parts)
                 await connection.execute(
-                    "UPDATE voiceover_jobs SET verified_chunks=?,verified_parts=?,updated_at=? "
-                    "WHERE job_id=?",
+                    "UPDATE voiceover_jobs SET verified_chunks=?,verified_parts=?,updated_at=?, "
+                    "reason=CASE WHEN ? THEN 'PROCESS_RESTARTED' ELSE reason END WHERE job_id=?",
                     (verified_chunks, len(all_parts - incomplete_parts),
-                     completed_at.isoformat(), identity.job_id),
+                     completed_at.isoformat(), recovery_owner is not None and
+                     not any(status == "unknown" for status, _ in chunks), identity.job_id),
                 )
+                if recovery_owner is not None:
+                    if recovery_owner.require_database(Path(self.db_path)) != database_identity:
+                        raise WorkspaceOwnershipError("Database changed during artifact adoption")
                 await connection.commit()
                 return result
             except BaseException:
@@ -1260,6 +1284,33 @@ class JobStore:
             except BaseException:
                 await connection.rollback()
                 raise
+
+    async def recovery_candidates(
+        self, ownership: WorkspaceLock
+    ) -> tuple[ArtifactIdentity, ...]:
+        """Return only latest uncertain attempts eligible for complete-sidecar checks."""
+        database_identity = ownership.require_database(Path(self.db_path))
+        async with self.connect() as connection:
+            async with connection.execute(
+                """
+                SELECT a.job_id,a.chunk_id,a.attempt_id,c.generation_fingerprint
+                FROM generation_attempts a
+                JOIN voiceover_chunks c ON c.job_id=a.job_id AND c.chunk_id=a.chunk_id
+                JOIN voiceover_jobs j ON j.job_id=a.job_id
+                WHERE a.dispatch_state='unknown' AND c.status='unknown'
+                  AND j.status='paused' AND j.deleted_at IS NULL
+                  AND NOT EXISTS (SELECT 1 FROM generation_attempts newer
+                    WHERE newer.job_id=a.job_id AND newer.chunk_id=a.chunk_id
+                      AND newer.rowid>a.rowid)
+                ORDER BY a.job_id,c.chunk_index,a.attempt_id
+                """,
+            ) as cursor:
+                rows = await cursor.fetchall()
+        if ownership.require_database(Path(self.db_path)) != database_identity:
+            raise WorkspaceOwnershipError("Database changed during recovery inventory")
+        return tuple(ArtifactIdentity(
+            job_id=row[0], chunk_id=row[1], attempt_id=row[2], generation_fingerprint=row[3],
+        ) for row in rows)
 
 
 async def _user_version(connection: aiosqlite.Connection) -> int:
