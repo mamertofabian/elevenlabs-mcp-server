@@ -1,5 +1,5 @@
 # ElevenLabs MCP Server
-[![smithery badge](https://smithery.ai/badge/elevenlabs-mcp-server)](https://smithery.ai/server/elevenlabs-mcp-server)
+[![Listed on LightNow](https://lightnow.ai/badge/io.github.mamertofabian/elevenlabs-mcp-server?variant=listed)](https://lightnow.ai/servers/io.github.mamertofabian/elevenlabs-mcp-server)
 
 A Model Context Protocol (MCP) server that integrates with ElevenLabs text-to-speech API, featuring both a server component and a sample web-based MCP Client (SvelteKit) for managing voice generation tasks.
 
